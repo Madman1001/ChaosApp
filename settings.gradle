@@ -1,0 +1,7 @@
+include ':sys'
+include ':anim'
+include ':utils'
+include ':view'
+include ':adb'
+include ':app'
+rootProject.name = "example"

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RewardFloatButton">
+        <attr name="barColor" format="color"/>
+        <attr name="barThick" format="dimension"/>
+        <attr name="barRadius" format="dimension"/>
+        <attr name="barMaxAngle" format="integer"/>
+        <attr name="barStartAngle" format="integer"/>
+    </declare-styleable>
+</resources>
