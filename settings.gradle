@@ -1,3 +1,4 @@
+include ':wallpaper'
 include ':sys'
 include ':anim'
 include ':utils'
