@@ -15,7 +15,7 @@ android {
     defaultConfig {
         applicationId "com.example.myapplication"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
 
@@ -43,7 +43,9 @@ dependencies {
     api project(':adb')
     api project(':view')
     api project(':utils')
+    api project(':sys')
     api project(':wallpaper')
+    api project(':access')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.2.0'

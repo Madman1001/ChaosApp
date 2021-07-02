@@ -1,7 +1,6 @@
 package com.example.view.snake
 
 import android.content.Context
-import android.util.Log
 import android.view.View
 import com.example.view.base.BaseMap
 import com.example.view.input.IActionInput
