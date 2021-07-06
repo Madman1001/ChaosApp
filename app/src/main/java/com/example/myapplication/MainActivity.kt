@@ -60,6 +60,11 @@ class MainActivity : AppCompatActivity() {
         buttonAdapter.addButton(gotoView)
         buttonAdapter.addButton(gotoSys)
         buttonAdapter.addButton(gotoAccess)
+        for (i in 0..50){
+            val but = Button(this)
+            but.text = "$i"
+            buttonAdapter.addButton(but)
+        }
     }
 
 }

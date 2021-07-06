@@ -30,6 +30,9 @@ class ButtonAdapter(private val list: ArrayList<Button>) :
         holder.buttonContainer.removeAllViews()
         val param = FrameLayout.LayoutParams(-1,-2)
         param.gravity = Gravity.CENTER
+        if (list[position].parent != null){
+            (list[position].parent as ViewGroup).removeView(list[position])
+        }
         holder.buttonContainer.addView(list[position],param)
     }
 

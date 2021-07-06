@@ -1,5 +1,6 @@
 package com.example.access
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -16,14 +17,15 @@ object OpenAccessibilitySettingHelper {
     fun jumpToSettingPage(context: Context) {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
+        if (context is Activity){
+            context.startActivityForResult(intent,1024)
+        }else{
+            context.startActivity(intent)
+        }
     }
 
     //判断自定义辅助功能服务是否开启
-    fun isAccessibilitySettingsOn(context: Context?, className: String): Boolean {
-        if (context == null) {
-            return false
-        }
+    fun isAccessibilitySettingsOn(context: Context, className: String): Boolean {
         val activityManager =
             context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         return if (activityManager != null) {
