@@ -12,7 +12,6 @@ import com.example.myapplication.adapter.ButtonAdapter
 import com.example.sys.SysActivity
 import com.example.view.GameActivity
 
-
 class MainActivity : AppCompatActivity() {
     private val buttonAdapter = ButtonAdapter(ArrayList<Button>())
     override fun onCreate(savedInstanceState: Bundle?) {
