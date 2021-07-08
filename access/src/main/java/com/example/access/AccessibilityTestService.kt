@@ -11,9 +11,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
+import com.example.access.action.AccessibilityActionExecutor
+import com.example.access.action.setting.WindowSettingTask
 
 
 /**
@@ -47,21 +48,22 @@ class AccessibilityTestService: AccessibilityService() {
         val inflater = LayoutInflater.from(this)
         inflater.inflate(R.layout.action_bar, mLayout)
         wm.addView(mLayout, lp)
+        AccessibilityActionExecutor.postAction(WindowSettingTask())
         mLayout.findViewById<View>(R.id.accessibility_scroll_forward_action).setOnClickListener {
-            TestAction.scrollForwardView(this)
+            AccessibilityUtils.scrollForwardView(this)
         }
         mLayout.findViewById<View>(R.id.accessibility_scroll_backward_action).setOnClickListener {
-            TestAction.scrollBackwardView(this)
+            AccessibilityUtils.scrollBackwardView(this)
         }
         mLayout.findViewById<View>(R.id.accessibility_click_action).setOnClickListener {
-            TestAction.clickViewByName(this,"始终允许")
+            AccessibilityUtils.clickViewByName(this,"始终允许")
 //            TestAction.checkAllView(this)
         }
         mLayout.findViewById<View>(R.id.accessibility_back_action).setOnClickListener {
-            TestAction.backAction(this)
+            AccessibilityUtils.backAction(this)
         }
-        mLayout.findViewById<View>(R.id.accessibility_home_action).setOnClickListener {
-            TestAction.homeAction(this)
+        mLayout.findViewById<View>(R.id.accessibility_setting_action).setOnClickListener {
+            AccessibilityActionExecutor.startAction(this)
         }
 
     }
@@ -70,28 +72,25 @@ class AccessibilityTestService: AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         Log.e(tag,"event type ${AccessibilityEvent.eventTypeToString(event.eventType)}")
 
-//        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){
-//            Log.e(tag,"event ${event}")
-//        }
+        AccessibilityActionExecutor.acceptActionEvent(this,event)
+        /*
+        视图获得焦点 AccessibilityEvent.TYPE_VIEW_FOCUSED打开一个新界面时以此事件为开始
+         */
 
-        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED){
-            Log.e(tag,"event ${event}")
-        }
+        /*
+        窗体发生变化 AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+         */
+
+        /*
+        窗体内容发生变化 AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+         */
+
+        /*
+        发生点击事件 AccessibilityEvent.TYPE_VIEW_CLICKED
+         */
     }
 
     override fun onInterrupt() {
         Log.e(tag,"onInterrupt")
-    }
-
-    private val action = object : IActionExecutor{
-        override fun action(service: AccessibilityService,event: AccessibilityEvent) {
-            val info = event.source
-            val count = info.childCount
-            Log.e(tag,"action info: ${info.className}")
-            for (i in 0 until count){
-                val child = info.getChild(i)
-                Log.e(tag,"action child: ${child.className}")
-            }
-        }
     }
 }

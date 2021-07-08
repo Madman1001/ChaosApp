@@ -11,14 +11,14 @@ class AccessActivity : AppCompatActivity(),View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_access)
-        if (!OpenAccessibilitySettingHelper.isAccessibilitySettingsOn(
+        if (!PermissionUtils.isAccessibilityEnable(
                 this,
                 AccessibilityTestService::class.java.name
             )
         ) { // 判断服务是否开启
-            OpenAccessibilitySettingHelper.jumpToSettingPage(this) // 跳转到开启页面
+            PermissionUtils.gotoAccessibilitySetting(this) // 跳转到开启页面
         } else {
-            Toast.makeText(this, "服务已开启",Toast.LENGTH_LONG)
+            Toast.makeText(this, "服务已开启",Toast.LENGTH_LONG).show()
             //do other things...
         }
 

@@ -42,10 +42,10 @@
         app:layout_constraintTop_toBottomOf="@id/accessibility_scroll_backward_action"/>
 
     <Button
-        android:id="@+id/accessibility_home_action"
+        android:id="@+id/accessibility_setting_action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home"
+        android:text="Window"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/accessibility_back_action" />

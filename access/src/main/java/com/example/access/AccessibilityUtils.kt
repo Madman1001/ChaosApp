@@ -12,13 +12,12 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 import java.util.*
 
-
 /**
  * @author lhr
  * @date 2021/7/6
  * @des
  */
-object TestAction {
+object AccessibilityUtils {
     private val tag = "TestAction"
 
     @SuppressLint("NewApi")
@@ -32,65 +31,75 @@ object TestAction {
     }
 
     @SuppressLint("NewApi")
-    fun scrollForwardView(service: AccessibilityService) {
+    fun scrollForwardView(service: AccessibilityService):Boolean{
         val info = service.rootInActiveWindow
         val scroll = findNode(info) {
             it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD)
         }
         Log.e(tag, "scrollForwardView $scroll")
-        scroll?.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD.id)
+        if (scroll != null){
+            scroll.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD.id)
+            return true
+        }else{
+            return false
+        }
     }
 
     @SuppressLint("NewApi")
-    fun scrollBackwardView(service: AccessibilityService) {
+    fun scrollBackwardView(service: AccessibilityService):Boolean{
         val info = service.rootInActiveWindow
         val scroll = findNode(info) {
             it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD)
         }
         Log.e(tag, "scrollBackwardView $scroll")
-        scroll?.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD.id)
+        if (scroll != null){
+            scroll.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD.id)
+            return true
+        }else{
+            return false
+        }
     }
 
     @SuppressLint("NewApi")
-    fun clickViewByName(service: AccessibilityService, name: String) {
+    fun clickViewByName(service: AccessibilityService, name: String):Boolean {
+        val click = findViewByName(service, name)
+        if (click != null){
+            return clickView(service,click)
+        }else{
+            return false
+        }
+    }
+
+    @SuppressLint("NewApi")
+    fun clickView(service: AccessibilityService,info: AccessibilityNodeInfo):Boolean {
+        Log.e(tag, "clickView find $info")
+        //可点击，直接调用点击方法
+        if (!performView(info)){
+            //不可点击，调用屏幕点击方法 ，24版本以上可用
+            val rect = Rect()
+            info.getBoundsInScreen(rect)
+            val centerX = rect.centerX()
+            val centerY = rect.centerY()
+            if (!clickScreen(service, centerX, centerY)) {
+                //所以点击均失败
+                Log.e(tag,"点击失败")
+                return false
+            }else{
+                return true
+            }
+        }else{
+            return true
+        }
+    }
+
+    fun findViewByName(service: AccessibilityService, name: String): AccessibilityNodeInfo? {
         val info = service.rootInActiveWindow
-        val click = findNode(info) {
+        return findNode(info) {
             name.equals(it.text?.toString(),true)
         }
-        Log.e(tag, "clickView find $name $click")
-        if (click != null) {
-            //可点击，直接调用点击方法
-            if (!performView(click)){
-                //不可点击，调用屏幕点击方法 ，24版本以上可用
-                val rect = Rect()
-                click.getBoundsInScreen(rect)
-                val centerX = rect.centerX()
-                val centerY = rect.centerY()
-                if (!clickScreen(service, centerX, centerY)) {
-                    //所以点击均失败
-                    Log.e(tag,"点击失败")
-                }
-            }
-        }
     }
 
-    @SuppressLint("NewApi")
-    fun checkAllView(service: AccessibilityService) {
-        val info = service.rootInActiveWindow
-        findNode(info) { false }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun findActionNode(
-        root: AccessibilityNodeInfo,
-        action: AccessibilityNodeInfo.AccessibilityAction
-    ): AccessibilityNodeInfo? {
-        return findNode(root) {
-            it.actionList.contains(action)
-        }
-    }
-
-    private fun findNode(
+    fun findNode(
         root: AccessibilityNodeInfo,
         contain: (AccessibilityNodeInfo) -> Boolean
     ): AccessibilityNodeInfo? {
@@ -112,7 +121,7 @@ object TestAction {
     /**
      * 点击屏幕
      */
-    private fun clickScreen(service: AccessibilityService, x: Int, y: Int): Boolean {
+    fun clickScreen(service: AccessibilityService, x: Int, y: Int): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val clickPath = Path()
             clickPath.moveTo(x.toFloat(), y.toFloat())
@@ -131,7 +140,7 @@ object TestAction {
      * 点击父类布局
      */
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun performView(info: AccessibilityNodeInfo): Boolean {
+    fun performView(info: AccessibilityNodeInfo): Boolean {
         if (info.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
             info.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id)
             Log.e(tag,"view 点击成功")
