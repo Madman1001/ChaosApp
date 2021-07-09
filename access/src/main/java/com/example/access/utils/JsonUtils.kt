@@ -1,7 +1,5 @@
 package com.example.access.utils
 
-import android.content.Context
-import android.content.res.AssetManager
 import android.util.Log
 import com.example.access.bean.PermissionActionBean
 import com.example.access.bean.PermissionIntentBean
@@ -10,22 +8,14 @@ import com.example.access.bean.RomRuleBean
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.FileNotFoundException
-import java.io.InputStream
 import java.lang.Boolean
 
 /**
  * @author lhr
- * @date 2021/7/8
- * @des 设配文件读取工具
+ * @date 2021/7/9
+ * @des
  */
-object AccessJsonUtils {
-    /**
-     * config file path
-     */
-    private const val ACCESS_ASSET_PATH = "accessconfigs/"
-    private const val ACCESS_FILE_SUFFIX = ".json"
-
+object JsonUtils {
     /**
      * 分割标签
      */
@@ -72,48 +62,17 @@ object AccessJsonUtils {
     private const val ACTION_RULE_SUB_FIND_TEXTS_KEY = "find_texts"
     private const val ACTION_RULE_SUB_BEHAVIOR_KEY = "behavior"
 
-    private var configBean: RomRuleBean? = null
-
-    fun generateRomRuleBean(code: Int,context: Context): RomRuleBean? {
+    fun readJson(data: String): RomRuleBean? {
         return try {
-            createRomRuleBean(code, context)
+            createRomRuleBean(JSONObject(data))
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
             null
         }
     }
 
-    private fun createRomRuleBean(code: Int,context: Context): RomRuleBean?{
-        var romRuleBean: RomRuleBean? = null
-        try {
-            var inputStream: InputStream? = openAccessFile(code,context)
-            if (inputStream != null) {
-                val jsonData: String? = IoUtils.stream2String(inputStream)
-                if (jsonData != null) {
-                    romRuleBean = JsonUtils.readJson(jsonData)
-                }
-                try {
-                    inputStream.close()
-                } catch (e2: java.lang.Exception) {
-                    e2.printStackTrace()
-                }
-                return romRuleBean
-            }else{
-                try {
-                    inputStream?.close()
-                } catch (e: java.lang.Exception) {
-                    e.printStackTrace()
-                }
-                return null
-            }
-        } catch (e3: java.lang.Exception) {
-            e3.printStackTrace()
-        }
-        return romRuleBean
-    }
-
     @Throws(JSONException::class)
-    private fun readAccessJsonConfig(jSONObject: JSONObject): RomRuleBean? {
+    private fun createRomRuleBean(jSONObject: JSONObject): RomRuleBean? {
         var bean:RomRuleBean? = null
         if (jSONObject.has(ROM_RULE_VERSION_KEY)) {
             bean = RomRuleBean(jSONObject.getInt(ROM_RULE_VERSION_KEY))
@@ -170,7 +129,7 @@ object AccessJsonUtils {
         if (jSONObject == null || !jSONObject.has(INTENT_RULE_ACTION_KEY)) {
             return null
         }
-        var intentBean: PermissionIntentBean? = null
+        var intentBean:PermissionIntentBean? = null
         if (jSONObject.has(INTENT_RULE_ACTION_KEY)) {
             intentBean = PermissionIntentBean(jSONObject.getString(INTENT_RULE_ACTION_KEY))
         }
@@ -266,30 +225,4 @@ object AccessJsonUtils {
 
         return actionBean
     }
-
-    /**
-     * 打开Accessibility Service设配文件
-     */
-    private fun openAccessFile(code: Int,context: Context): InputStream? {
-        val assets: AssetManager = context.resources.assets
-        val sb = StringBuilder()
-        sb.append(ACCESS_ASSET_PATH)
-        sb.append(code)
-        sb.append(ACCESS_FILE_SUFFIX)
-        return try {
-            assets.open(sb.toString())
-        } catch (unused: FileNotFoundException) {
-            try {
-                assets.open("accessconfigs/902.json")
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        } catch (e2: Exception) {
-            e2.printStackTrace()
-            null
-        }
-    }
-
-
 }

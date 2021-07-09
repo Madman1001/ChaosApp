@@ -2,9 +2,11 @@ package com.example.access
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.access.utils.AccessJsonUtils
 import com.example.access.utils.PermissionUtils
 
 class AccessActivity : AppCompatActivity(),View.OnClickListener {
@@ -26,6 +28,11 @@ class AccessActivity : AppCompatActivity(),View.OnClickListener {
         this.findViewById<View>(R.id.accessibility_ring).setOnClickListener(this)
         this.findViewById<View>(R.id.accessibility_setting).setOnClickListener(this)
         this.findViewById<View>(R.id.accessibility_permission).setOnClickListener(this)
+
+        Thread{
+            val bean = AccessJsonUtils.readAccessJsonConfig(902,this)
+            Log.e("Test",bean?.toString()?:"")
+        }.start()
     }
 
     override fun onClick(v: View) {

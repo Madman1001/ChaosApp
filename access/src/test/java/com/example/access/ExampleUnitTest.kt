@@ -1,8 +1,13 @@
 package com.example.access
 
+import com.example.access.utils.IoUtils
+import com.example.access.utils.JsonUtils
 import org.junit.Test
 
 import org.junit.Assert.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,6 +17,10 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val input = FileInputStream(File("src/main/assets/accessconfigs/902.json"))
+        val data = IoUtils.stream2String(input)?:""
+        val beans = JsonUtils.readJson(data)
+        println(beans)
+
     }
 }

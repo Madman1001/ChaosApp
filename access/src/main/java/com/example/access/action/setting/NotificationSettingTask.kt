@@ -3,7 +3,7 @@ package com.example.access.action.setting
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.view.accessibility.AccessibilityEvent
-import com.example.access.AccessibilityUtils
+import com.example.access.utils.AccessibilityUtils
 import com.example.access.utils.PermissionUtils
 
 /**

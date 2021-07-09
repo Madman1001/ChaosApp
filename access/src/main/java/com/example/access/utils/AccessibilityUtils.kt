@@ -1,4 +1,4 @@
-package com.example.access
+package com.example.access.utils
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
@@ -62,9 +62,15 @@ object AccessibilityUtils {
 
     @SuppressLint("NewApi")
     fun clickViewByName(service: AccessibilityService, name: String):Boolean {
-        val click = findViewByName(service, name)
+        val click = findViewByName(
+            service,
+            name
+        )
         if (click != null){
-            return clickView(service,click)
+            return clickView(
+                service,
+                click
+            )
         }else{
             return false
         }
@@ -80,7 +86,12 @@ object AccessibilityUtils {
             info.getBoundsInScreen(rect)
             val centerX = rect.centerX()
             val centerY = rect.centerY()
-            if (!clickScreen(service, centerX, centerY)) {
+            if (!clickScreen(
+                    service,
+                    centerX,
+                    centerY
+                )
+            ) {
                 //所以点击均失败
                 Log.e(tag,"点击失败")
                 return false
@@ -95,7 +106,7 @@ object AccessibilityUtils {
     fun findViewByName(service: AccessibilityService, name: String): AccessibilityNodeInfo? {
         val info = service.rootInActiveWindow
         return findNode(info) {
-            name.equals(it.text?.toString(),true)
+            name.equals(it.text?.toString(), true)
         }
     }
 
