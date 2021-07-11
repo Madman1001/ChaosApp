@@ -71,15 +71,16 @@ object PermissionUtils {
     fun gotoNotificationAccessSetting(context: Context) {
         try {
             val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             if (context is Activity) {
                 context.startActivityForResult(intent, 1024)
             } else {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
         } catch (e: ActivityNotFoundException) {
             try {
                 val intent = Intent()
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 val cn = ComponentName(
                     "com.android.settings",
                     "com.android.settings.Settings\$NotificationAccessSettingsActivity"
@@ -89,7 +90,6 @@ object PermissionUtils {
                 if (context is Activity) {
                     context.startActivityForResult(intent, 1024)
                 } else {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context.startActivity(intent)
                 }
             } catch (ex: Exception) {
@@ -116,12 +116,12 @@ object PermissionUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + context.getPackageName())
+                Uri.parse("package:" + context.packageName)
             )
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             if (context is Activity) {
                 context.startActivityForResult(intent, 1024)
             } else {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
             }
         }
@@ -160,18 +160,22 @@ object PermissionUtils {
         }
     }
 
-    //跳转到设置页面无障碍服务开启自定义辅助功能服务
+    /**
+     *跳转到设置页面无障碍服务开启自定义辅助功能服务
+     */
     fun gotoAccessibilitySetting(context: Context) {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        if (context is Activity){
-            context.startActivityForResult(intent,1024)
-        }else{
+        if (context is Activity) {
+            context.startActivityForResult(intent, 1024)
+        } else {
             context.startActivity(intent)
         }
     }
 
-    //判断自定义辅助功能服务是否开启
+    /**
+     * 判断自定义辅助功能服务是否开启
+     */
     fun isAccessibilityEnable(context: Context, className: String): Boolean {
         val activityManager =
             context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -190,6 +194,26 @@ object PermissionUtils {
             false
         } else {
             false
+        }
+    }
+
+    fun isSystemWriteEnable(context: Context): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            !Settings.System.canWrite(context)
+        } else {
+            true
+        }
+    }
+
+    fun gotoSystemWrite(context: Context){
+        val intent = Intent(
+            Settings.ACTION_MANAGE_WRITE_SETTINGS,
+            Uri.parse("package:" + context.packageName))
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (context is Activity) {
+            context.startActivityForResult(intent, 1024)
+        } else {
+            context.startActivity(intent)
         }
     }
 

@@ -5,7 +5,7 @@ package com.example.access.bean
  * @date 2021/7/9
  * @des 权限动作类
  */
-data class PermissionActionBean(val id: Long = System.currentTimeMillis()) {
+data class PermissionActionBean(val id: Long = System.currentTimeMillis()) : Cloneable{
     var needWaitWindow: Boolean = false
     var needWaitTime: Int = 0
     var findTexts: ArrayList<String> = ArrayList()
@@ -15,7 +15,7 @@ data class PermissionActionBean(val id: Long = System.currentTimeMillis()) {
     var behavior: String = ""
     var notNeedBack: Boolean = false
 
-    class CheckNode {
+    class CheckNode : Cloneable{
         var nodeClassName: String = ""
         var nodeStatus = false
     }
@@ -23,6 +23,7 @@ data class PermissionActionBean(val id: Long = System.currentTimeMillis()) {
     override fun toString(): String {
         return "PermissionActionBean(id=$id, needWaitWindow=$needWaitWindow, needWaitTime=$needWaitTime, findTexts=$findTexts, scrollNode='$scrollNode', clickNode='$clickNode', checkNode=$checkNode, behavior='$behavior', notNeedBack=$notNeedBack)"
     }
+
 
 
 }

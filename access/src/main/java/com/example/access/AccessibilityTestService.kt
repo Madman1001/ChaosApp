@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.example.access.action.AccessibilityActionExecutor
 import com.example.access.action.setting.WindowSettingTask
+import com.example.access.utils.AccessJsonUtils
 import com.example.access.utils.AccessibilityUtils
 
 
@@ -49,7 +50,16 @@ class AccessibilityTestService: AccessibilityService() {
         val inflater = LayoutInflater.from(this)
         inflater.inflate(R.layout.action_bar, mLayout)
         wm.addView(mLayout, lp)
-        AccessibilityActionExecutor.postAction(WindowSettingTask())
+
+        val bean = AccessJsonUtils.getRomRuleBean(this.applicationContext)
+        bean?.let {
+            for (i in it.permissionRuleBeans){
+                if (i.type == 2) {
+                    AccessibilityActionExecutor.postAction(i)
+                }
+            }
+        }
+
         mLayout.findViewById<View>(R.id.accessibility_scroll_forward_action).setOnClickListener {
             AccessibilityUtils.scrollForwardView(this)
         }

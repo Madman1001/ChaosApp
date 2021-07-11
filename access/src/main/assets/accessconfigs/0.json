@@ -28,7 +28,8 @@
               "允许许可",
               "允许出现在其他应用上",
               "允許拖動其他應用程式",
-              "允许显示在其他应用的上层"
+              "允许显示在其他应用的上层",
+              "Allow display over other apps"
             ]
           },
           "click_node": {
@@ -47,10 +48,10 @@
       "checkable": 1,
       "guide_animation_type": 0,
       "guide_text": [
-        "找到【闪音】并开启"
+        "找到【】并开启"
       ],
       "intent": {
-        "describe": "打开通知栏权限(nexus,sony,motorola, miv7)",
+        "describe": "打开通知栏权限",
         "package": "com.android.settings",
         "action": "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
       },
@@ -88,7 +89,8 @@
               "允许",
               "是 ",
               "yes",
-              "允許"
+              "允許",
+              "Allow"
             ],
             "index":1
           },

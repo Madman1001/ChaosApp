@@ -5,7 +5,7 @@ package com.example.access.bean
  * @date 2021/7/9
  * @des 权限跳转类
  */
-data class PermissionIntentBean(val action: String) {
+data class PermissionIntentBean(val action: String):Cloneable{
     var permissionActivity:String = ""
     var permissionPackage:String = ""
 

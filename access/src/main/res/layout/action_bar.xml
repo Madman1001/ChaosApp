@@ -45,7 +45,7 @@
         android:id="@+id/accessibility_setting_action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Window"
+        android:text="Run"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/accessibility_back_action" />

@@ -1,8 +1,8 @@
 package com.example.access.utils
 
+import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import com.example.access.bean.PermissionActionBean
 import com.example.access.bean.PermissionIntentBean
 import com.example.access.bean.PermissionRuleBean
@@ -73,8 +73,17 @@ object AccessJsonUtils {
     private const val ACTION_RULE_SUB_BEHAVIOR_KEY = "behavior"
 
     private var configBean: RomRuleBean? = null
+    private var application: Context? = null
 
-    fun generateRomRuleBean(code: Int,context: Context): RomRuleBean? {
+    fun getRomRuleBean(context: Context): RomRuleBean? {
+        if (configBean == null){
+            application = context.applicationContext
+            configBean = generateRomRuleBean(RomFeatureJsonUtils.getRomCode(context), context)
+        }
+        return configBean
+    }
+
+    private fun generateRomRuleBean(code: Int,context: Context): RomRuleBean? {
         return try {
             createRomRuleBean(code, context)
         } catch (e: java.lang.Exception) {
@@ -90,7 +99,7 @@ object AccessJsonUtils {
             if (inputStream != null) {
                 val jsonData: String? = IoUtils.stream2String(inputStream)
                 if (jsonData != null) {
-                    romRuleBean = JsonUtils.readJson(jsonData)
+                    romRuleBean = readAccessJsonConfig(JSONObject(jsonData))
                 }
                 try {
                     inputStream.close()
@@ -237,7 +246,7 @@ object AccessJsonUtils {
                 val jSONArray = locateNode.getJSONArray(ACTION_RULE_SUB_FIND_TEXTS_KEY)
                 for (index in 0 until jSONArray.length()) {
                     var findText = jSONArray.getString(index)
-                    if (findText.contains(RULE_GREP_SIGN_KEY)) {
+                    if (findText.contains(RULE_GREP_SIGN_KEY + "product_name")) {
                         //todo 设置为应用名称
                         findText = "My Application"
                     }
@@ -280,7 +289,7 @@ object AccessJsonUtils {
             assets.open(sb.toString())
         } catch (unused: FileNotFoundException) {
             try {
-                assets.open("accessconfigs/902.json")
+                assets.open("accessconfigs/0.json")
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
@@ -290,6 +299,4 @@ object AccessJsonUtils {
             null
         }
     }
-
-
 }

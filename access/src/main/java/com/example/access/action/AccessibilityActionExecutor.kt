@@ -2,7 +2,9 @@ package com.example.access.action
 
 import android.accessibilityservice.AccessibilityService
 import android.view.accessibility.AccessibilityEvent
+import com.example.access.action.setting.AutoPermissionTask
 import com.example.access.action.setting.BaseSettingTask
+import com.example.access.bean.PermissionRuleBean
 import java.util.*
 
 /**
@@ -11,8 +13,8 @@ import java.util.*
  * @des
  */
 object AccessibilityActionExecutor {
-    private val actionQueue = ArrayDeque<BaseSettingTask>()
-    private var currentAction:BaseSettingTask? = null
+    private val actionQueue = ArrayDeque<PermissionRuleBean>()
+    private var currentAction:AutoPermissionTask? = null
 
     fun acceptActionEvent(service: AccessibilityService, event: AccessibilityEvent){
         if (currentAction != null){
@@ -26,20 +28,20 @@ object AccessibilityActionExecutor {
 
     fun startAction(service: AccessibilityService){
         if (currentAction == null && actionQueue.isNotEmpty()){
-            currentAction = actionQueue.remove()
+            currentAction = AutoPermissionTask(actionQueue.remove())
         }
         if (currentAction?.isExecuting() != true && currentAction?.isFinish() != true){
             currentAction?.requestPermission(service.applicationContext)
         }
     }
 
-    fun postAction(vararg action: BaseSettingTask){
+    fun postAction(vararg action: PermissionRuleBean){
         action.forEach {
             actionQueue.add(it)
         }
     }
 
-    fun removeAction(action: BaseSettingTask){
+    fun removeAction(action: PermissionRuleBean){
         actionQueue.remove(action)
     }
 

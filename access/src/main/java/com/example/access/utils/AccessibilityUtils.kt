@@ -31,10 +31,15 @@ object AccessibilityUtils {
     }
 
     @SuppressLint("NewApi")
-    fun scrollForwardView(service: AccessibilityService):Boolean{
+    fun scrollForwardView(service: AccessibilityService, className: String = ""):Boolean{
         val info = service.rootInActiveWindow
         val scroll = findNode(info) {
-            it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD)
+            val isScroll = it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD)
+            if (className.isNotEmpty()) {
+                isScroll && className == it.className
+            }else{
+                isScroll
+            }
         }
         Log.e(tag, "scrollForwardView $scroll")
         if (scroll != null){
@@ -46,10 +51,15 @@ object AccessibilityUtils {
     }
 
     @SuppressLint("NewApi")
-    fun scrollBackwardView(service: AccessibilityService):Boolean{
+    fun scrollBackwardView(service: AccessibilityService, className: String = ""):Boolean{
         val info = service.rootInActiveWindow
         val scroll = findNode(info) {
-            it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD)
+            val isScroll = it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD)
+            if (className.isNotEmpty()) {
+                isScroll && className == it.className
+            }else{
+                isScroll
+            }
         }
         Log.e(tag, "scrollBackwardView $scroll")
         if (scroll != null){

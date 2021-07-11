@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         gotoAccess.setOnClickListener {
-            //跳转至无障碍服务设置
+            //跳转无障碍页面
             startActivity(Intent(this, AccessActivity::class.java))
         }
 
