@@ -7,6 +7,7 @@ import android.view.accessibility.AccessibilityEvent
 import com.example.access.action.setting.AutoPermissionTask
 import com.example.access.action.setting.BaseSettingTask
 import com.example.access.bean.PermissionRuleBean
+import com.example.access.utils.IntentUtils
 import com.example.access.utils.PermissionUtils
 import java.util.*
 
@@ -47,11 +48,9 @@ object AccessibilityActionExecutor {
         } else if (currentAction == null && actionQueue.isNotEmpty()) {
             val bean = actionQueue.remove()
             currentAction =
-                AutoPermissionTask(bean, getRequestAction(bean.type), getCheckAction(bean.type))
+                AutoPermissionTask(bean, getRequestAction(service.applicationContext,bean), getCheckAction(bean))
         }
         currentAction?.requestPermission(service.applicationContext)
-
-        Log.e(tag, "action action $currentAction ${currentAction?.checkPermission(service.applicationContext)}")
     }
 
     fun postAction(vararg action: PermissionRuleBean) {
@@ -68,8 +67,18 @@ object AccessibilityActionExecutor {
         actionQueue.clear()
     }
 
-    private fun getRequestAction(type: Int): ((Context) -> Unit) {
-        return when (type) {
+    private fun getRequestAction(context: Context,bean: PermissionRuleBean): ((Context) -> Unit) {
+        Log.e(tag, "getRequestAction:$bean")
+        if (bean.ruleIntent != null){
+            val intent = IntentUtils.getIntentByBean(context, bean.ruleIntent!!)
+            Log.e(tag,"isIntentAvailable:" + IntentUtils.isIntentAvailable(context, intent))
+            if (IntentUtils.isIntentAvailable(context, intent)){
+                return {
+                    it.startActivity(intent)
+                }
+            }
+        }
+        return when (bean.type) {
             1 -> PermissionUtils::gotoWindowEnableSetting
             2 -> PermissionUtils::gotoNotificationAccessSetting
             31 -> PermissionUtils::gotoAccessibilitySetting
@@ -77,13 +86,12 @@ object AccessibilityActionExecutor {
         }
     }
 
-    private fun getCheckAction(type: Int): ((Context) -> Boolean) {
-        return when (type) {
+    private fun getCheckAction(bean: PermissionRuleBean): ((Context) -> Boolean) {
+        return when (bean.type) {
             1 -> PermissionUtils::windowEnable
             2 -> PermissionUtils::notificationListenerEnable
             31 -> PermissionUtils::isSystemWriteEnable
             else -> { _ -> true }
         }
     }
-
 }

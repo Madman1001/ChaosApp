@@ -205,7 +205,7 @@ object PermissionUtils {
         val intent = Intent(
             Settings.ACTION_MANAGE_WRITE_SETTINGS,
             Uri.parse("package:" + context.packageName))
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         if (context is Activity) {
             context.startActivityForResult(intent, 1024)
         } else {

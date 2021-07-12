@@ -5,13 +5,14 @@ package com.example.access.bean
  * @date 2021/7/9
  * @des 权限跳转类
  */
-data class PermissionIntentBean(val action: String):Cloneable{
-    var permissionActivity:String = ""
-    var permissionPackage:String = ""
-
+data class PermissionIntentBean(val id: Long = System.currentTimeMillis()) : Cloneable {
+    var permissionAction: String = ""
+    var permissionActivity: String = ""
+    var permissionPackage: String = ""
+    var permissionExtra: String = ""
+    var permissionData: String = ""
     override fun toString(): String {
-        return "PermissionIntentBean(action='$action', permissionActivity='$permissionActivity', permissionPackage='$permissionPackage')"
+        return "PermissionIntentBean(id=$id, permissionAction='$permissionAction', permissionActivity='$permissionActivity', permissionPackage='$permissionPackage', permissionExtra='$permissionExtra', permissionData='$permissionData')"
     }
-
 
 }

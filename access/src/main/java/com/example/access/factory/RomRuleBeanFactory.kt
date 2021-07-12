@@ -203,30 +203,36 @@ object RomRuleBeanFactory {
 
     @Throws(JSONException::class)
     private fun createPermissionIntentBean(jSONObject: JSONObject?): PermissionIntentBean? {
-        if (jSONObject == null || !jSONObject.has(INTENT_RULE_ACTION_KEY)) {
+        if (jSONObject == null) {
             return null
         }
-        var intentBean: PermissionIntentBean? = null
+        var intentBean: PermissionIntentBean = PermissionIntentBean()
         if (jSONObject.has(INTENT_RULE_ACTION_KEY)) {
-            intentBean = PermissionIntentBean(jSONObject.getString(INTENT_RULE_ACTION_KEY))
+            intentBean.permissionAction = jSONObject.getString(INTENT_RULE_ACTION_KEY)
         }
         if (jSONObject.has(INTENT_RULE_ACTIVITY_KEY)) {
-            intentBean?.permissionActivity = (jSONObject.getString(INTENT_RULE_ACTIVITY_KEY))
+            intentBean.permissionActivity = (jSONObject.getString(INTENT_RULE_ACTIVITY_KEY))
         }
         if (jSONObject.has(INTENT_RULE_PACKAGE_KEY)) {
-            intentBean?.permissionPackage = jSONObject.getString(INTENT_RULE_PACKAGE_KEY)
+            intentBean.permissionPackage = jSONObject.getString(INTENT_RULE_PACKAGE_KEY)
         }
 
         if (jSONObject.has(INTENT_RULE_NEW_EXTRA_KEY)) {
             var string = jSONObject.getString(INTENT_RULE_NEW_EXTRA_KEY)
             if (string.contains(RULE_GREP_SIGN_KEY)) {
-                //todo intent携带的extra数据
+                val list = string.split(":$RULE_GREP_SIGN_KEY")
+                if (!list.isNullOrEmpty() && list.size >= 2){
+                    intentBean.permissionExtra = list[0]
+                }
             }
         }
         if (jSONObject.has(INTENT_RULE_NEW_DATA_KEY)) {
             var string2 = jSONObject.getString(INTENT_RULE_NEW_DATA_KEY)
             if (string2.contains(RULE_GREP_SIGN_KEY)) {
-                //todo intent需携带的data数据
+                val list = string2.split(":$RULE_GREP_SIGN_KEY")
+                if (!list.isNullOrEmpty() && list.size >= 2){
+                    intentBean.permissionData = list[0]
+                }
             }
         }
         return intentBean

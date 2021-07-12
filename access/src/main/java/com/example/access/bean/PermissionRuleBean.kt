@@ -11,13 +11,6 @@ data class PermissionRuleBean(val type: Int) {
     var priority:Int = 0
     var checkable:Boolean = true
     var ruleIntent: PermissionIntentBean? = null
-        get() {
-            var intent: PermissionIntentBean? = null
-            if (field != null){
-                intent = field?.copy()
-            }
-            return intent
-        }
     val actionList: ArrayList<PermissionActionBean> = ArrayList()
 
     override fun toString(): String {

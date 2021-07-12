@@ -20,7 +20,7 @@
           "need_wait_time": 200,
           "locate_node": {
             "find_texts": [
-              "在其他应用上层显示"
+              "$product_name"
             ]
           },
           "scroll_node": {
