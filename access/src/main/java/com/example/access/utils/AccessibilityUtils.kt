@@ -18,7 +18,7 @@ import java.util.*
  * @des
  */
 object AccessibilityUtils {
-    private val tag = "TestAction"
+    private val tag = "AS_${this::class.java.simpleName}"
 
     @SuppressLint("NewApi")
     fun backAction(service: AccessibilityService){
@@ -32,7 +32,7 @@ object AccessibilityUtils {
 
     @SuppressLint("NewApi")
     fun scrollForwardView(service: AccessibilityService, className: String = ""):Boolean{
-        val info = service.rootInActiveWindow
+        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
         val scroll = findNode(info) {
             val isScroll = it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD)
             if (className.isNotEmpty()) {
@@ -52,7 +52,7 @@ object AccessibilityUtils {
 
     @SuppressLint("NewApi")
     fun scrollBackwardView(service: AccessibilityService, className: String = ""):Boolean{
-        val info = service.rootInActiveWindow
+        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
         val scroll = findNode(info) {
             val isScroll = it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD)
             if (className.isNotEmpty()) {
@@ -114,21 +114,39 @@ object AccessibilityUtils {
     }
 
     fun findViewByName(service: AccessibilityService, name: String): AccessibilityNodeInfo? {
-        val info = service.rootInActiveWindow
-        return findNode(info) {
-            name.equals(it.text?.toString(), true)
+        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
+        return if (info != null){
+            findNode(info) {
+                Log.e(tag,"${name.equals(it.text?.toString(), true)}:${name.equals(it.contentDescription?.toString(),true)}")
+                name.equals(it.text?.toString(), true)
+                        || name.equals(it.contentDescription?.toString(),true)
+            }
+        }else{
+            null
+        }
+    }
+
+    fun findViewByClassName(service: AccessibilityService, className: String): AccessibilityNodeInfo? {
+        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
+        return if (info != null){
+            findNode(info) {
+                className.equals(it.className?.toString(), false)
+            }
+        }else{
+            null
         }
     }
 
     fun findNode(
-        root: AccessibilityNodeInfo,
+        root: AccessibilityNodeInfo?,
         contain: (AccessibilityNodeInfo) -> Boolean
     ): AccessibilityNodeInfo? {
-        val deque: Deque<AccessibilityNodeInfo> = ArrayDeque()
+        if (root == null) return null
+        val deque: Deque<AccessibilityNodeInfo?> = ArrayDeque()
         deque.add(root)
         while (!deque.isEmpty()) {
-            val node: AccessibilityNodeInfo = deque.removeFirst()
-            Log.e(tag, "findNode:>>>>>>>>>>>>> $node")
+            val node: AccessibilityNodeInfo = deque.removeFirst() ?: continue
+            Log.e(tag, "findNode:>>>>>>>>>>>>> text:${node.text}; description:${node.contentDescription}; className:${node.className}; ")
             if (contain.invoke(node)) {
                 return node
             }

@@ -145,17 +145,13 @@ object PermissionUtils {
 
     fun gotoRingtoneAdjustEnableSetting(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (!notificationManager.isNotificationPolicyAccessGranted) {
-                val intent =
-                    Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-                if (context is Activity) {
-                    context.startActivityForResult(intent, 1024)
-                } else {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                }
+            val intent =
+                Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+            if (context is Activity) {
+                context.startActivityForResult(intent, 1024)
+            } else {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
             }
         }
     }
@@ -199,7 +195,7 @@ object PermissionUtils {
 
     fun isSystemWriteEnable(context: Context): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            !Settings.System.canWrite(context)
+            Settings.System.canWrite(context)
         } else {
             true
         }

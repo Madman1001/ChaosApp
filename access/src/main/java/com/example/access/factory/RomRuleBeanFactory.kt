@@ -1,12 +1,13 @@
-package com.example.access.utils
+package com.example.access.factory
 
-import android.app.Application
 import android.content.Context
 import android.content.res.AssetManager
+import android.util.Log
 import com.example.access.bean.PermissionActionBean
 import com.example.access.bean.PermissionIntentBean
 import com.example.access.bean.PermissionRuleBean
 import com.example.access.bean.RomRuleBean
+import com.example.access.utils.IoUtils
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -17,9 +18,9 @@ import java.lang.Boolean
 /**
  * @author lhr
  * @date 2021/7/8
- * @des 设配文件读取工具
+ * @des 适配文件读取工具
  */
-object AccessJsonUtils {
+object RomRuleBeanFactory {
     /**
      * config file path
      */
@@ -78,14 +79,23 @@ object AccessJsonUtils {
     fun getRomRuleBean(context: Context): RomRuleBean? {
         if (configBean == null){
             application = context.applicationContext
-            configBean = generateRomRuleBean(RomFeatureJsonUtils.getRomCode(context), context)
+            configBean =
+                generateRomRuleBean(
+                    RomFeatureBeanFactory.getRomCode(
+                        context
+                    ),
+                    context
+                )
         }
         return configBean
     }
 
     private fun generateRomRuleBean(code: Int,context: Context): RomRuleBean? {
         return try {
-            createRomRuleBean(code, context)
+            return createRomRuleBean(
+                code,
+                context
+            )
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
             null
@@ -95,11 +105,19 @@ object AccessJsonUtils {
     private fun createRomRuleBean(code: Int,context: Context): RomRuleBean?{
         var romRuleBean: RomRuleBean? = null
         try {
-            var inputStream: InputStream? = openAccessFile(code,context)
+            var inputStream: InputStream? =
+                openAccessFile(
+                    code,
+                    context
+                )
             if (inputStream != null) {
-                val jsonData: String? = IoUtils.stream2String(inputStream)
+                val jsonData: String? =
+                    IoUtils.stream2String(inputStream)
                 if (jsonData != null) {
-                    romRuleBean = readAccessJsonConfig(JSONObject(jsonData))
+                    romRuleBean =
+                        readAccessJsonConfig(
+                            JSONObject(jsonData)
+                        )
                 }
                 try {
                     inputStream.close()
@@ -132,7 +150,10 @@ object AccessJsonUtils {
                 val jSONArray: JSONArray? = jSONObject.getJSONArray(ROM_RULE_PERMISSION_KEY)
                 if (jSONArray != null) {
                     for (i in 0 until jSONArray.length()) {
-                        val permissions = createPermissionRuleBean(jSONArray.getJSONObject(i))
+                        val permissions =
+                            createPermissionRuleBean(
+                                jSONArray.getJSONObject(i)
+                            )
                         if (permissions != null){
                             it.permissionRuleBeans.add(permissions)
                         }
@@ -159,13 +180,19 @@ object AccessJsonUtils {
         }
 
         if (jSONObject.has(PERMISSION_RULE_INTENT_KEY)) {
-            permission.ruleIntent = createPermissionIntentBean(jSONObject.getJSONObject(PERMISSION_RULE_INTENT_KEY))
+            permission.ruleIntent =
+                createPermissionIntentBean(
+                    jSONObject.getJSONObject(PERMISSION_RULE_INTENT_KEY)
+                )
         }
 
         if (jSONObject.has(PERMISSION_RULE_ACTION_KEY)) {
             val jSONArray = jSONObject.getJSONArray(PERMISSION_RULE_ACTION_KEY)
             for (index in 0 until jSONArray.length()) {
-                val action = createActionBean(jSONArray.getJSONObject(index))
+                val action =
+                    createActionBean(
+                        jSONArray.getJSONObject(index)
+                    )
                 if (action != null){
                     permission.actionList.add(action)
                 }
@@ -193,11 +220,13 @@ object AccessJsonUtils {
         if (jSONObject.has(INTENT_RULE_NEW_EXTRA_KEY)) {
             var string = jSONObject.getString(INTENT_RULE_NEW_EXTRA_KEY)
             if (string.contains(RULE_GREP_SIGN_KEY)) {
+                //todo intent携带的extra数据
             }
         }
         if (jSONObject.has(INTENT_RULE_NEW_DATA_KEY)) {
             var string2 = jSONObject.getString(INTENT_RULE_NEW_DATA_KEY)
             if (string2.contains(RULE_GREP_SIGN_KEY)) {
+                //todo intent需携带的data数据
             }
         }
         return intentBean
@@ -228,7 +257,9 @@ object AccessJsonUtils {
         if (jSONObject.has(ACTION_RULE_CHECK_NODE_KEY)) {
             val checkJson = jSONObject.getJSONObject(ACTION_RULE_CHECK_NODE_KEY)
             if (checkJson.has(ACTION_RULE_SUB_CLASS_NAME_KEY)) {
-                actionBean.checkNode.nodeClassName = jSONObject.getString(ACTION_RULE_SUB_CLASS_NAME_KEY)
+                actionBean.checkNode = checkJson.getString(
+                    ACTION_RULE_SUB_CLASS_NAME_KEY
+                )
             }
             if (jSONObject.has(ACTION_RULE_SUB_CORRECT_STATUS_KEY)) {
                 var status = jSONObject.getString(ACTION_RULE_SUB_CORRECT_STATUS_KEY)
@@ -236,7 +267,7 @@ object AccessJsonUtils {
                 if (!status.equals(defaultStatus, ignoreCase = true) && !status.equals("false", ignoreCase = true)) {
                     status = defaultStatus
                 }
-                actionBean.checkNode.nodeStatus = Boolean.parseBoolean(status)
+                actionBean.checkStatus = Boolean.parseBoolean(status)
             }
         }
 
@@ -256,9 +287,9 @@ object AccessJsonUtils {
         }
 
         if (jSONObject.has(ACTION_RULE_OPERATION_NODE_KEY)) {
-            val operationNode = jSONObject.getJSONObject(ACTION_RULE_OPERATION_NODE_KEY)
-            if(operationNode.has(ACTION_RULE_SUB_BEHAVIOR_KEY)) {
-                actionBean.behavior = operationNode.getString(ACTION_RULE_SUB_BEHAVIOR_KEY)
+            val behaviorNode = jSONObject.getJSONObject(ACTION_RULE_OPERATION_NODE_KEY)
+            if(behaviorNode.has(ACTION_RULE_SUB_BEHAVIOR_KEY)) {
+                actionBean.behavior = behaviorNode.getString(ACTION_RULE_SUB_BEHAVIOR_KEY)
             }
         }
 

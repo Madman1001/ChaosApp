@@ -14,8 +14,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.example.access.action.AccessibilityActionExecutor
-import com.example.access.action.setting.WindowSettingTask
-import com.example.access.utils.AccessJsonUtils
+import com.example.access.factory.RomRuleBeanFactory
 import com.example.access.utils.AccessibilityUtils
 
 
@@ -25,7 +24,7 @@ import com.example.access.utils.AccessibilityUtils
  * @des
  */
 class AccessibilityTestService: AccessibilityService() {
-    private val tag = "AccessService"
+    private val tag = "AS_${this::class.java.simpleName}"
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -51,12 +50,10 @@ class AccessibilityTestService: AccessibilityService() {
         inflater.inflate(R.layout.action_bar, mLayout)
         wm.addView(mLayout, lp)
 
-        val bean = AccessJsonUtils.getRomRuleBean(this.applicationContext)
+        val bean = RomRuleBeanFactory.getRomRuleBean(this.applicationContext)
         bean?.let {
             for (i in it.permissionRuleBeans){
-                if (i.type == 2) {
-                    AccessibilityActionExecutor.postAction(i)
-                }
+                AccessibilityActionExecutor.postAction(i)
             }
         }
 
@@ -81,7 +78,8 @@ class AccessibilityTestService: AccessibilityService() {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        Log.e(tag,"event type ${AccessibilityEvent.eventTypeToString(event.eventType)}")
+//        Log.e(tag,"event type ${AccessibilityEvent.eventTypeToString(event.eventType)}")
+        Log.e(tag,"event type ${event}")
 
         AccessibilityActionExecutor.acceptActionEvent(this,event)
         /*

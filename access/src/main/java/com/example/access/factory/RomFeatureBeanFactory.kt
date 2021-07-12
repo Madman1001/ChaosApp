@@ -1,13 +1,14 @@
-package com.example.access.utils
+package com.example.access.factory
 
 import android.content.Context
 import android.content.res.AssetManager
-import android.util.Log
 import com.example.access.bean.RomFeatureBean
+import com.example.access.utils.IoUtils
+import com.example.access.utils.RomMatchUtils
 import org.json.JSONObject
 import java.io.InputStream
 
-object RomFeatureJsonUtils {
+object RomFeatureBeanFactory {
     private const val FEATURE_ASSET_FILE = "rom_feature_config.json"
     private const val ROM_FEATURE_PRIMARY_KEY = "rom_items"
 
@@ -37,7 +38,9 @@ object RomFeatureJsonUtils {
         for (bean in romFeatures) {
             var result = true
             for (item in bean.features){
-                result = result && RomMatchUtils.matchFeatureBean(item)
+                result = result && RomMatchUtils.matchFeatureBean(
+                    item
+                )
                 if (!result){
                     break
                 }
@@ -51,11 +54,17 @@ object RomFeatureJsonUtils {
 
     private fun init(context: Context){
         try {
-            var inputStream: InputStream? =openAccessFile(context)
+            var inputStream: InputStream? =
+                openAccessFile(
+                    context
+                )
             if (inputStream != null) {
-                val jsonData: String? = IoUtils.stream2String(inputStream)
+                val jsonData: String? =
+                    IoUtils.stream2String(inputStream)
                 if (jsonData != null) {
-                    readFeatureConfig(JSONObject(jsonData))
+                    readFeatureConfig(
+                        JSONObject(jsonData)
+                    )
                 }
                 try {
                     inputStream.close()
@@ -82,7 +91,10 @@ object RomFeatureJsonUtils {
             val jsonArray = jsonObject.getJSONArray(ROM_FEATURE_PRIMARY_KEY)
             for (index in 0 until jsonArray.length()){
 
-                val bean = createRomFeatureBean(jsonArray.getJSONObject(index))
+                val bean =
+                    createRomFeatureBean(
+                        jsonArray.getJSONObject(index)
+                    )
                 if (bean != null){
                     romFeatures.add(bean)
                 }
@@ -103,7 +115,10 @@ object RomFeatureJsonUtils {
         if (jsonObject.has(FEATURE_FEATURE_ITEMS_KEY)){
             val jsonArray = jsonObject.getJSONArray(FEATURE_FEATURE_ITEMS_KEY)
             for (index in 0 until jsonArray.length()){
-                val item = createFeatureItemBean(jsonArray.getJSONObject(index))
+                val item =
+                    createFeatureItemBean(
+                        jsonArray.getJSONObject(index)
+                    )
                 if (item != null){
                     bean?.features?.add(item)
                 }

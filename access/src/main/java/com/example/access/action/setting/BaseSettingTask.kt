@@ -10,72 +10,94 @@ import com.example.access.action.IPermissionTask
  * @des 设置权限动作基类
  */
 abstract class BaseSettingTask : IPermissionTask {
-    var actionStatus = ActionStatus.NONE
+    protected val tag = "AS_${this::class.java.simpleName}"
+
+    var taskStatus = TaskStatus.NONE
         protected set
 
-    abstract fun acceptEvent(service: AccessibilityService, event: AccessibilityEvent)
+    var actionFlag: Int = 0
+        protected set
+
+    fun acceptEvent(service: AccessibilityService, event: AccessibilityEvent) {
+        if (isExecuting() && enableAcceptEvent(event)) {
+            onAcceptEvent(service, event)
+        }
+    }
+
+    abstract fun onAcceptEvent(service: AccessibilityService, event: AccessibilityEvent)
 
     fun isExecuting(): Boolean {
-        return when (actionStatus) {
-            ActionStatus.WAIT_WINDOW,
-            ActionStatus.WAIT_FOCUSED,
-            ActionStatus.WAIT_SCROLL,
-            ActionStatus.WAIT_BACK -> true
+        return when (taskStatus) {
+            TaskStatus.EXECUTING -> true
             else -> false
         }
     }
 
     fun isFinish(): Boolean {
-        return when (actionStatus) {
-            ActionStatus.SUCCESS,
-            ActionStatus.FAIL -> true
+        return when (taskStatus) {
+            TaskStatus.SUCCESS,
+            TaskStatus.FAIL -> true
             else -> false
         }
     }
 
-    fun enableAcceptEvent(event: AccessibilityEvent): Boolean{
-        var enable = false
-        when(actionStatus){
-            ActionStatus.WAIT_WINDOW ->{
-                //等待窗体事件
-                if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){
-                    enable = true
+    fun enableAcceptEvent(event: AccessibilityEvent): Boolean {
+        val flag =
+            when (event.eventType) {
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                    //等待窗体事件
+                    ActionFlag.WAIT_WINDOW
                 }
-            }
-            ActionStatus.WAIT_SCROLL ->{
-                //等待滚动事件
-                if (event.eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED){
-                    enable = true
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
+                    //等待窗体事件
+                    ActionFlag.WAIT_CONTENT_CHANGED
                 }
-            }
+                AccessibilityEvent.TYPE_VIEW_SCROLLED -> {
+                    //等待滚动事件
+                    ActionFlag.WAIT_SCROLL
+                }
 
-            ActionStatus.WAIT_CLICK ->{
-                //等待点击事件
-                if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED){
-                    enable = true
+                AccessibilityEvent.TYPE_VIEW_CLICKED -> {
+                    //等待点击事件
+                    ActionFlag.WAIT_CLICK
                 }
-            }
 
-            ActionStatus.WAIT_FOCUSED ->{
-                //等待焦点事件
-                if (event.eventType == AccessibilityEvent.TYPE_VIEW_FOCUSED){
-                    enable = true
+                AccessibilityEvent.TYPE_VIEW_FOCUSED -> {
+                    //等待焦点事件
+                    ActionFlag.WAIT_FOCUSED
+                }
+                else -> {
+                    return false
                 }
             }
+        val isInclude = actionFlag and flag != 0
+        if (isInclude) {
+            actionFlag = actionFlag and flag.inv()
+            return actionFlag == 0
         }
-
-        return enable
+        return false
     }
 
-    enum class ActionStatus {
+    /**
+     * 任务状态
+     */
+    enum class TaskStatus {
         NONE,
         PREPARED,//准备
-        WAIT_FOCUSED,//等待界面切换
-        WAIT_CLICK,//等待点击
-        WAIT_SCROLL,//等待滚动
-        WAIT_WINDOW,//等待弹窗
-        WAIT_BACK,//等待返回
+        EXECUTING,//准备
         SUCCESS,//完成
         FAIL//失败
+    }
+
+    /**
+     * 执行动作所需的标志
+     */
+    object ActionFlag {
+        val WAIT_FOCUSED = 0x00000002//等待界面切换
+        val WAIT_CLICK = 0x00000004//等待点击
+        val WAIT_SCROLL = 0x00000008//等待滚动
+        val WAIT_WINDOW = 0x00000020//等待窗体
+        val WAIT_CONTENT_CHANGED = 0x00000040//等待内容发送改变
+        val WAIT_BACK = 0x00000080//等待返回
     }
 }

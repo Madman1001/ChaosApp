@@ -11,19 +11,13 @@ data class PermissionActionBean(val id: Long = System.currentTimeMillis()) : Clo
     var findTexts: ArrayList<String> = ArrayList()
     var scrollNode: String = ""
     var clickNode: String = ""
-    var checkNode: CheckNode = CheckNode()
+    var checkNode: String = ""
+    var checkStatus = true
     var behavior: String = ""
     var notNeedBack: Boolean = false
 
-    class CheckNode : Cloneable{
-        var nodeClassName: String = ""
-        var nodeStatus = false
-    }
-
     override fun toString(): String {
-        return "PermissionActionBean(id=$id, needWaitWindow=$needWaitWindow, needWaitTime=$needWaitTime, findTexts=$findTexts, scrollNode='$scrollNode', clickNode='$clickNode', checkNode=$checkNode, behavior='$behavior', notNeedBack=$notNeedBack)"
+        return "PermissionActionBean(id=$id, needWaitWindow=$needWaitWindow, needWaitTime=$needWaitTime, findTexts=$findTexts, scrollNode='$scrollNode', clickNode='$clickNode', checkNode='$checkNode', checkStatus=$checkStatus, behavior='$behavior', notNeedBack=$notNeedBack)"
     }
-
-
 
 }

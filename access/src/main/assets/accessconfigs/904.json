@@ -1,0 +1,177 @@
+{
+  "version": "1",
+  "permission": [
+    {
+      "title": "正在获取悬浮窗权限...",
+      "type": "1",
+      "priority": "1",
+      "checkable": 1,
+      "guide_animation_type": 0,
+      "intent": {
+        "describe": "打开悬浮窗设置界面(华为EMUI 3.1)",
+        "package": "com.huawei.systemmanager",
+        "activity": "com.huawei.systemmanager.addviewmonitor.AddViewMonitorActivity"
+      },
+      "action": [
+        {
+          "id": 7001,
+          "describe": "打开悬浮窗权限",
+          "need_wait_window": false,
+          "need_wait_time": 200,
+          "locate_node": {
+            "find_texts": [
+              "在其他应用上层显示"
+            ]
+          },
+          "scroll_node": {
+            "class_name": "android.widget.ListView"
+          },
+          "check_node": {
+            "class_name": "android.widget.Switch",
+            "id_name": "com.huawei.systemmanager:id/addview_app_item_button",
+            "parent_deep": 1,
+            "index_list": "2",
+            "correct_text": "已允许",
+            "correct_text_index": 1,
+            "correct_status": true
+          },
+          "operation_node": {
+            "behavior": "click"
+          }
+        }
+      ]
+    },
+    {
+      "title": "正在获取通知栏权限...",
+      "type": "2",
+      "priority": "1",
+      "checkable": 1,
+      "guide_animation_type": 0,
+      "intent": {
+        "describe": "打开通知栏权限(nexus,sony,motorola, miv7)",
+        "package": "com.android.settings",
+        "action": "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS"
+      },
+      "action": [
+        {
+          "describe": "通用修改通知监听权限第一步",
+          "need_wait_window": false,
+          "locate_node": {
+            "find_texts": [
+              "$product_name"
+            ]
+          },
+          "scroll_node": {
+            "class_name": "android.widget.ListView"
+          },
+          "click_node": {
+            "class_name": "android.widget.CheckBox"
+          },
+          "check_node": {
+            "correct_status": false
+          },
+          "operation_node": {
+            "behavior": "click"
+          }
+        },
+        {
+          "describe": "华为 EMUI 4.0 通知第二步",
+          "need_wait_window": true,
+          "need_wait_time": 1,
+          "locate_node": {
+            "find_texts": [
+              "确定",
+              "确认",
+              "允许",
+              "是 ",
+              "yes",
+              "允許",
+              "Allow"
+            ]
+          },
+          "operation_node": {
+            "behavior": "click"
+          }
+        }
+      ]
+    },
+    {
+      "title": "打开自启动",
+      "type": "3",
+      "priority": "1",
+      "checkable": 0,
+      "guide_animation_type": 0,
+      "intent": {
+        "describe": "华为EMUI 4.0 自启动管理",
+        "package": "com.huawei.systemmanager",
+        "activity": "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+      },
+      "action": [
+        {
+          "describe": "华为荣耀10 自启动第一步",
+          "locate_node": {
+            "find_texts": [
+              "$product_name"
+            ]
+          },
+          "scroll_node": {
+            "class_name": "android.widget.ListView"
+          },
+          "operation_node": {
+            "behavior": "click"
+          }
+        },
+        {
+          "describe": "华为 EMUI 4.0 通知第二步",
+          "need_wait_window": true,
+          "need_wait_time": 1,
+          "locate_node": {
+            "find_texts": [
+              "确定"
+            ]
+          },
+          "operation_node": {
+            "behavior": "click"
+          }
+        }
+      ]
+    },
+    {
+      "title": "修改系统设置",
+      "type": "31",
+      "priority": "0",
+      "checkable": 1,
+      "guide_animation_type": 0,
+      "guide_text": [
+        "开启【允许修改系统设置】"
+      ],
+      "intent": {
+        "describe": "通用修系统设置",
+        "action": "android.settings.action.MANAGE_WRITE_SETTINGS",
+        "data": "$product_data",
+        "new_data": "package:$new_product_data"
+      },
+      "action": [
+        {
+          "describe": "通用修改系统设置",
+          "not_need_perform_back": "true",
+          "locate_node": {
+            "find_texts": [
+              "允许修改系统设置",
+              "允许许可",
+              "允許修改系統設定",
+              "更改系统设置",
+              "修改系统设置"
+            ]
+          },
+          "click_node": {
+            "class_name": "android.widget.TextView"
+          },
+          "operation_node": {
+            "behavior": "click"
+          }
+        }
+      ]
+    }
+  ]
+}
