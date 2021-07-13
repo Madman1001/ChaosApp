@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import com.example.access.bean.PermissionIntentBean
 
@@ -26,7 +27,7 @@ object IntentUtils {
             intent.component = ComponentName(bean.permissionPackage, bean.permissionActivity)
         }
         if (bean.permissionData.isNotEmpty()){
-            intent.putExtra(bean.permissionData, context.packageName)
+            intent.data = Uri.parse("${bean.permissionData}:${context.packageName}")
         }
         if (bean.permissionExtra.isNotEmpty()){
             intent.putExtra(bean.permissionExtra,context.packageName)

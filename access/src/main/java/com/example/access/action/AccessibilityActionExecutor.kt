@@ -2,6 +2,8 @@ package com.example.access.action
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.example.access.action.setting.AutoPermissionTask
@@ -18,6 +20,9 @@ import java.util.*
  */
 object AccessibilityActionExecutor {
     private val tag = "AS_${this::class.java.simpleName}"
+    private const val TASK_WAIT_TIME = 1000L
+    private val mHandler = Handler(Looper.getMainLooper())
+    private var isWaitTask = false
     private val actionQueue = ArrayDeque<PermissionRuleBean>()
     private var currentAction: BaseSettingTask? = null
 
@@ -29,7 +34,11 @@ object AccessibilityActionExecutor {
             currentAction?.acceptEvent(service, event)
             if (currentAction?.isFinish() == true) {
                 currentAction = null
-//            startAction(service)
+                isWaitTask = true
+                mHandler.postDelayed({
+                   startAction(service)
+                    isWaitTask = false
+                }, TASK_WAIT_TIME)
             }
         }
     }
