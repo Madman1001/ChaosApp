@@ -17,17 +17,17 @@ object TaskExecutor {
     private const val TASK_WAIT_TIME = 1000L
     private val mHandler = Handler(Looper.getMainLooper())
     private var isWaitTask = false
-    private val actionQueue = ArrayDeque<BaseTask>()
-    private var currentAction: BaseTask? = null
+    private val taskQueue = ArrayDeque<BaseTask>()
+    private var currentTask: BaseTask? = null
 
     /**
      * 接收无障碍服务事件
      */
     fun acceptActionEvent(service: AccessibilityService, event: AccessibilityEvent) {
-        if (currentAction != null) {
-            currentAction?.acceptEvent(service, event)
-            if (currentAction?.isFinish() == true) {
-                currentAction = null
+        if (currentTask != null) {
+            currentTask?.acceptEvent(service, event)
+            if (currentTask?.isFinish() == true) {
+                currentTask = null
                 isWaitTask = true
                 mHandler.postDelayed({
                    startExecuteTask(service)
@@ -45,17 +45,17 @@ object TaskExecutor {
             mHandler.removeCallbacksAndMessages(null)
             isWaitTask = false
         }
-        if (currentAction != null) {
-            if (currentAction?.isFinish() == true) {
-                currentAction = null
+        if (currentTask != null) {
+            if (currentTask?.isFinish() == true) {
+                currentTask = null
             }else{
-                currentAction?.startTask(service)
+                currentTask?.startTask(service)
             }
-        } else if (currentAction == null && actionQueue.isNotEmpty()) {
-            currentAction = actionQueue.remove()
+        } else if (currentTask == null && taskQueue.isNotEmpty()) {
+            currentTask = taskQueue.remove()
 
         }
-        currentAction?.startTask(service)
+        currentTask?.startTask(service)
     }
 
     /**
@@ -66,34 +66,34 @@ object TaskExecutor {
             mHandler.removeCallbacksAndMessages(null)
             isWaitTask = false
         }
-        if (currentAction != null && currentAction?.isFinish() != true){
-            currentAction?.stopTask()
-            currentAction = null
+        if (currentTask != null && currentTask?.isFinish() != true){
+            currentTask?.stopTask()
+            currentTask = null
         }
         clearTask()
 
     }
 
-    fun postTask(task: BaseTask) {
-        currentAction = task
+    fun postTask(vararg task: BaseTask) {
+        taskQueue.addAll(task)
     }
 
     fun removeAction(task: BaseTask) {
-        if (currentAction == task){
-            currentAction?.stopTask()
-            currentAction = null
+        if (currentTask == task){
+            currentTask?.stopTask()
+            currentTask = null
             if (isWaitTask){
                 mHandler.removeCallbacksAndMessages(null)
                 isWaitTask = false
             }
         }else{
-            if (actionQueue.contains(task)) {
-                actionQueue.remove(task)
+            if (taskQueue.contains(task)) {
+                taskQueue.remove(task)
             }
         }
     }
 
     fun clearTask() {
-        actionQueue.clear()
+        taskQueue.clear()
     }
 }

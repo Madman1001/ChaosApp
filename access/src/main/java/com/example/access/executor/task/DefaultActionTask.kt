@@ -19,21 +19,10 @@ import com.example.access.executor.ITask.*
  */
 class DefaultActionTask(
     private val bean: TaskBean,
-    startAction: (Context) -> Unit,
-    checkAction: (Context) -> Boolean
+    private val startAction: (Context) -> Unit
 ) : BaseTask(bean.type,bean.name) {
 
     private val mHandler = Handler(Looper.getMainLooper())
-
-    /**
-     * 请求权限动作
-     */
-    private val requestPermissionAction = startAction
-
-    /**
-     * 检查权限动作
-     */
-    private val checkPermissionAction = checkAction
 
     /**
      * 任务集
@@ -63,7 +52,7 @@ class DefaultActionTask(
                     mHandler.postDelayed({
                         execAction(action, service)
                         taskWait = false
-                    },action.needWaitTime * 1L + 1500)
+                    },action.needWaitTime * 1L)
                 }
             }else{
                 if (currentIndex != -1) {
@@ -118,8 +107,8 @@ class DefaultActionTask(
         } else {
             //未找到目标，滑动视图进行查找
             setActionFlag(ActionFlag.WAIT_SCROLL or ActionFlag.WAIT_CONTENT_CHANGED)
-            if (!AccessibilityUtils.scrollForwardView(service, action.clickNode)
-                && !AccessibilityUtils.scrollBackwardView(service, action.clickNode)
+            if (!AccessibilityUtils.scrollForwardView(service, action.actionNode)
+                && !AccessibilityUtils.scrollBackwardView(service, action.actionNode)
             ) {
                 taskStatus = TaskStatus.FAIL
             }
@@ -127,12 +116,13 @@ class DefaultActionTask(
     }
 
     override fun startTask(context: Context) {
-        if (!checkPermissionAction(context)) {
+        if (!checkTask(context)) {
             taskStatus = TaskStatus.EXECUTING
             setActionFlag(ActionFlag.WAIT_WINDOW , ActionFlag.WAIT_CONTENT_CHANGED)
             currentIndex = 0
+            taskWait = false
             //未获取权限，开始任务
-            requestPermissionAction(context)
+            startAction(context)
         } else {
             //权限已获取，结束任务
             taskStatus = TaskStatus.FAIL
@@ -140,10 +130,12 @@ class DefaultActionTask(
     }
 
     override fun checkTask(context: Context): Boolean {
-        return checkPermissionAction.invoke(context)
+        return false
     }
 
     override fun stopTask() {
         taskStatus = TaskStatus.FAIL
+        currentIndex = -1
+        taskWait = false
     }
 }
