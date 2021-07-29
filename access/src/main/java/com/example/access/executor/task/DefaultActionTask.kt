@@ -1,4 +1,4 @@
-package com.example.access.action.setting
+package com.example.access.executor.task
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Context
@@ -7,27 +7,28 @@ import android.os.Looper
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import com.example.access.bean.PermissionActionBean
-import com.example.access.bean.PermissionRuleBean
+import com.example.access.bean.ActionBean
+import com.example.access.bean.TaskBean
 import com.example.access.utils.AccessibilityUtils
+import com.example.access.executor.ITask.*
 
 /**
  * @author lhr
  * @date 2021/7/8
  * @des 自动授权动作
  */
-class AutoPermissionTask(
-    private val bean: PermissionRuleBean,
-    requestAction: (Context) -> Unit,
+class DefaultActionTask(
+    private val bean: TaskBean,
+    startAction: (Context) -> Unit,
     checkAction: (Context) -> Boolean
-) : BaseSettingTask() {
+) : BaseTask(bean.type,bean.name) {
 
     private val mHandler = Handler(Looper.getMainLooper())
 
     /**
      * 请求权限动作
      */
-    private val requestPermissionAction = requestAction
+    private val requestPermissionAction = startAction
 
     /**
      * 检查权限动作
@@ -37,9 +38,7 @@ class AutoPermissionTask(
     /**
      * 任务集
      */
-    private val actions = bean.getRuleActions()
-
-    private val ruleIntent = bean.ruleIntent
+    private val actions = bean.actionList
 
     private var currentIndex = -1
 
@@ -56,7 +55,7 @@ class AutoPermissionTask(
                 val action = actions[currentIndex]
                 Log.e(tag, "executing action $action")
                 //检查动作是否完成
-                if (checkPermission(service.applicationContext)) {
+                if (checkTask(service.applicationContext)) {
                     currentIndex = -1
                     taskStatus = TaskStatus.SUCCESS
                 }else{
@@ -64,7 +63,7 @@ class AutoPermissionTask(
                     mHandler.postDelayed({
                         execAction(action, service)
                         taskWait = false
-                    },action.needWaitTime * 1L + 300)
+                    },action.needWaitTime * 1L + 1500)
                 }
             }else{
                 if (currentIndex != -1) {
@@ -93,7 +92,7 @@ class AutoPermissionTask(
     /**
      * 执行动作
      */
-    private fun execAction(action: PermissionActionBean,service: AccessibilityService){
+    private fun execAction(action: ActionBean, service: AccessibilityService){
         var node: AccessibilityNodeInfo? = null
         for (text in action.findTexts) {
             Log.e(tag, "find node $text")
@@ -105,9 +104,9 @@ class AutoPermissionTask(
         if (node != null) {
             //点击目标
             if (action.behavior == "click") {
-                actionFlag = ActionFlag.WAIT_CLICK
+                setActionFlag(ActionFlag.WAIT_CLICK)
                 if (action.checkNode.isNotEmpty()){
-                    actionFlag = actionFlag or ActionFlag.WAIT_CONTENT_CHANGED
+                    addActionFlag(ActionFlag.WAIT_CONTENT_CHANGED)
                 }
                 if (!AccessibilityUtils.clickView(service, node)) {
                     taskStatus = TaskStatus.FAIL
@@ -118,7 +117,7 @@ class AutoPermissionTask(
             }
         } else {
             //未找到目标，滑动视图进行查找
-            actionFlag = ActionFlag.WAIT_SCROLL or ActionFlag.WAIT_CONTENT_CHANGED
+            setActionFlag(ActionFlag.WAIT_SCROLL or ActionFlag.WAIT_CONTENT_CHANGED)
             if (!AccessibilityUtils.scrollForwardView(service, action.clickNode)
                 && !AccessibilityUtils.scrollBackwardView(service, action.clickNode)
             ) {
@@ -127,10 +126,10 @@ class AutoPermissionTask(
         }
     }
 
-    override fun requestPermission(context: Context) {
+    override fun startTask(context: Context) {
         if (!checkPermissionAction(context)) {
             taskStatus = TaskStatus.EXECUTING
-            actionFlag = ActionFlag.WAIT_WINDOW or ActionFlag.WAIT_CONTENT_CHANGED
+            setActionFlag(ActionFlag.WAIT_WINDOW , ActionFlag.WAIT_CONTENT_CHANGED)
             currentIndex = 0
             //未获取权限，开始任务
             requestPermissionAction(context)
@@ -140,7 +139,11 @@ class AutoPermissionTask(
         }
     }
 
-    override fun checkPermission(context: Context): Boolean {
-        return checkPermissionAction(context)
+    override fun checkTask(context: Context): Boolean {
+        return checkPermissionAction.invoke(context)
+    }
+
+    override fun stopTask() {
+        taskStatus = TaskStatus.FAIL
     }
 }

@@ -1,7 +1,7 @@
 package com.example.access
 
 import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+import android.accessibilityservice.AccessibilityServiceInfo.*
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
@@ -13,8 +13,8 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
-import com.example.access.action.AccessibilityActionExecutor
-import com.example.access.factory.RomRuleBeanFactory
+import com.example.access.executor.TaskExecutor
+import com.example.access.factory.DemoFactory
 import com.example.access.utils.AccessibilityUtils
 
 
@@ -29,7 +29,7 @@ class AccessibilityTestService: AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         //获取所有view需要添加FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
-        this.serviceInfo.flags = this.serviceInfo.flags or FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+        this.serviceInfo.flags = this.serviceInfo.flags or FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or FLAG_RETRIEVE_INTERACTIVE_WINDOWS
 
         // 创建测试按钮
         val wm =
@@ -50,13 +50,6 @@ class AccessibilityTestService: AccessibilityService() {
         inflater.inflate(R.layout.action_bar, mLayout)
         wm.addView(mLayout, lp)
 
-        val bean = RomRuleBeanFactory.getRomRuleBean(this.applicationContext)
-        bean?.let {
-            for (i in it.permissionRuleBeans){
-                AccessibilityActionExecutor.postAction(i)
-            }
-        }
-
         mLayout.findViewById<View>(R.id.accessibility_scroll_forward_action).setOnClickListener {
             AccessibilityUtils.scrollForwardView(this)
         }
@@ -65,13 +58,23 @@ class AccessibilityTestService: AccessibilityService() {
         }
         mLayout.findViewById<View>(R.id.accessibility_click_action).setOnClickListener {
             AccessibilityUtils.clickViewByName(this,"始终允许")
-//            TestAction.checkAllView(this)
         }
         mLayout.findViewById<View>(R.id.accessibility_back_action).setOnClickListener {
             AccessibilityUtils.backAction(this)
         }
-        mLayout.findViewById<View>(R.id.accessibility_setting_action).setOnClickListener {
-            AccessibilityActionExecutor.startAction(this)
+        mLayout.findViewById<View>(R.id.accessibility_home_action).setOnClickListener {
+            AccessibilityUtils.homeAction(this)
+        }
+        mLayout.findViewById<View>(R.id.accessibility_run_action).setOnClickListener {
+//            Log.e(tag,"accessibility_run_action")
+//            for (systemAction in this.systemActions) {
+//                Log.e(tag,systemAction.toString())
+//                if (systemAction.label == "所有应用"){
+//                    this.performGlobalAction(systemAction.id)
+//                }
+//            }
+            TaskExecutor.postTask(DemoFactory.uninstallSelfTask(this))
+            TaskExecutor.startExecuteTask(this)
         }
 
     }
@@ -81,7 +84,8 @@ class AccessibilityTestService: AccessibilityService() {
 //        Log.e(tag,"event type ${AccessibilityEvent.eventTypeToString(event.eventType)}")
         Log.e(tag,"event type ${event}")
 
-        AccessibilityActionExecutor.acceptActionEvent(this,event)
+        event.contentChangeTypes
+        TaskExecutor.acceptActionEvent(this,event)
         /*
         视图获得焦点 AccessibilityEvent.TYPE_VIEW_FOCUSED打开一个新界面时以此事件为开始
          */

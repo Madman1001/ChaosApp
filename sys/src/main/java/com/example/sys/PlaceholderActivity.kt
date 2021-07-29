@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
-import com.example.sys.reflection.SysReflection
 
 /**
  * @author lhr
@@ -52,12 +51,5 @@ class PlaceholderActivity : Activity() {
             }
 
         })
-        val activityClass = Activity::class.java
-        val result = SysReflection.runSysMethod(activityClass,this,"dispatchActivityStopped")
-        if (result){
-            Log.e("Test", "run dispatchActivityStopped is success")
-        }else{
-            Log.e("Test", "run dispatchActivityStopped is fail")
-        }
     }
 }

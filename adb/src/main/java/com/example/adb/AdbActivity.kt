@@ -2,11 +2,9 @@ package com.example.adb
 
 import android.app.Activity
 import android.os.Bundle
-import android.text.TextWatcher
-import android.view.KeyEvent
+import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.adb.adapter.ResultAdapter
@@ -20,8 +18,8 @@ import java.util.*
  * @des
  */
 class AdbActivity : Activity(){
-    private val results = ArrayList<String>()
-    private val adapter = ResultAdapter(results)
+    private val tag = "AS_${this::class.java.simpleName}"
+    private val adapter = ResultAdapter(ArrayList<String>())
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adb)
@@ -39,8 +37,7 @@ class AdbActivity : Activity(){
         }
 
         findViewById<View>(R.id.adb_out_clean).setOnClickListener {
-            results.clear()
-            adapter.notifyDataSetChanged()
+            adapter.clearItem()
         }
     }
 
@@ -55,9 +52,10 @@ class AdbActivity : Activity(){
             if (code.isEmpty()){
                 return@launch
             }
-            results.add(AdbRunner.runCommand(code))
+            val result = AdbRunner.runCommand(code)
+            Log.e(tag,result)
             withContext(Dispatchers.Main){
-                adapter.notifyDataSetChanged()
+                adapter.addItem(result)
                 findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount-1)
             }
         }
