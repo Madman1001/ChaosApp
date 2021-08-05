@@ -1,6 +1,5 @@
 package com.lhr.wallpaper
 
-import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.service.wallpaper.WallpaperService

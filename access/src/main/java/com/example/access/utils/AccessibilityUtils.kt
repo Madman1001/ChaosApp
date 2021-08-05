@@ -146,7 +146,7 @@ object AccessibilityUtils {
         deque.add(root)
         while (!deque.isEmpty()) {
             val node: AccessibilityNodeInfo = deque.removeFirst() ?: continue
-            Log.e(tag, "findNode:>>>>>>>>>>>>> text:${node.text}; description:${node.contentDescription}; className:${node.className}; ")
+            Log.e(tag, "findNode:>>>>> text:${node.text}; description:${node.contentDescription}; className:${node.className}; childCount:${node.childCount}")
             if (contain.invoke(node)) {
                 return node
             }

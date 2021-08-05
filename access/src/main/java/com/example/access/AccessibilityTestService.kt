@@ -1,9 +1,10 @@
-package com.example.access
+    package com.example.access
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo.*
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.Rect
 import android.os.Build
 import android.util.Log
 import android.view.Gravity
@@ -11,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 import com.example.access.executor.TaskExecutor
@@ -58,6 +60,19 @@ class AccessibilityTestService: AccessibilityService() {
         }
         mLayout.findViewById<View>(R.id.accessibility_click_action).setOnClickListener {
             AccessibilityUtils.clickViewByName(this,"始终允许")
+            val info = AccessibilityUtils.findViewByName(this,"悬浮窗")
+            info?.let {
+                val nodeParent = info.parent
+                val infoRect = Rect()
+                info.getBoundsInScreen(infoRect)
+                val parentRect = Rect()
+                nodeParent.getBoundsInScreen(parentRect)
+                AccessibilityUtils.clickScreen(
+                    this,
+                    parentRect.right - infoRect.left,
+                    infoRect.centerY())
+            }
+
         }
         mLayout.findViewById<View>(R.id.accessibility_back_action).setOnClickListener {
             AccessibilityUtils.backAction(this)
