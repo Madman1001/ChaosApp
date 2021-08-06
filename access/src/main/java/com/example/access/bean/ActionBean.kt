@@ -12,7 +12,7 @@ class ActionBean private constructor(builder: ActionBuild) {
     val scrollNode: String
     val actionNode: String
     val checkNode: String
-    val checkStatus:Boolean
+    val checkStatus: Boolean
     val behavior: String
     val needBack: Boolean
 

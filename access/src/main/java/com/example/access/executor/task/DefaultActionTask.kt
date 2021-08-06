@@ -15,7 +15,7 @@ import com.example.access.executor.ITask.*
 /**
  * @author lhr
  * @date 2021/7/8
- * @des 自动授权动作
+ * @des 默认实现动作
  */
 class DefaultActionTask(
     private val bean: TaskBean,
