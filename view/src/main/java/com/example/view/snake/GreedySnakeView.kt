@@ -11,7 +11,7 @@ import com.example.view.power.ActionPower
  * @date 2021/5/7
  * @des 贪吃蛇
  */
-class GreedySnakeView(context: Context) : BaseMap(context), IActionInput {
+class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseMap(context,row, column), IActionInput {
     private var snake = GreedySnakeComponent(9)
     var direction = Direction.GO_UP
     var listener: SnakeListener? = null

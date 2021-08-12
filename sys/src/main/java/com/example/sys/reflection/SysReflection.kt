@@ -20,7 +20,7 @@ object SysReflection {
         return try {
             val hideMethod = sysMethodReflection.invoke(targetClass,method) as Method
             hideMethod.isAccessible = true
-            hideMethod.invoke(target,params)
+            hideMethod.invoke(target,*params)
             true
         }catch (e:Exception){
             e.printStackTrace()

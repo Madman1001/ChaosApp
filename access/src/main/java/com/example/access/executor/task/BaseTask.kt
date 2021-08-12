@@ -4,7 +4,7 @@ import android.accessibilityservice.AccessibilityService
 import android.content.Context
 import android.view.accessibility.AccessibilityEvent
 import com.example.access.executor.ITask
-import com.example.access.executor.ITask.*
+import com.example.access.executor.ITask.TaskStatus
 import java.util.*
 
 /**
@@ -177,7 +177,7 @@ abstract class BaseTask(val taskType: Int, val taskName: String):ITask {
      * 执行动作所需的标志
      */
     object ActionFlag {
-        val WAIT_ALL = 0x11111111//等待任意事件
+        val WAIT_ALL = -0x1//等待任意事件
         val WAIT_FOCUSED = 0x00000002//等待界面切换事件
         val WAIT_CLICK = 0x00000004//等待点击事件
         val WAIT_SCROLL = 0x00000008//等待滚动事件

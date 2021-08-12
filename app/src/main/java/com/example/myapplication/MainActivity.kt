@@ -10,6 +10,7 @@ import com.example.access.AccessActivity
 import com.example.adb.AdbActivity
 import com.example.myapplication.adapter.ButtonAdapter
 import com.example.sys.SysActivity
+import com.example.utils.UtilActivity
 import com.example.view.GameActivity
 
 class MainActivity : AppCompatActivity() {
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         val gotoView = Button(this)
         val gotoSys = Button(this)
         val gotoAccess = Button(this)
+        val gotoUtil = Button(this)
 
         gotoAdb.setOnClickListener {
             //跳转adb页面
@@ -50,15 +52,22 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, AccessActivity::class.java))
         }
 
+        gotoUtil.setOnClickListener {
+            //跳转工具页面
+            startActivity(Intent(this,UtilActivity::class.java))
+        }
+
         gotoAdb.text = "跳转adb页面"
         gotoView.text = "跳转view页面"
         gotoSys.text = "跳转sys页面"
         gotoAccess.text = "跳转无障碍页面"
+        gotoUtil.text = "跳转工具页面"
 
         buttonAdapter.addButton(gotoAdb)
         buttonAdapter.addButton(gotoView)
         buttonAdapter.addButton(gotoSys)
         buttonAdapter.addButton(gotoAccess)
+        buttonAdapter.addButton(gotoUtil)
     }
 
 }
