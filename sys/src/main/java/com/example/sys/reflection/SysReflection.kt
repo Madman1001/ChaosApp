@@ -8,8 +8,9 @@ import java.lang.reflect.Method
  * @des
  */
 object SysReflection {
-    private val sysMethodReflection: Method =
+    private val sysMethodReflection: Method by lazy {
         Class::class.java.getDeclaredMethod("getDeclaredMethod")
+    }
 
     fun runSysMethod(
         targetClass: Any,

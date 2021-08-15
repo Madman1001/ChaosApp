@@ -39,13 +39,13 @@ android {
 
 dependencies {
 
-    implementation project(':adb')
     api project(':adb')
     api project(':view')
     api project(':utils')
     api project(':sys')
     api project(':wallpaper')
     api project(':access')
+    api project(':centre')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.2.0'
