@@ -22,10 +22,10 @@ object Centre {
                 val listPlugin = ArrayList<IPlugin>()
                 for (clazzName in DexUtil.getDexAllClassName(context)) {
                     try {
-                        val clazz = Class.forName(clazzName)
-                        if (clazz.interfaces.contains(IPlugin::class.java)){
-                            listPlugin.add(clazz.newInstance() as IPlugin)
-                        }
+//                        val clazz = Class.forName(clazzName)
+//                        if (clazz.interfaces.contains(IPlugin::class.java)){
+//                            listPlugin.add(clazz.newInstance() as IPlugin)
+//                        }
                         Log.e(tag,clazzName)
                     }catch (e:Exception){
                         continue

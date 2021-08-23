@@ -11,7 +11,9 @@ import com.example.adb.AdbActivity
 import com.example.myapplication.adapter.ButtonAdapter
 import com.example.sys.SysActivity
 import com.example.utils.UtilActivity
-import com.example.view.GameActivity
+import com.example.game.GameActivity
+import com.example.utils.start
+import com.lhr.view.ViewActivity
 
 class MainActivity : AppCompatActivity() {
     private val buttonAdapter = ButtonAdapter(ArrayList<Button>())
@@ -31,33 +33,40 @@ class MainActivity : AppCompatActivity() {
         val gotoSys = Button(this)
         val gotoAccess = Button(this)
         val gotoUtil = Button(this)
+        val gotoGame = Button(this)
 
         gotoAdb.setOnClickListener {
             //跳转adb页面
             startActivity(Intent(this, AdbActivity::class.java))
         }
 
+        gotoGame.setOnClickListener {
+            //跳转game页面
+            start(GameActivity::class.java)
+        }
+
         gotoView.setOnClickListener {
             //跳转view页面
-            startActivity(Intent(this, GameActivity::class.java))
+            start(ViewActivity::class.java)
         }
 
         gotoSys.setOnClickListener {
             //跳转sys页面
-            startActivity(Intent(this, SysActivity::class.java))
+            start(SysActivity::class.java)
         }
 
         gotoAccess.setOnClickListener {
             //跳转无障碍页面
-            startActivity(Intent(this, AccessActivity::class.java))
+            start(AccessActivity::class.java)
         }
 
         gotoUtil.setOnClickListener {
             //跳转工具页面
-            startActivity(Intent(this,UtilActivity::class.java))
+            start(UtilActivity::class.java)
         }
 
         gotoAdb.text = "跳转adb页面"
+        gotoGame.text = "跳转game页面"
         gotoView.text = "跳转view页面"
         gotoSys.text = "跳转sys页面"
         gotoAccess.text = "跳转无障碍页面"
@@ -65,6 +74,7 @@ class MainActivity : AppCompatActivity() {
 
         buttonAdapter.addButton(gotoAdb)
         buttonAdapter.addButton(gotoView)
+        buttonAdapter.addButton(gotoGame)
         buttonAdapter.addButton(gotoSys)
         buttonAdapter.addButton(gotoAccess)
         buttonAdapter.addButton(gotoUtil)

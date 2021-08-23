@@ -41,6 +41,7 @@ dependencies {
 
     api project(':adb')
     api project(':game')
+    api project(':view')
     api project(':utils')
     api project(':sys')
     api project(':wallpaper')

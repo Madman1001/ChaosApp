@@ -1,8 +1,6 @@
 package com.example.utils
 
-import android.graphics.Point
 import android.view.MotionEvent
-import android.view.PointerIcon
 import android.view.View
 import android.view.ViewGroup
 import kotlin.math.abs
