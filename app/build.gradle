@@ -40,7 +40,7 @@ android {
 dependencies {
 
     api project(':adb')
-    api project(':view')
+    api project(':game')
     api project(':utils')
     api project(':sys')
     api project(':wallpaper')

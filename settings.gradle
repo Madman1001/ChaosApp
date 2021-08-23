@@ -1,11 +1,11 @@
 include ':centre'
 include ':access'
-include ':game'
+include ':view'
 include ':wallpaper'
 include ':sys'
 include ':anim'
 include ':utils'
-include ':view'
+include ':game'
 include ':adb'
 include ':app'
 rootProject.name = "example"
