@@ -15,7 +15,7 @@ class DemoView(context: Context): View(context) {
     private val render = MapRender()
     init {
         this.post {
-            render.rect = Rect(100,100,width - 100,height - 100)
+            render.drawRect = Rect(50,50,width - 50,height - 50)
             invalidate()
         }
     }

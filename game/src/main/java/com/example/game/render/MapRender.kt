@@ -20,7 +20,25 @@ class MapRender(val map: MapData = MapData(row = 20,column = 10)) :
     /**
      * 绘画区域
      */
-    var rect : Rect = Rect(0,0,0,0)
+    var drawRect : Rect = Rect()
+        set(value) {
+
+        }
+
+    /**
+     * 小方块大小
+     */
+    private var cellRect = Rect()
+
+    /**
+     * 小方块边框大小
+     */
+    private var cellFrameRect = Rect()
+
+    /**
+     * 小方块边距
+     */
+    private var cellRectMargin = 0
 
     /**
      * 边框画笔
@@ -44,6 +62,6 @@ class MapRender(val map: MapData = MapData(row = 20,column = 10)) :
 
     override fun onRender(canvas: Canvas){
         canvas.drawColor(map.mapBackgroundColor)
-        canvas.drawRect(rect, framePaint)
+        canvas.drawRect(drawRect, framePaint)
     }
 }

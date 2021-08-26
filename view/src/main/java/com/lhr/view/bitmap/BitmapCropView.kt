@@ -12,7 +12,7 @@ import com.lhr.view.CalculateUtils
 /**
  * @author lhr
  * @date 2021/8/23
- * @des
+ * @des 图片拖动View
  */
 class BitmapCropView(context: Context): View(context),View.OnTouchListener {
 
