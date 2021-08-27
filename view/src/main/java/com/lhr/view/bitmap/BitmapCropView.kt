@@ -7,7 +7,7 @@ import android.graphics.Rect
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
-import com.lhr.view.CalculateUtils
+import com.lhr.view.utils.CalculateUtils
 
 /**
  * @author lhr

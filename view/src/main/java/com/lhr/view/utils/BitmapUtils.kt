@@ -1,4 +1,4 @@
-package com.lhr.view
+package com.lhr.view.utils
 
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -24,7 +24,12 @@ object BitmapUtils {
         val option = BitmapFactory.Options()
         option.inJustDecodeBounds = true
         BitmapFactory.decodeResource(resource,id,option)
-        option.inSampleSize = calculateInSampleSize(option, reqWidth, reqHeight)
+        option.inSampleSize =
+            calculateInSampleSize(
+                option,
+                reqWidth,
+                reqHeight
+            )
         option.inJustDecodeBounds = false
         bitmap = BitmapFactory.decodeResource(resource,id,option)
         return bitmap
@@ -41,7 +46,12 @@ object BitmapUtils {
         val option = BitmapFactory.Options()
         option.inJustDecodeBounds = true
         BitmapFactory.decodeFile(path,option)
-        option.inSampleSize = calculateInSampleSize(option, reqWidth, reqHeight)
+        option.inSampleSize =
+            calculateInSampleSize(
+                option,
+                reqWidth,
+                reqHeight
+            )
         option.inJustDecodeBounds = false
         bitmap = BitmapFactory.decodeFile(path,option)
         return bitmap

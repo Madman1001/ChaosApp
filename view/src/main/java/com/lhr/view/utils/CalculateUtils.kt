@@ -1,4 +1,4 @@
-package com.lhr.view
+package com.lhr.view.utils
 
 import android.graphics.Rect
 

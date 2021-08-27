@@ -6,14 +6,17 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Button
 import com.lhr.view.bitmap.BitmapCropView
+import com.lhr.view.utils.BitmapUtils
+import com.lhr.view.utils.MediaUtils
+import com.lhr.view.utils.GLESUtils
 
 /**
  * @author lhr
  * @date 2021/5/7
  * @des
  */
-class ViewActivity : Activity(),SurfaceHolder.Callback,View.OnClickListener {
-    private val mp = MediaPlayer()
+class ViewActivity : Activity(),SurfaceHolder.Callback {
+    private var mediaPlayer:MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,21 +61,31 @@ class ViewActivity : Activity(),SurfaceHolder.Callback,View.OnClickListener {
     }
 
     private fun showSurfaceMedia(surface: Surface){
+        if (mediaPlayer != null){
+            mediaPlayer?.release()
+            mediaPlayer = null
+        }
         val am = this.assets
         val afd = am.openFd("video_heart.mp4")
-
+        val mp = MediaPlayer()
         mp.setDataSource(afd.fileDescriptor,afd.startOffset,afd.length)
         mp.setSurface(surface)
         mp.isLooping = true
-        mp.prepare()
-        mp.start()
+        mp.setOnPreparedListener {
+            mediaPlayer?.release()
+            mediaPlayer = it
+            mediaPlayer?.start()
+
+        }
+        mp.prepareAsync()
     }
 
     private fun showSurfaceBitmap(surface: Surface){
         val bitmap = BitmapUtils.getBitmapFromResource(this.resources,R.drawable.pixel_forest)
-        val canvas = surface.lockCanvas(null)
-        canvas.drawBitmap(bitmap!!,0f,0f,null)
-        surface.unlockCanvasAndPost(canvas)
+        if (bitmap != null){
+            val view = findViewById<SurfaceView>(R.id.surface_view)
+            GLESUtils.drawBitmapToSurface(surface,bitmap,view.width,view.height)
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -90,24 +103,25 @@ class ViewActivity : Activity(),SurfaceHolder.Callback,View.OnClickListener {
         btn2.text = "播放视频"
         findViewById<ViewGroup>(android.R.id.content).addView(btn1,param)
         btn1.setOnClickListener {
-            if (mp.isPlaying) {
-                mp.release()
-            }
+
             showSurfaceBitmap(holder.surface)
         }
         btn1.y += 100
 
         findViewById<ViewGroup>(android.R.id.content).addView(btn2,param)
         btn2.setOnClickListener {
-            if (mp.isPlaying) {
-                mp.release()
-            }
             showSurfaceMedia(holder.surface)
         }
         btn2.y += 300
-    }
 
-    override fun onClick(v: View) {
-
+        val btn3 = Button(this)
+        btn3.text = "清除画面"
+        findViewById<ViewGroup>(android.R.id.content).addView(btn3,param)
+        btn3.setOnClickListener {
+            mediaPlayer?.release()
+            mediaPlayer = null
+            GLESUtils.clearSurfaceBuffer(holder.surface)
+        }
+        btn3.y += 500
     }
 }
