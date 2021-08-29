@@ -103,8 +103,13 @@ class BitmapSurface(private val surface: Surface, val width: Int, val height: In
 
     fun clearSurfaceBuffer() {
         // 清空缓冲区
+        // 设置清屏颜色
         GLES20.glClearColor(0f, 0f, 0f, 0f)
+
+        //执行清屏
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+        //交换缓冲区
         EGL14.eglSwapBuffers(eglDisplay, eglSurface)
     }
 

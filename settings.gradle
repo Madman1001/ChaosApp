@@ -1,11 +1,27 @@
-include ':centre'
-include ':access'
-include ':view'
-include ':wallpaper'
-include ':sys'
-include ':anim'
-include ':utils'
-include ':game'
-include ':adb'
-include ':app'
 rootProject.name = "example"
+
+//基础层
+include ':sys',':utils',':anim',':view'
+project(':sys').projectDir = new File("layer_base/sys")
+project(':utils').projectDir = new File("layer_base/utils")
+project(':anim').projectDir = new File("layer_base/anim")
+project(':view').projectDir = new File("layer_base/view")
+
+//中间层
+include ':centre'
+project(':centre').projectDir = new File("layer_inter/centre")
+
+//组件层
+include ':access',':wallpaper',':game',':adb'
+project(':access').projectDir = new File("layer_element/access")
+project(':wallpaper').projectDir = new File("layer_element/wallpaper")
+project(':game').projectDir = new File("layer_element/game")
+project(':adb').projectDir = new File("layer_element/adb")
+
+//应用层
+include ':app'
+
+
+
+
+
