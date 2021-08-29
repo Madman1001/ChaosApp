@@ -8,8 +8,10 @@ project(':anim').projectDir = new File("layer_base/anim")
 project(':view').projectDir = new File("layer_base/view")
 
 //中间层
-include ':centre'
+include ':centre',':centre_processor',':centre_annotation'
 project(':centre').projectDir = new File("layer_inter/centre")
+project(':centre_processor').projectDir = new File("layer_inter/centre_processor")
+project(':centre_annotation').projectDir = new File("layer_inter/centre_annotation")
 
 //组件层
 include ':access',':wallpaper',':game',':adb'

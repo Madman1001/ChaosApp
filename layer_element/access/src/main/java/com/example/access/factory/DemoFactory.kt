@@ -26,14 +26,14 @@ object DemoFactory {
     fun uninstallTask(packageName: String) : BaseTask {
         val task = TaskBean(0,"卸载自身程序")
         val action1 = ActionBean.ActionBuild().let {
-            it.findTexts.addAll(arrayOf("卸载"))
+            it.findTexts.addAll(arrayOf("卸载","Uninstall"))
             it.behavior = "click"
             it.needWaitTime = 1500
             it.build()
         }
 
         val action2 = ActionBean.ActionBuild().let {
-            it.findTexts.addAll(arrayOf("确定"))
+            it.findTexts.addAll(arrayOf("确定","OK"))
             it.behavior = "click"
             it.needWaitTime = 1500
             it.build()
