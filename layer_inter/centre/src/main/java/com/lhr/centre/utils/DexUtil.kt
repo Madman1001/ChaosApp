@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import dalvik.system.DexFile
 
-object DexUtil {
+internal object DexUtil {
     const val tag = "DexUtil"
 
     fun getDexAllClassName(context: Context): Array<String>{

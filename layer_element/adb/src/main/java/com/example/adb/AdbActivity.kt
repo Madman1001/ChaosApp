@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.adb.adapter.ResultAdapter
 import com.example.adb.utils.AdbRunner
+import com.lhr.centre.annotation.CElement
 import kotlinx.coroutines.*
 import java.util.*
 
@@ -17,6 +18,7 @@ import java.util.*
  * @date 2021/4/27
  * @des
  */
+@CElement(name = "ADB功能")
 class AdbActivity : Activity(){
     private val tag = "AS_${this::class.java.simpleName}"
     private val adapter = ResultAdapter(ArrayList<String>())

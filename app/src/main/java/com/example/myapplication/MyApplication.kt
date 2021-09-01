@@ -1,7 +1,6 @@
 package com.example.myapplication
 
 import android.app.Application
-import android.util.Log
 
 /**
  * @author lhr
@@ -12,6 +11,5 @@ class MyApplication : Application() {
     private val tag = this::class.java.simpleName
     override fun onCreate() {
         super.onCreate()
-        Log.e(tag,"myUid = ${android.os.Process.myUid()}")
     }
 }

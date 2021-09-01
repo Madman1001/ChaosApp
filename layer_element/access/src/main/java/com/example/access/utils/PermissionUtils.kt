@@ -14,7 +14,6 @@ import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.example.access.AccessibilityTestService
 
 object PermissionUtils {
     /**
@@ -176,22 +175,18 @@ object PermissionUtils {
     fun isAccessibilityEnable(context: Context, className: String): Boolean {
         val activityManager =
             context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        return if (activityManager != null) {
-            val runningServices =
-                activityManager.getRunningServices(100) // 获取正在运行的服务列表
-            if (runningServices.size < 0) {
-                return false
-            }
-            for (i in runningServices.indices) {
-                val service = runningServices[i].service
-                if (service.className == className) {
-                    return true
-                }
-            }
-            false
-        } else {
-            false
+        val runningServices =
+            activityManager.getRunningServices(100) // 获取正在运行的服务列表
+        if (runningServices.size < 0) {
+            return false
         }
+        for (i in runningServices.indices) {
+            val service = runningServices[i].service
+            if (service.className == className) {
+                return true
+            }
+        }
+         return false
     }
 
     fun isSystemWriteEnable(context: Context): Boolean {

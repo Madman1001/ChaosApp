@@ -1,6 +1,6 @@
 package com.lhr.centre.processor
 
-import com.lhr.centre.annotation.CPlugin
+import com.lhr.centre.annotation.CElement
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
@@ -15,7 +15,15 @@ import javax.tools.Diagnostic
  * @des 注解处理类
  */
 class CentreProcessor: AbstractProcessor() {
+    /**
+     * 注解环境对象
+     */
     private lateinit var environment: ProcessingEnvironment
+
+    /**
+     * 组件配置信息
+     */
+    private lateinit var elementConfig: CentreElementConfig
 
     /**
      * 初始化
@@ -23,8 +31,11 @@ class CentreProcessor: AbstractProcessor() {
     override fun init(processingEnv: ProcessingEnvironment) {
         super.init(processingEnv)
         environment = processingEnv
+        val elementName = environment.options[CentreConstant.KEY_ELEMENT_NAME]?:"default"
+        elementConfig = CentreElementConfig(elementName)
+
         val messager = processingEnv.messager
-        messager.printMessage(Diagnostic.Kind.NOTE, "CentreProcessor init")
+        messager.printMessage(Diagnostic.Kind.NOTE, "CentreProcessor init: $elementName")
     }
 
 
@@ -40,7 +51,7 @@ class CentreProcessor: AbstractProcessor() {
      */
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
         val annoTypes = HashSet<String>()
-        annoTypes.add(CPlugin::class.java.name)
+        annoTypes.add(CElement::class.java.name)
         return annoTypes
     }
 
@@ -50,25 +61,24 @@ class CentreProcessor: AbstractProcessor() {
     ): Boolean {
         if (roundEnv.processingOver()) {
             /*注解处理结束*/
+            ElementFactory.generateElementRouterTableToJava(environment, elementConfig)
             return true
         }
 
         /*筛选注解*/
         val elements = roundEnv.rootElements
-        val plugins: MutableMap<CPlugin, String> = HashMap(4)
         if (elements.isNotEmpty()) {
             for (value in elements) {
-                val plugin: CPlugin? = value.getAnnotation(CPlugin::class.java)
+                val plugin: CElement? = value.getAnnotation(CElement::class.java)
                 environment.messager.printMessage(Diagnostic.Kind.NOTE, "-----------------------")
                 if (plugin == null) {
                     continue
                 }
                 environment.messager.printMessage(Diagnostic.Kind.NOTE, plugin.toString())
                 environment.messager.printMessage(Diagnostic.Kind.NOTE, value.toString())
-                plugins[plugin] = value.toString()
+                elementConfig.extra.add(CentreElementPluginConfig(plugin.name,value.toString()))
             }
             /*处理注解*/
-
         }
         return true
     }

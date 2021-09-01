@@ -3,7 +3,9 @@ package com.example.access
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.access.utils.PermissionUtils
+import com.lhr.centre.annotation.CElement
 
+@CElement(name = "无障碍功能")
 class AccessActivity : AppCompatActivity() {
     private val tag = "AS_${this::class.java.simpleName}"
 
