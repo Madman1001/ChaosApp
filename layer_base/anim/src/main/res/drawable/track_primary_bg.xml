@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 设置默认时颜色背景 -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="180"
+                android:gradientRadius="7dp"
+                android:endColor="#ffd300ff"
+                android:startColor="#ff4102ca"
+                android:type="linear"
+                android:useLevel="true" />
+            <corners android:radius="3dp" />
+        </shape>
+    </item>
+</selector>

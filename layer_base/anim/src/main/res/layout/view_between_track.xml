@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/guide_track"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:orientation="horizontal">
+    <FrameLayout
+        android:id="@+id/track_one"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="4"
+        android:clipChildren="false">
+        <View
+            android:id="@+id/guide_one_back_iv"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/track_white_bg"/>
+        <View
+            android:id="@+id/guide_one_front_iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/track_primary_bg"/>
+    </FrameLayout>
+    <View
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:background="#0000"/>
+
+    <FrameLayout
+        android:id="@+id/track_two"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:clipChildren="false">
+        <View
+            android:id="@+id/guide_two_back_iv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/track_white_bg"/>
+        <View
+            android:id="@+id/guide_two_front_iv"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/track_primary_bg"/>
+    </FrameLayout>
+</LinearLayout>
+

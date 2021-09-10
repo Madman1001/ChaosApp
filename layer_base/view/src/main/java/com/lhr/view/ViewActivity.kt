@@ -5,6 +5,9 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.*
 import android.widget.Button
+import android.widget.Toast
+import com.example.sys.reflection.SysReflection
+import com.lhr.centre.annotation.CElement
 import com.lhr.view.bitmap.BitmapCropView
 import com.lhr.view.utils.BitmapUtils
 import com.lhr.view.utils.MediaUtils
@@ -15,6 +18,7 @@ import com.lhr.view.utils.GLESUtils
  * @date 2021/5/7
  * @des
  */
+@CElement(name = "视图功能")
 class ViewActivity : Activity(),SurfaceHolder.Callback {
     private var mediaPlayer:MediaPlayer? = null
 
@@ -85,6 +89,12 @@ class ViewActivity : Activity(),SurfaceHolder.Callback {
         if (bitmap != null){
             val view = findViewById<SurfaceView>(R.id.surface_view)
             GLESUtils.drawBitmapToSurface(surface,bitmap,view.width,view.height)
+//            val canvas = surface.lockCanvas(null)
+//            canvas.drawBitmap(bitmap,0f,0f,null)
+//            surface.unlockCanvasAndPost(canvas)
+//            if (SysReflection.runSysMethod(Surface::class.java,surface,"forceScopedDisconnect")){
+//                Toast.makeText(this,"反射成功",Toast.LENGTH_SHORT).show()
+//            }
         }
     }
 

@@ -58,35 +58,6 @@ object BitmapUtils {
     }
 
     /**
-     * 根据屏幕比例裁剪图片
-     * @param bitmap 原始图片
-     * @param screenWidth 屏幕宽度
-     * @param screenHeight 屏幕高度
-     */
-    fun cropBitmapToScreen(bitmap: Bitmap, screenWidth: Int, screenHeight: Int): Bitmap?{
-        val oldWidth = bitmap.width
-        val oldHeight = bitmap.height
-
-        val scale = (screenWidth * 1.0f) / (screenHeight * 1.0f)
-
-        var newWidth = oldWidth
-        var newHeight = oldHeight
-
-        if (oldWidth >= oldHeight){
-            newWidth = (newHeight * scale).toInt()
-            if (newWidth > oldWidth){
-                newWidth = oldWidth
-            }
-        } else{
-            newHeight = (newWidth / scale).toInt()
-            if (newHeight > oldHeight){
-                newHeight = oldHeight
-            }
-        }
-        return Bitmap.createBitmap(bitmap,(oldWidth - newWidth) / 2, (oldHeight - newHeight) / 2, newWidth, newHeight)
-    }
-
-    /**
      * 计算缩放比例
      */
     private fun calculateInSampleSize(option: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int{
