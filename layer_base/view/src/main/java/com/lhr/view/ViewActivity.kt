@@ -5,8 +5,6 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.*
 import android.widget.Button
-import android.widget.Toast
-import com.example.sys.reflection.SysReflection
 import com.lhr.centre.annotation.CElement
 import com.lhr.view.bitmap.BitmapCropView
 import com.lhr.view.utils.BitmapUtils

@@ -1,17 +1,24 @@
 package com.example.sys
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.sys.utils.HookUtil
+import com.lhr.centre.annotation.CElement
+import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 /**
  * @author lhr
  * @date 2021/5/7
  * @des
  */
+@CElement(name = "系统反射")
 class SysActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         HookUtil.hookInstrumentation(this)
@@ -22,5 +29,17 @@ class SysActivity : Activity() {
         val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
         setContentView(text,params)
         startActivity(Intent(this,PlaceholderActivity::class.java))
+        test()
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun test() {
+        val activityThread =
+            Class.forName("android.app.ActivityThread")
+        val hclass = Class.forName("android.app.ActivityThread\$H")
+        val declaredMethods: Array<Method> = hclass.declaredMethods
+        for (declaredMethod in declaredMethods) {
+            Log.e("Test", "declareField: $declaredMethod")
+        }
     }
 }

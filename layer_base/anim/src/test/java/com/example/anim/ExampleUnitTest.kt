@@ -12,6 +12,15 @@ import org.junit.Assert.*
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val rawVersion = "V11.2.0"
+        var version = ""
+        for (index in rawVersion.indices){
+            if (rawVersion[index] in '1'..'9'){
+                version = rawVersion.substring(index)
+                break
+            }
+        }
+
+        println(version)
     }
 }

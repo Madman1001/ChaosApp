@@ -25,31 +25,5 @@ class PlaceholderActivity : Activity() {
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
         setContentView(text, params)
-
-        this.registerActivityLifecycleCallbacks(object : Application.ActivityLifecycleCallbacks {
-            override fun onActivityPaused(activity: Activity) {
-
-            }
-
-            override fun onActivityStarted(activity: Activity) {
-            }
-
-            override fun onActivityDestroyed(activity: Activity) {
-            }
-
-            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-            }
-
-            override fun onActivityStopped(activity: Activity) {
-                Log.e("Test", "run onResume")
-            }
-
-            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            }
-
-            override fun onActivityResumed(activity: Activity) {
-            }
-
-        })
     }
 }
