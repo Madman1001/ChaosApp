@@ -11,11 +11,10 @@
         android:id="@+id/track_one"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="4"
+        android:layout_weight="2"
         android:clipChildren="false">
         <View
             android:id="@+id/guide_one_back_iv"
-            android:visibility="invisible"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/track_white_bg"/>
@@ -44,7 +43,6 @@
             android:background="@drawable/track_white_bg"/>
         <View
             android:id="@+id/guide_two_front_iv"
-            android:visibility="invisible"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/track_primary_bg"/>

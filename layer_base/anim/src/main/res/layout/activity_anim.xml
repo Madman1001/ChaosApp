@@ -12,6 +12,8 @@
         android:id="@+id/guide_track"
         android:layout_width="100dp"
         android:layout_height="13dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

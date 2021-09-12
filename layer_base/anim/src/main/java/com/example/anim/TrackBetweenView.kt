@@ -5,10 +5,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
-import android.view.animation.ScaleAnimation
 import android.widget.FrameLayout
 
 /**
@@ -17,11 +13,19 @@ import android.widget.FrameLayout
  * @des 简易的轨迹滑动组件，现只支持两个滑块
  */
 class TrackBetweenView : FrameLayout {
-    var currentSelection: Select
+    var currentSelection: Select = Select.UNKNOWN
         private set
+
+    var animDuration = 600L
 
     private val trackRight: ViewGroup
     private val trackLeft: ViewGroup
+
+    /**
+     * 选中时的长度，和取消选择时的长度
+     */
+    private var selectLen = 0f
+    private var unselectLen = 0f
 
     constructor(context: Context) : super(context)
 
@@ -30,76 +34,70 @@ class TrackBetweenView : FrameLayout {
     init {
         LayoutInflater.from(context).inflate(R.layout.view_between_track,this,true)
 
-        trackRight = this.findViewById<ViewGroup>(R.id.track_two)
         trackLeft = this.findViewById<ViewGroup>(R.id.track_one)
-
-        currentSelection = Select.LEFT
+        trackRight = this.findViewById<ViewGroup>(R.id.track_two)
+        this.post {
+            val w = this.findViewById<View>(R.id.guide_track)
+            selectLen = (w.width * 1.0f) / 7f * 4f
+            unselectLen = (w.width * 1.0f) / 7f * 2f
+            select(Select.LEFT)
+        }
     }
 
     fun select(selection: Select){
         if (currentSelection == selection){
             return
         }
-
-        when(selection){
-            Select.LEFT -> {
-                playLeftAnimation(600L,true)
-                playRightAnimation(600L,false)
-            }
-            Select.RIGHT -> {
-                playLeftAnimation(600L,false)
-                playRightAnimation(600L,true)
-            }
-        }
+        playLeftAnimation(animDuration,selection == Select.LEFT)
+        playRightAnimation(animDuration,selection == Select.RIGHT)
         currentSelection = selection
     }
 
     private fun playLeftAnimation(duration: Long, isSelect: Boolean){
-        val frontAnimationSet =
-            generateAnimationSet((trackRight.width * 1.0f) / (trackLeft.width * 1.0f),!isSelect)
-        val backAnimationSet =
-            generateAnimationSet((trackRight.width * 1.0f) / (trackLeft.width * 1.0f),isSelect)
-        frontAnimationSet.duration = duration
-        backAnimationSet.duration = duration
-        this.findViewById<View>(R.id.guide_one_back_iv).startAnimation(backAnimationSet)
-        this.findViewById<View>(R.id.guide_one_front_iv).startAnimation(frontAnimationSet)
+        this.findViewById<View>(R.id.guide_one_front_iv).apply {
+            this.animate()
+                .alpha(if (isSelect) 1f else 0f)
+                .setDuration(duration)
+                .start()
+        }
+        this.findViewById<View>(R.id.guide_one_back_iv).apply {
+            this.animate()
+                .alpha(if (isSelect) 0f else 1f)
+                .setDuration(duration)
+                .start()
+        }
+        trackLeft.apply {
+            this.animate()
+                .scaleX(if (isSelect) selectLen / this.width else unselectLen / this.width)
+                .setDuration(duration)
+                .start()
+        }
     }
 
     private fun playRightAnimation(duration: Long, isSelect: Boolean){
-        val frontAnimationSet =
-            generateAnimationSet((trackLeft.width * 1.0f) / (trackRight.width * 1.0f),!isSelect)
-        val backAnimationSet =
-            generateAnimationSet((trackLeft.width * 1.0f) / (trackRight.width * 1.0f),isSelect)
-        frontAnimationSet.duration = duration
-        backAnimationSet.duration = duration
-        this.findViewById<View>(R.id.guide_two_back_iv).startAnimation(backAnimationSet)
-        this.findViewById<View>(R.id.guide_two_front_iv).startAnimation(frontAnimationSet)
-    }
-
-    /**
-     * 生成拉伸动画，只限x轴
-     */
-    private fun generateAnimationSet(toScale: Float,isTransparent: Boolean): AnimationSet{
-        return AnimationSet(true).apply {
-            val scale = ScaleAnimation(
-                1f,toScale,
-                1f, 1f,
-                Animation.RELATIVE_TO_SELF,0.5f,
-                Animation.RELATIVE_TO_SELF,0.5f)
-            val alpha = if (isTransparent){
-                AlphaAnimation(1f,0f)
-            }else{
-                AlphaAnimation(0f,1f)
-            }
-            this.addAnimation(scale)
-            this.addAnimation(alpha)
-            this.isFillEnabled = true
-            this.fillAfter = true
+        this.findViewById<View>(R.id.guide_two_front_iv).apply {
+            this.animate()
+                .alpha(if (isSelect) 1f else 0f)
+                .setDuration(duration)
+                .start()
+        }
+        this.findViewById<View>(R.id.guide_two_back_iv).apply {
+            this.animate()
+                .alpha(if (isSelect) 0f else 1f)
+                .setDuration(duration)
+                .start()
+        }
+        trackRight.apply {
+            this.animate()
+                .scaleX(if (isSelect) selectLen / this.width else unselectLen / this.width)
+                .setDuration(duration)
+                .start()
         }
     }
 
     enum class Select{
         LEFT, //左边
-        RIGHT //右边
+        RIGHT, //右边
+        UNKNOWN
     }
 }
