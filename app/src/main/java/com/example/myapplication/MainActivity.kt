@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.adapter.ButtonAdapter
+import com.example.sys.utils.ApplicationUtil
 import com.example.utils.ActivityLaunchUtils
 import com.example.utils.live
 import com.lhr.centre.Centre
@@ -29,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         this.startService(Intent(this, MainService::class.java))
+
+        ApplicationUtil.getRunningServices()
     }
 
     private fun initListButton() {

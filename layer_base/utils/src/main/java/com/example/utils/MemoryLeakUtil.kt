@@ -68,6 +68,18 @@ class ProxyCallback(private var concrete: Any?) : InvocationHandler {
             val runner = it::class.java.getMethod(method.name, *method.parameterTypes)
             return runner.invoke(concrete, *(args ?: arrayOfNulls<Any>(0)))
         }
-        return null
+        /**
+         * 返回默认值
+         */
+        return when(method.returnType) {
+            java.lang.Double.TYPE -> 0.0
+            java.lang.Float.TYPE -> 0f
+            java.lang.Character.TYPE -> '\u0000'
+            java.lang.Boolean.TYPE -> false
+            java.lang.Integer.TYPE -> 0
+            java.lang.String::class.java -> ""
+            java.lang.Void.TYPE -> null
+            else -> null
+        }
     }
 }
