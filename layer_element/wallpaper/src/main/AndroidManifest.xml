@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lhr.wallpaper">
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+
     <application>
+        <activity android:name=".WallpaperActivity"></activity>
+
         <service
-            android:permission="android.permission.BIND_WALLPAPER"
-            android:name=".GameWallpaperService">
+            android:name=".GameWallpaperService"
+            android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
             </intent-filter>
-            <meta-data android:name="android.service.wallpaper"
+
+            <meta-data
+                android:name="android.service.wallpaper"
                 android:resource="@xml/game_wallpaper" />
         </service>
     </application>
+
 </manifest>

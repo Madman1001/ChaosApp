@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -15,6 +16,10 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        ndk {
+            abiFilters 'x86_64', 'x86', 'arm64-v8a', 'armeabi-v7a'
+        }
     }
 
     buildTypes {
@@ -30,11 +35,29 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    kapt {
+        arguments {
+            arg("ELEMENT_MODULE_NAME", project.name)
+        }
+    }
+
+    //配置NDK编译脚本
+    externalNativeBuild {
+        cmake{
+            path "CMakeLists.txt"
+        }
+    }
+
+    ndkVersion "23.0.7599858"
 }
 
 dependencies {
     implementation project(':utils')
     implementation project(':game')
+
+    implementation project(':centre')
+    kapt project(':centre_processor')
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
