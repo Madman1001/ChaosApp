@@ -19,6 +19,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
+
+    <com.example.anim.GameSeekBar
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guide_track"
+        app:layout_constraintBottom_toTopOf="@id/start"/>
     <Button
         android:id="@+id/start"
         android:layout_width="wrap_content"
