@@ -14,5 +14,5 @@ java {
 
 dependencies {
     implementation project(':centre_annotation')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation rootProject.ext.dependencies['kotlin']
 }

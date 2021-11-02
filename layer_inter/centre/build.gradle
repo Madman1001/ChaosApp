@@ -4,29 +4,27 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion rootProject.ext.android['targetSdkVersion']
+    buildToolsVersion rootProject.ext.android['buildToolsVersion']
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
+        minSdkVersion rootProject.ext.android['minSdkVersion']
+        targetSdkVersion rootProject.ext.android['targetSdkVersion']
+        versionCode rootProject.ext.android['versionCode']
+        versionName rootProject.ext.android['versionName']
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -35,12 +33,17 @@ android {
 dependencies {
     api project(':centre_annotation')
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.2.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.1.0'
-    testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    api rootProject.ext.dependencies['androidx-core']
+    api rootProject.ext.dependencies['androidx-appcompat']
+    api rootProject.ext.dependencies['androidx-material']
+    api rootProject.ext.dependencies['androidx-fragment']
+    api rootProject.ext.dependencies['androidx-fragment-ktx']
+    api rootProject.ext.dependencies['androidx-constraintlayout']
+    api rootProject.ext.dependencies['kotlin']
+    api rootProject.ext.dependencies['kotlin-reflect']
+    api rootProject.ext.dependencies['kotlin-jdk8']
+    api rootProject.ext.dependencies['kotlinx-coroutines-core']
+    api rootProject.ext.dependencies['kotlinx-coroutines-android']
+    api rootProject.ext.dependencies['junit']
+    api rootProject.ext.dependencies['junit-android']
 }
