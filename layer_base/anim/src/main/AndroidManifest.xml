@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.anim">
+    package="com.lhr.anim">
 
     <application>
-        <activity android:name=".AnimActivity"></activity>
+        <activity android:name="com.lhr.anim.AnimActivity"></activity>
     </application>
 
 </manifest>

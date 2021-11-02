@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.game">
+    package="com.lhr.game">
 
     <application>
-        <activity android:name="com.example.game.GameActivity"/>
+        <activity android:name="com.lhr.game.GameActivity"/>
     </application>
 </manifest>

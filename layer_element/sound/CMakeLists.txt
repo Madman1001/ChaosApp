@@ -36,6 +36,4 @@ target_link_libraries( example fmod )
 # add_executable()
 
 # Specifies a path to native header files.
-#include_directories(C:/Users/liaohaorui/AppData/Local/Android/Sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include)
-#include_directories(C:/Users/liaohaorui/AppData/Local/Android/Sdk/ndk/21.1.6352462/sources/android/support/include)
-#include_directories(C:/Users/liaohaorui/AppData/Local/Android/Sdk/ndk/21.1.6352462/sources/android/ndk_helper)
+#include_directories()

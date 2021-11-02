@@ -11,18 +11,20 @@ cmake_minimum_required(VERSION 3.4.1)
 # automatically packages shared libraries with your APK.
 
 add_library( # Specifies the name of the library.
-             wallpaper-image
+            chaos-image
 
              # Sets the library as a shared library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/wallpaper-image.c)
+             src/main/cpp/chaos-image.c)
+
+find_library(log-lib log)
+
+target_link_libraries(chaos-image ${log-lib})
 
 # build executable
 # add_executable()
 
 # Specifies a path to native header files.
-include_directories(C:/Users/liaohaorui/AppData/Local/Android/Sdk/ndk/21.1.6352462/sources/cxx-stl/llvm-libc++/include)
-include_directories(C:/Users/liaohaorui/AppData/Local/Android/Sdk/ndk/21.1.6352462/sources/android/ndk_helper)
-include_directories(C:/Users/liaohaorui/AppData/Local/Android/Sdk/ndk/21.1.6352462/sources/android/support/include)
+#include_directories()

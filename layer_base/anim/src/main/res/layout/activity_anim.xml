@@ -8,7 +8,7 @@
     android:clipChildren="false"
     android:background="#999"
     tools:context=".AnimActivity">
-    <com.example.anim.TrackBetweenView
+    <com.lhr.anim.TrackBetweenView
         android:id="@+id/guide_track"
         android:layout_width="100dp"
         android:layout_height="13dp"
@@ -20,7 +20,7 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-    <com.example.anim.GameSeekBar
+    <com.lhr.anim.GameSeekBar
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginStart="25dp"
