@@ -21,7 +21,7 @@ add_library( # Specifies the name of the library.
 
 find_library(log-lib log)
 
-target_link_libraries(chaos-image ${log-lib})
+target_link_libraries(chaos-image -ljnigraphics ${log-lib})
 
 # build executable
 # add_executable()

@@ -7,6 +7,7 @@ import android.os.*
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import kotlin.jvm.Throws
 
 /**
  * @author lhr
@@ -155,13 +156,7 @@ object ActivityLaunchUtils : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-        if (activity.intent.getStringExtra(LAUNCH_SIGN) == waitIntent?.intent?.getStringExtra(LAUNCH_SIGN)){
-            launchHandler?.removeMessages(MSG_WHAT)
-            if (waitIntent?.pendingIntent != null){
-                alarmManager?.cancel(waitIntent?.pendingIntent)
-            }
-            waitIntent = null
-        }
+
         Log.d(TAG,"on created $activity ")
     }
 
@@ -181,6 +176,17 @@ object ActivityLaunchUtils : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityResumed(activity: Activity) {
+        if (activity.intent.getStringExtra(LAUNCH_SIGN) == waitIntent?.intent?.getStringExtra(LAUNCH_SIGN)){
+            launchHandler?.removeMessages(MSG_WHAT)
+            try {
+                if (waitIntent?.pendingIntent != null){
+                    alarmManager?.cancel(waitIntent?.pendingIntent)
+                }
+            }catch (e: Throwable){
+
+            }
+            waitIntent = null
+        }
     }
 
     private class LaunchIntent(context: Context, val intent: Intent){

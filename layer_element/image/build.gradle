@@ -49,7 +49,6 @@ android {
 
 dependencies {
     implementation project(':utils')
-    implementation project(':game')
 
     implementation project(':centre')
     kapt project(':centre_processor')
