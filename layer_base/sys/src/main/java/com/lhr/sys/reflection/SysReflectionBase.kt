@@ -10,10 +10,22 @@ import java.lang.reflect.Method
 abstract class SysReflectionBase {
 
     /**
+     * class 数组类型
+     */
+    protected val _ClassArrayType by lazy {
+        val classes: Array<Class<*>?> = arrayOfNulls(0)
+        classes::class.java
+    }
+
+    /**
      * 查询方法
      */
     protected val _FindMethod: Method by lazy {
-        Class::class.java.getMethod("getDeclaredMethod", String::class.java, Array::class.java)
+        Class::class.java.getMethod(
+            "getDeclaredMethod",
+            String::class.java,
+            _ClassArrayType
+        )
     }
 
     /**
@@ -22,4 +34,5 @@ abstract class SysReflectionBase {
     protected val _FindFeild: Method by lazy {
         Class::class.java.getMethod("getDeclaredField", String::class.java)
     }
+
 }

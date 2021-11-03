@@ -16,7 +16,10 @@ class HookActivity : Activity() {
         val text = TextView(this)
         text.text = "this is HookActivity"
         text.textSize = 30f
-        val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        setContentView(text,params)
+        val params = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        setContentView(text, params)
     }
 }

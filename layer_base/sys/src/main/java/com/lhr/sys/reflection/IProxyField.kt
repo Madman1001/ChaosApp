@@ -1,7 +1,5 @@
 package com.lhr.sys.reflection
 
-import kotlin.jvm.Throws
-
 /**
  * @author lhr
  * @date 2021/9/17

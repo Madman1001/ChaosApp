@@ -14,7 +14,7 @@ import android.util.Log
  * @date 2021/10/8
  * @des
  */
-class ProxyInstrumentation(private val baseIns: Instrumentation) : Instrumentation(){
+class ProxyInstrumentation(private val baseIns: Instrumentation) : Instrumentation() {
     private val PI_TAG = "PILog"
 
     @SuppressLint("DiscouragedPrivateApi")
@@ -22,9 +22,11 @@ class ProxyInstrumentation(private val baseIns: Instrumentation) : Instrumentati
         who: Context?, contextThread: IBinder?, token: IBinder?, target: Activity?,
         intent: Intent?, requestCode: Int, options: Bundle?
     ): ActivityResult? {
-        Log.e(PI_TAG,
+        Log.e(
+            PI_TAG,
             "Context: " + who + " , IBinder: " + contextThread + " , IBinder: " + token + " , Activity: " + target + " " +
-                    "Intent: " + intent + " , Int: " + requestCode + " , Bundle: " + options + "")
+                    "Intent: " + intent + " , Int: " + requestCode + " , Bundle: " + options + ""
+        )
         return try {
             val realExec =
                 Instrumentation::class.java.getDeclaredMethod(

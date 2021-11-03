@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.lhr.sys.utils.HookUtil
 import com.lhr.centre.annotation.CElement
+import com.lhr.sys.reflection.SysProxyField
+import com.lhr.sys.reflection.SysProxyMethod
 import java.lang.reflect.Method
 
 /**
@@ -19,25 +21,24 @@ import java.lang.reflect.Method
 @CElement(name = "系统反射")
 class SysActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        HookUtil.hookInstrumentation(this)
         super.onCreate(savedInstanceState)
+        hook()
         val text = TextView(this)
         text.text = "this is SysActivity"
         text.textSize = 30f
         val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
         setContentView(text,params)
         startActivity(Intent(this,PlaceholderActivity::class.java))
-        test()
     }
 
     @SuppressLint("PrivateApi")
-    private fun test() {
-        val activityThread =
-            Class.forName("android.app.ActivityThread")
-        val hclass = Class.forName("android.app.ActivityThread\$H")
-        val declaredMethods: Array<Method> = hclass.declaredMethods
-        for (declaredMethod in declaredMethods) {
-            Log.e("Test", "declareField: $declaredMethod")
-        }
+    private fun hook() {
+        val hookClass = HookUtil::class.java
+        val proxyMethod = SysProxyMethod(hookClass,"hookInstrumentation",Activity::class.java)
+        proxyMethod.invoke(HookUtil,this)
+
+        val proxyField = SysProxyField(hookClass,"hooking")
+        proxyField.set(HookUtil,true)
+        Log.e("Test",proxyField.get(HookUtil)?.toString() ?: "")
     }
 }

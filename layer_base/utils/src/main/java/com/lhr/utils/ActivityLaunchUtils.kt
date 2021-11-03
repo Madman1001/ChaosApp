@@ -156,7 +156,6 @@ object ActivityLaunchUtils : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-
         Log.d(TAG,"on created $activity ")
     }
 
@@ -167,6 +166,7 @@ object ActivityLaunchUtils : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityDestroyed(activity: Activity) {
+        Log.d(TAG,"on created $activity ")
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {

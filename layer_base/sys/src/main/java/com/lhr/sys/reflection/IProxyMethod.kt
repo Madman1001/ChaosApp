@@ -1,7 +1,6 @@
 package com.lhr.sys.reflection
 
 import java.lang.reflect.InvocationTargetException
-import kotlin.jvm.Throws
 
 /**
  * @author lhr
@@ -10,6 +9,10 @@ import kotlin.jvm.Throws
  */
 interface IProxyMethod {
 
-    @Throws(IllegalAccessException::class, IllegalArgumentException::class, InvocationTargetException::class)
+    @Throws(
+        IllegalAccessException::class,
+        IllegalArgumentException::class,
+        InvocationTargetException::class
+    )
     fun invoke(obj: Any?, vararg args: Any?): Any?
 }

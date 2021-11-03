@@ -13,22 +13,22 @@ import android.util.Log
 object ApplicationUtil {
     //只能获取app自身服务
     private val app: Application? by lazy { ContextUtil.getApplicationByReflect() }
-    fun getRunningServices(){
+    fun getRunningServices() {
         app?.let {
             val am = it.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             am.getRunningServices(Int.MAX_VALUE)?.all {
-                Log.e("Test",it.service.toString())
+                Log.e("Test", it.service.toString())
                 true
             }
         }
     }
 
     //只能获取app自身task
-    fun getRunningTasks(){
+    fun getRunningTasks() {
         app?.let {
             val am = it.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
             am.getRunningTasks(Int.MAX_VALUE)?.all {
-                Log.e("Test",it.topActivity.toString())
+                Log.e("Test", it.topActivity.toString())
                 true
             }
         }

@@ -11,6 +11,11 @@ import com.lhr.utils.ActivityLaunchUtils
 import com.lhr.utils.live
 import com.lhr.centre.Centre
 
+/**
+ * @author lhr
+ * @date 2021/4/27
+ * @des 应用主Activity
+ */
 class MainActivity : AppCompatActivity() {
     private val buttonAdapter = ButtonAdapter(ArrayList<Button>())
     override fun onCreate(savedInstanceState: Bundle?) {
