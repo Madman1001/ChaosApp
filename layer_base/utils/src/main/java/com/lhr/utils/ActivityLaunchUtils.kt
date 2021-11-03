@@ -7,7 +7,6 @@ import android.os.*
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import kotlin.jvm.Throws
 
 /**
  * @author lhr
@@ -166,7 +165,7 @@ object ActivityLaunchUtils : Application.ActivityLifecycleCallbacks {
     }
 
     override fun onActivityDestroyed(activity: Activity) {
-        Log.d(TAG,"on created $activity ")
+        Log.d(TAG,"on destroy $activity ")
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
