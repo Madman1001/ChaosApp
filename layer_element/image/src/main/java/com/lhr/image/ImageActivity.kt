@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
-import androidx.core.graphics.drawable.toBitmap
 import com.lhr.centre.annotation.CElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
