@@ -44,4 +44,5 @@ dependencies {
 //    implementation project(':sound')
     implementation project(':image')
     implementation project(':adb')
+    implementation project(':vpn')
 }

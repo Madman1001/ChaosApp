@@ -3,7 +3,15 @@
     package="com.lhr.vpn">
 
     <application>
-        <activity android:name=".LocalVpnActivity"></activity>
+        <activity android:name=".LocalVpnActivity"/>
+
+        <service
+            android:name=".LocalVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
