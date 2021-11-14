@@ -9,12 +9,15 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.lhr.centre.annotation.CElement
+import com.lhr.vpn.test.LocalVpnTest
 
 /**
  * @author lhr
  * @date 2021/11/9
  * @des
  */
+@CElement(name = "网络代理")
 class LocalVpnActivity : AppCompatActivity() {
 
     companion object {
@@ -42,10 +45,30 @@ class LocalVpnActivity : AppCompatActivity() {
             })
     }
 
-    private fun startVPN(mView: View){
+    fun onClick(view: View){
+        when(view.id){
+            R.id.start_vpn_bt ->{
+                startVPN()
+            }
+            R.id.stop_vpn_bt ->{
+                stopVPN()
+            }
+            R.id.test_vpn_bt ->{
+                LocalVpnTest.httpTest()
+            }
+        }
+    }
+
+    private fun startVPN() {
         val intent = VpnService.prepare(this)
         if (intent != null){
             _launchActivity.launch(intent)
+        }else{
+            startService(Intent(this, LocalVpnService::class.java))
         }
+    }
+
+    fun stopVPN() {
+
     }
 }
