@@ -6,13 +6,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".LocalVpnActivity">
-    <Button
+    <TextView
+        android:id="@+id/status_vpn_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="clickSwitch"
+        android:text="VPN未开启"
+        android:textColor="@color/cardview_dark_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/start_vpn_bt"/>
+    <Button
+        android:id="@+id/start_vpn_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Start VPN"
+        android:onClick="onClick"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/stop_vpn_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop VPN"
+        android:onClick="onClick"
+        android:layout_marginTop="50dp"
+        app:layout_constraintTop_toBottomOf="@id/start_vpn_bt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/test_vpn_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Test VPN"
+        android:onClick="onClick"
+        android:layout_marginTop="50dp"
+        app:layout_constraintTop_toBottomOf="@id/stop_vpn_bt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

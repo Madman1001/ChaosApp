@@ -7,4 +7,7 @@ package com.lhr.vpn.protocol
  */
 class TCPPacket: IPacket{
     override fun getType(): IPacket.PacketType = IPacket.PacketType.TCP
+    override fun getHeader(): IPacket.IPacketHeader {
+        return object : IPacket.IPacketHeader{}
+    }
 }

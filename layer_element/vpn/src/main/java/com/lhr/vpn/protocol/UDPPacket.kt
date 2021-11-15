@@ -7,4 +7,7 @@ package com.lhr.vpn.protocol
  */
 class UDPPacket: IPacket {
     override fun getType(): IPacket.PacketType = IPacket.PacketType.UDP
+    override fun getHeader(): IPacket.IPacketHeader {
+        return object : IPacket.IPacketHeader{}
+    }
 }
