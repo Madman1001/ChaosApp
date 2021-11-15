@@ -7,9 +7,9 @@
     android:layout_height="match_parent"
     tools:context=".LocalVpnActivity">
     <Button
-        android:onClick="startVPN"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="clickSwitch"
         android:text="Start VPN"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
