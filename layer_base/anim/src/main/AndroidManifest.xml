@@ -3,7 +3,7 @@
     package="com.lhr.anim">
 
     <application>
-        <activity android:name="com.lhr.anim.AnimActivity"></activity>
+        <activity android:name="com.lhr.anim.AnimActivity"/>
     </application>
 
 </manifest>

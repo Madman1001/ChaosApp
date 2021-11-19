@@ -16,5 +16,6 @@ Just coding
   * access 无障碍服务应用库---实现基本使用
   * adb adb服务访问库---未完成
   * game 游戏库---未完成
-  * wallpaper 壁纸服务库---未完成
+  * image 图像库---未完成
+  * sound 音频库---未完成
   * vpn 本地网络代理库---未实现

@@ -32,6 +32,15 @@ android {
             arg("ELEMENT_MODULE_NAME", project.name)
         }
     }
+
+    //配置NDK编译脚本
+    externalNativeBuild {
+        cmake{
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+    ndkVersion "21.1.6352462"
+
 }
 
 dependencies {

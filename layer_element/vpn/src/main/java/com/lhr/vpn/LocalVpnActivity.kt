@@ -63,6 +63,8 @@ class LocalVpnActivity : AppCompatActivity() {
         val intent = VpnService.prepare(this)
         if (intent != null){
             _launchActivity.launch(intent)
+        } else {
+            startService(Intent(this, LocalVpnService::class.java))
         }
     }
 

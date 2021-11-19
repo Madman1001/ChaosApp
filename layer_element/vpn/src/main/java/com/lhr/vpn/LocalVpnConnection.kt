@@ -3,11 +3,11 @@ package com.lhr.vpn
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.util.*
 
 
 /**
@@ -55,7 +55,7 @@ class LocalVpnConnection(
 //                            packet.position(),
 //                            packet.limit(),
 //                            Charset.forName("utf-8"))
-                    val message = Arrays.toString(packet.array())
+                    val message = ByteLog.toByteBufferString(packet,0,len)
                     Log.i(TAG, "${Thread.currentThread().name} send $message")
                     packet.clear()
                 }
