@@ -1,14 +1,18 @@
 package com.lhr.adb
 
-import android.app.Activity
 import android.os.Bundle
 import android.util.Log
+import android.view.ContextMenu
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lhr.adb.adapter.ResultAdapter
-import com.lhr.adb.utils.AdbRunner
+import com.lhr.adb.exce.CommandRunnable
+import com.lhr.adb.script.OpenAdbScript
 import com.lhr.centre.annotation.CElement
 import kotlinx.coroutines.*
 import java.util.*
@@ -19,13 +23,38 @@ import java.util.*
  * @des
  */
 @CElement(name = "ADB功能")
-class AdbActivity : Activity(){
+class AdbActivity : AppCompatActivity(){
     private val tag = "AS_${this::class.java.simpleName}"
     private val adapter = ResultAdapter(ArrayList<String>())
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adb)
+        val ab = this.actionBar
+        ab?.show()
         init()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val menuInflater = this.menuInflater
+        menuInflater.inflate(R.menu.adb_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.open_adb_connect -> {
+                OpenAdbScript().apply {
+                    this.listener = { command, result, message ->
+                        GlobalScope.launch(Dispatchers.Main) {
+                            adapter.addItem(message)
+                            findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
+                        }
+                    }
+                    this.start()
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun init(){
@@ -44,22 +73,22 @@ class AdbActivity : Activity(){
     }
 
     private fun runCode(){
+        val codeET = findViewById<EditText>(R.id.adb_in_code)
+        val codeCommand = codeET.text.toString()
+        codeET.setText("")
+        if (codeCommand.isEmpty()){
+            return
+        }
+        val runnable = CommandRunnable(codeCommand,Runtime.getRuntime()) { result, message ->
+            Log.e(tag, message)
+            GlobalScope.launch(Dispatchers.Main) {
+                adapter.addItem(message)
+                findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
+            }
+            result
+        }
         GlobalScope.launch {
-            val code = withContext(Dispatchers.Main){
-                val codeET = findViewById<EditText>(R.id.adb_in_code)
-                val codeCommand = codeET.text.toString()
-                codeET.setText("")
-                codeCommand
-            }
-            if (code.isEmpty()){
-                return@launch
-            }
-            val result = AdbRunner.runCommand(code)
-            Log.e(tag,result)
-            withContext(Dispatchers.Main){
-                adapter.addItem(result)
-                findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount-1)
-            }
+            runnable.run()
         }
     }
 }

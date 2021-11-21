@@ -4,6 +4,8 @@
 
     <application>
         <activity android:name="com.lhr.adb.AdbActivity"
-            android:windowSoftInputMode="adjustPan"/>
+            android:theme="@style/Theme.AppCompat"
+            android:windowSoftInputMode="adjustPan"
+            android:label="Adb"/>
     </application>
 </manifest>
