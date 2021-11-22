@@ -2,7 +2,6 @@ package com.lhr.adb
 
 import android.os.Bundle
 import android.util.Log
-import android.view.ContextMenu
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -11,8 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lhr.adb.adapter.ResultAdapter
-import com.lhr.adb.exce.CommandRunnable
+import com.lhr.adb.exce.DefaultActuator
 import com.lhr.adb.script.OpenAdbScript
+import com.lhr.adb.script.ShowIpScript
 import com.lhr.centre.annotation.CElement
 import kotlinx.coroutines.*
 import java.util.*
@@ -42,9 +42,22 @@ class AdbActivity : AppCompatActivity(){
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-            R.id.open_adb_connect -> {
+            R.id.adb_open_connect -> {
                 OpenAdbScript().apply {
                     this.listener = { command, result, message ->
+                        Log.d(tag, "$command: $result : $message")
+                        GlobalScope.launch(Dispatchers.Main) {
+                            adapter.addItem(message)
+                            findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
+                        }
+                    }
+                    this.start()
+                }
+            }
+            R.id.adb_show_ip -> {
+                ShowIpScript().apply {
+                    this.listener = { command, result, message ->
+                        Log.d(tag, "$command: $result : $message")
                         GlobalScope.launch(Dispatchers.Main) {
                             adapter.addItem(message)
                             findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
@@ -79,16 +92,16 @@ class AdbActivity : AppCompatActivity(){
         if (codeCommand.isEmpty()){
             return
         }
-        val runnable = CommandRunnable(codeCommand,Runtime.getRuntime()) { result, message ->
+        val actuator = DefaultActuator { command, result, message ->
             Log.e(tag, message)
             GlobalScope.launch(Dispatchers.Main) {
                 adapter.addItem(message)
                 findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
             }
-            result
         }
+        actuator.addCommand(codeCommand)
         GlobalScope.launch {
-            runnable.run()
+            actuator.exceCommand()
         }
     }
 }

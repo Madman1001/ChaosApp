@@ -40,7 +40,8 @@ class MainActivity : AppCompatActivity() {
                 bt.text = entry.key
                 bt.setOnClickListener {
                     val intent = Intent(this, Class.forName(entry.value) as Class<*>)
-                    ActivityLaunchUtils.launchActivity(this, intent)
+//                    ActivityLaunchUtils.launchActivity(this, intent)
+                    this.startActivity(intent)
                 }
                 buttonAdapter.addButton(bt)
             }

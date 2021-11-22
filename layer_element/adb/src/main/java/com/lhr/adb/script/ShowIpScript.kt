@@ -9,11 +9,11 @@ import kotlinx.coroutines.launch
 
 /**
  * @author lhr
- * @date 2021/11/21
- * @des 开启adb调试脚本
+ * @date 2021/11/22
+ * @des 查看ip地址
  */
-class OpenAdbScript : IScript {
-    private val tag = "OpenAdbScript"
+class ShowIpScript : IScript{
+    private val tag = "ShowIpScript"
 
     private var actuator: IActuator
 
@@ -30,9 +30,7 @@ class OpenAdbScript : IScript {
         }else{
             actuator.addCommand("su")
         }
-        actuator.addCommand("setprop service.adb.tcp.port 5555")
-        actuator.addCommand("stop adbd")
-        actuator.addCommand("start adbd")
+        actuator.addCommand("ifconfig wlan0")
     }
 
     override fun start() {

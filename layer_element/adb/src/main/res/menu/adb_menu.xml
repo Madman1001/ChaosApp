@@ -2,7 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group>
-        <item android:id="@+id/open_adb_connect"
+        <item android:id="@+id/adb_open_connect"
             android:title="Start Adb" />
+        <item android:id="@+id/adb_show_ip"
+            android:title="IP Address" />
     </group>
 </menu>

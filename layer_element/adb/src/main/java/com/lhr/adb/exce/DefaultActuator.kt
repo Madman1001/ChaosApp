@@ -14,10 +14,10 @@ class DefaultActuator(
 
     private val mRuntime: Runtime = Runtime.getRuntime()
 
-    private val linkedDeque: Deque<CommandRunnable> = LinkedList<CommandRunnable>()
+    private val linkedDeque: Deque<CommandExecute> = LinkedList<CommandExecute>()
 
     override fun addCommand(command: String) {
-        CommandRunnable(command, mRuntime) { result, message ->
+        CommandExecute(command) { result, message ->
             listener.invoke(command, result, message)
             result
         }.apply {
@@ -36,8 +36,9 @@ class DefaultActuator(
     }
 
     override fun exceCommand() {
+        val process = mRuntime.exec("date")
         for (runnable in this.linkedDeque) {
-            runnable.run()
+            runnable.exce(process)
         }
     }
 
