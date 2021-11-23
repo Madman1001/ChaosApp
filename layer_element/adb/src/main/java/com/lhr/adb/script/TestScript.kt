@@ -9,11 +9,11 @@ import kotlinx.coroutines.launch
 
 /**
  * @author lhr
- * @date 2021/11/22
- * @des 查看ip地址
+ * @date 2021/11/21
+ * @des 开启adb调试脚本
  */
-class ShowIpScript : IScript{
-    private val tag = "ShowIpScript"
+class TestScript : IScript {
+    private val tag = "OpenAdbScript"
 
     private var actuator: IActuator
 
@@ -30,8 +30,9 @@ class ShowIpScript : IScript{
         }else{
             actuator.addCommand("su")
         }
-        actuator.addCommand("ifconfig wlan0")
-
+        actuator.addCommand("date")
+        actuator.addCommand("date")
+        actuator.addCommand("date")
     }
 
     override fun start() {

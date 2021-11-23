@@ -6,5 +6,9 @@
             android:title="Start Adb" />
         <item android:id="@+id/adb_show_ip"
             android:title="IP Address" />
+        <item android:id="@+id/adb_show_packages"
+            android:title="Packages" />
+        <item android:id="@+id/adb_test"
+            android:title="Test" />
     </group>
 </menu>

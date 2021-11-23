@@ -1,4 +1,4 @@
-package com.lhr.adb.exce
+package com.lhr.adb.exec
 
 import com.lhr.utils.IOUtils
 import java.io.DataOutputStream
@@ -16,10 +16,11 @@ class CommandExecute(
     /**
      * 执行命令
      */
-    override fun exce(process: Process) {
+    override fun exec(process: Process) {
         try {
             val output = DataOutputStream(process.outputStream)
-            output.write("$command\n".toByteArray())
+            output.writeBytes("$command\n")
+            output.flush()
             val success =
                 try {
                     IOUtils.readStream(process.inputStream)
@@ -34,7 +35,7 @@ class CommandExecute(
                     ""
                 }
 
-            if (success.isNotEmpty() && success.isNotBlank()){
+            if (success.isNotEmpty()){
                 resultCallback.invoke(true, success)
             }else{
                 resultCallback.invoke(false, fail)

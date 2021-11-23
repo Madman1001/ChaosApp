@@ -1,4 +1,4 @@
-package com.lhr.adb.exce
+package com.lhr.adb.exec
 
 /**
  * @author lhr
@@ -20,5 +20,5 @@ interface IActuator {
     /**
      * 执行命令
      */
-    fun exceCommand()
+    fun execCommand()
 }

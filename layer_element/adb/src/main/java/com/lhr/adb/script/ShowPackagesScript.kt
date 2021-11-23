@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
  * @date 2021/11/22
  * @des 查看ip地址
  */
-class ShowIpScript : IScript{
+class ShowPackagesScript : IScript{
     private val tag = "ShowIpScript"
 
     private var actuator: IActuator
@@ -30,8 +30,7 @@ class ShowIpScript : IScript{
         }else{
             actuator.addCommand("su")
         }
-        actuator.addCommand("ifconfig wlan0")
-
+        actuator.addCommand("pm list packages")
     }
 
     override fun start() {

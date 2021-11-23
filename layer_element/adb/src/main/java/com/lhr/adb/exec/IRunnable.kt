@@ -1,4 +1,4 @@
-package com.lhr.adb.exce
+package com.lhr.adb.exec
 
 /**
  * @author lhr
@@ -6,5 +6,5 @@ package com.lhr.adb.exce
  * @des 执行接口
  */
 interface IExecute {
-    fun exce(process: Process)
+    fun exec(process: Process)
 }

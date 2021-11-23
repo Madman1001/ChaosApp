@@ -2,8 +2,8 @@ package com.lhr.adb.script
 
 import android.os.Build
 import android.util.Log
-import com.lhr.adb.exce.DefaultActuator
-import com.lhr.adb.exce.IActuator
+import com.lhr.adb.exec.DefaultActuator
+import com.lhr.adb.exec.IActuator
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
  * @date 2021/11/21
  * @des 开启adb调试脚本
  */
-class OpenAdbScript : IScript {
+class OpenAdbScript(port: String) : IScript {
     private val tag = "OpenAdbScript"
 
     private var actuator: IActuator
@@ -30,14 +30,14 @@ class OpenAdbScript : IScript {
         }else{
             actuator.addCommand("su")
         }
-        actuator.addCommand("setprop service.adb.tcp.port 5555")
+        actuator.addCommand("setprop service.adb.tcp.port $port")
         actuator.addCommand("stop adbd")
         actuator.addCommand("start adbd")
     }
 
     override fun start() {
         GlobalScope.launch {
-            actuator.exceCommand()
+            actuator.execCommand()
         }
     }
 

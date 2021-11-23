@@ -1,4 +1,4 @@
-package com.lhr.adb.exce
+package com.lhr.adb.exec
 
 import com.lhr.utils.MachineUtils
 import java.util.concurrent.ExecutorService
@@ -17,7 +17,7 @@ class AsynActuator : IActuator {
     override fun removeCommand(command: String) {
     }
 
-    override fun exceCommand() {
+    override fun execCommand() {
 
     }
 }
