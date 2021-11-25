@@ -2,8 +2,8 @@ package com.lhr.adb.script
 
 import android.os.Build
 import android.util.Log
-import com.lhr.adb.exec.DefaultActuator
 import com.lhr.adb.exec.IActuator
+import com.lhr.adb.exec.SyncActuator
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -22,7 +22,7 @@ class TestScript : IScript {
     }
 
     init {
-        actuator = DefaultActuator { command, result, message ->
+        actuator = SyncActuator { command, result, message ->
             listener.invoke(command, result, message)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1){

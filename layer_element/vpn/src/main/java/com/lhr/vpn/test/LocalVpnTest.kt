@@ -1,6 +1,10 @@
 package com.lhr.vpn.test
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -10,19 +14,22 @@ import java.net.URL
  * @des 测试样例
  */
 object LocalVpnTest {
+    private val mainHandler = Handler(Looper.getMainLooper())
     const val tag = "VpnTest"
     fun httpTest(){
-        Thread({
-            val httpTestUrl = URL("http://www.baidu.com")
-            val http = httpTestUrl.openConnection() as HttpURLConnection
-            http.connect()
-            Log.d(tag,"start http connect")
+        GlobalScope.launch {
+            try {
+                val httpTestUrl = URL("http://www.baidu.com")
+                val http = httpTestUrl.openConnection() as HttpURLConnection
+                mainHandler.postDelayed({
+                    http.disconnect()
+                    Log.d(tag,"start http disconnect")
+                },2000)
+                Log.d(tag,"start http connect")
+                http.connect()
+            }catch (e: Exception){
 
-            Thread.sleep(5000)
-
-            http.disconnect()
-            Log.d(tag,"start http disconnect")
-
-        }, "${tag}:httpTest").start()
+            }
+        }
     }
 }
