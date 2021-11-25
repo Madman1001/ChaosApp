@@ -35,8 +35,6 @@ class SyncActuator(
         for(execute in linkedDeque){
             execute.exec(process)
         }
-        process.outputStream.close()
-        listener.invoke("",true,IOUtils.readStream(process.inputStream))
     }
 
 }

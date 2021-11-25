@@ -143,21 +143,20 @@ static void readTargetIpAddress(const char *data, unsigned char *targetIp){
 /**
 * 读取ip其它选项
 */
-static void readOtherHeadFields(const char *data, unsigned char *other_head_fields, int offset, int length){
+static void readOtherHeadFields(const char *data, char *other_head_fields, int offset, int length){
     int i = 0;
     for (; i < length; ++i) {
-        other_head_fields[i] += data[offset + i];
+        other_head_fields[i] = data[offset + i];
     }
 }
 
 /**
 * 读取ip数据
 */
-static void readData(const char *data, unsigned char *ip_data, int offset, int length){
+static void readData(const char *data, char *ip_data, int offset, int length){
     int i = 0;
     for (; i < length; ++i) {
-        ip_data[i] += data[offset + i];
+        ip_data[i] = data[offset + i];
     }
 }
-
 #endif

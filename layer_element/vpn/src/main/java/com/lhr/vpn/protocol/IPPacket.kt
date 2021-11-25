@@ -6,10 +6,17 @@ package com.lhr.vpn.protocol
  * @des ip 数据报
  */
 class IPPacket(private val bytes: ByteArray) {
+    protected var mPacketRef: Int = 0
+
     init {
         nativeInit(bytes)
     }
 
-
     private external fun nativeInit(bytes: ByteArray)
+
+    private external fun nativeGetData(mPacket: Int): String
+
+    override fun toString(): String {
+        return nativeGetData(mPacketRef)
+    }
 }

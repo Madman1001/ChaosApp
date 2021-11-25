@@ -10,15 +10,7 @@
 #include <stdio.h>
 #include <jni.h>
 #include <android/log.h>
-
-jstring charTojstring(JNIEnv *env, const char* str){
-    jclass strClass = (*env)->FindClass(env, "java/lang/String");
-    jmethodID ctorID = (*env)->GetMethodID(env, strClass, "<init>","([BLjava/lang/String;)V");
-    jbyteArray bytes = (*env)->NewByteArray(env, strlen(str));
-    (*env)->SetByteArrayRegion(env, bytes, 0, strlen(str), (jbyte *) str);
-    jstring encoding = (*env)->NewStringUTF(env, "utf-8");
-    return (jstring) (*env)->NewObject(env, strClass, ctorID, bytes, encoding);
-}
+#include "vpn_java_utils.c"
 
 JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeGetByteBufferString
         (JNIEnv *env, jobject jobj, jbyteArray jba, jint jstart, jint jend) {

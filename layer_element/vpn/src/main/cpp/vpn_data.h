@@ -39,10 +39,10 @@ struct IP_Packet{
     unsigned char* target_ip_address;
 
     //可选字段 (单位 32 bit)
-    unsigned char* other_head_fields;
+    char* other_head_fields;
 
     //数据
-    unsigned char* data;
+    char* data;
 };
 
 #endif
