@@ -11,17 +11,17 @@ cmake_minimum_required(VERSION 3.4.1)
 # automatically packages shared libraries with your APK.
 
 add_library( # Specifies the name of the library.
-            byte-log-utils
+             chaos_vpn
 
              # Sets the library as a shared library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             byte-log-utils.c)
+             vpn_data.h vpn_log.c vpn_data_utils.c vpn_ip_object.c)
 
 find_library(log-lib log)
 
-target_link_libraries(byte-log-utils ${log-lib})
+target_link_libraries(chaos_vpn ${log-lib})
 
 # build executable
 # add_executable()

@@ -13,8 +13,4 @@ object ByteLog {
     }
 
     private external fun nativeGetByteBufferString(bytes: ByteArray, start: Int, end: Int): String
-
-    init {
-        System.loadLibrary("byte-log-utils")
-    }
 }

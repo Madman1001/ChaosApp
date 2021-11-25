@@ -38,6 +38,10 @@ class LocalVpnService : VpnService() {
 
     private lateinit var mPendingIntent: PendingIntent
 
+    init {
+        System.loadLibrary("chaos_vpn")
+    }
+
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
         }
@@ -90,6 +94,7 @@ class LocalVpnService : VpnService() {
     private fun disconnect() {
         setConnectionThread(null)
         setConnection(null)
+        stopService(Intent(this,this::class.java))
     }
 
     private fun registerControl() {

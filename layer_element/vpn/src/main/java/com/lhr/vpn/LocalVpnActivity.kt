@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.VpnService
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
@@ -18,13 +19,21 @@ import com.lhr.vpn.test.LocalVpnTest
  * @des
  */
 @CElement(name = "网络代理")
-class LocalVpnActivity : AppCompatActivity() {
+class LocalVpnActivity : AppCompatActivity {
 
     companion object {
         private const val VPN_REQUEST_CODE = 0xF0F
 
         private const val VPN_REQUEST_KEY = "VPN_REQUEST_KEY"
     }
+    init {
+        Log.d("LocalVpnActivity","object init")
+    }
+
+    constructor(){
+        Log.d("LocalVpnActivity","object constructor")
+    }
+
 
     /**
      * 获取权限资源
