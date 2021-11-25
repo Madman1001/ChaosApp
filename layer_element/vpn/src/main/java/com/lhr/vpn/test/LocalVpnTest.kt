@@ -5,8 +5,7 @@ import android.os.Looper
 import android.util.Log
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.net.HttpURLConnection
-import java.net.URL
+import java.net.*
 
 /**
  * @author lhr
@@ -23,10 +22,41 @@ object LocalVpnTest {
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 mainHandler.postDelayed({
                     http.disconnect()
-                    Log.d(tag,"start http disconnect")
+                    Log.d(tag,"over http test")
                 },2000)
-                Log.d(tag,"start http connect")
                 http.connect()
+            }catch (e: Exception){
+
+            }
+        }
+    }
+
+    fun udpTest(){
+        GlobalScope.launch {
+            try {
+                val buf = "test".toByteArray()
+                val udpSocket = DatagramSocket()
+                val address = InetAddress.getByName("14.215.177.39")
+                val packet = DatagramPacket(buf,buf.size,address,4445)
+                udpSocket.send(packet)
+                udpSocket.close()
+                Log.d(tag,"over udp test")
+            }catch (e: Exception){
+
+            }
+        }
+    }
+
+    fun tcpTest(){
+        GlobalScope.launch {
+            try {
+                val buf = "test".toByteArray()
+                val tcpSocket = Socket(InetAddress.getByName("14.215.177.39"),80)
+                val os = tcpSocket.getOutputStream()
+                os.write(buf)
+                tcpSocket.shutdownOutput()
+                tcpSocket.close()
+                Log.d(tag,"over tcp test")
             }catch (e: Exception){
 
             }

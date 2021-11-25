@@ -8,9 +8,6 @@ import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 import java.nio.ByteBuffer
 
 
@@ -29,19 +26,12 @@ class LocalVpnConnection(
 
         private const val MAX_PACKET_SIZE = Short.MAX_VALUE.toInt()
     }
-    private lateinit var address:InetAddress
-    private val port = 4445
-    private lateinit var protectSocket:DatagramSocket
-
     override fun run() {
         try {
             Log.i(TAG, "${Thread.currentThread().name} Starting")
 
             //发送数据报到VPN通道接口
             val packetInput = FileInputStream(tunInterface.fileDescriptor)
-            address = InetAddress.getByName("localhost")
-            protectSocket = DatagramSocket()
-            vpnService.protect(protectSocket)
             //接收数据报到VPN通道接口
             val packetOutput = FileOutputStream(tunInterface.fileDescriptor)
 
@@ -63,10 +53,8 @@ class LocalVpnConnection(
                     for(i in 0 until len){
                         byteBuffer[i] = packet[i]
                     }
-                    val message = ByteLog.toByteBufferString(packet,0,len)
-                    Log.i(TAG, "${Thread.currentThread().name} send packet $message")
-                    val ip = IPPacket(byteBuffer)
-                    protectSocket.send(DatagramPacket(byteBuffer,0,len,address,port))
+                    Log.i(TAG, "${Thread.currentThread().name} send packet ${ByteLog.toByteBufferString(byteBuffer)}")
+                    IPPacket(byteBuffer)
                     packet.clear()
                 }
                 //读取外部发往内部的数据报，（如果有的话）

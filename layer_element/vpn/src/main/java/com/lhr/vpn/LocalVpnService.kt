@@ -94,7 +94,6 @@ class LocalVpnService : VpnService() {
     private fun disconnect() {
         setConnectionThread(null)
         setConnection(null)
-        stopService(Intent(this,this::class.java))
     }
 
     private fun registerControl() {

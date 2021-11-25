@@ -29,17 +29,17 @@ void printPacket(IP_Packet *packet){
     TAG_E("head_check_sum %d",packet->head_check_sum);
 
     unsigned char* sourceAddress = packet->source_ip_address;
-    TAG_E("source_ip_address %d : %d : %d : %d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
+    TAG_E("source_ip_address %d.%d.%d.%d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
     unsigned char* targetAddress = packet->target_ip_address;
-    TAG_E("target_ip_address %d : %d : %d : %d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
+    TAG_E("target_ip_address %d.%d.%d.%d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
 
-    if (packet->other_head_fields != NULL){
-        TAG_E("other_head_fields %s",packet->other_head_fields);
-    }
+//    if (packet->other_head_fields != NULL){
+//        TAG_E("other_head_fields %s",packet->other_head_fields);
+//    }
 
-    if (packet->data != NULL){
-        TAG_E("data %s",packet->data);
-    }
+//    if (packet->data != NULL){
+//        TAG_E("data %s",packet->data);
+//    }
 }
 
 JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
@@ -53,6 +53,8 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
     }
 
     char *arrays = (char *) malloc(len * sizeof(char));
+    (*env)->GetByteArrayRegion(env, jba, 0, len, (jbyte*)arrays);
+
     if (arrays == NULL){
         return;
     }
@@ -99,12 +101,12 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
     ipPacket->source_ip_address = malloc(4 * sizeof(unsigned char));
     readSourceIpAddress(arrays, ipPacket->source_ip_address);
     unsigned char* sourceAddress = ipPacket->source_ip_address;
-    TAG_E("source_ip_address %d : %d : %d : %d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
+    TAG_E("source_ip_address %d.%d.%d.%d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
 
     ipPacket->target_ip_address = malloc(4 * sizeof(unsigned char));
     readTargetIpAddress(arrays, ipPacket->target_ip_address);
     unsigned char* targetAddress = ipPacket->target_ip_address;
-    TAG_E("target_ip_address %d : %d : %d : %d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
+    TAG_E("target_ip_address %d.%d.%d.%d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
 
     int headLength = (int)ipPacket->head_length * 4;
     int dataLength = (int)ipPacket->total_length - headLength;
@@ -115,19 +117,24 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
         ipPacket->data[dataLength * sizeof(char)] = '\0';
         readData(arrays, ipPacket->data, headLength, dataLength);
     }
-    if (ipPacket->other_head_fields != NULL){
-        TAG_E("other_head_fields %s",ipPacket->other_head_fields);
-    }
+//    if (ipPacket->other_head_fields != NULL){
+//        TAG_E("other_head_fields %s",ipPacket->other_head_fields);
+//    }
+
+    TAG_E("data over");
 
     ipPacket->other_head_fields = NULL;
-    if (dataLength > 0){
-        ipPacket->other_head_fields = malloc((headLength - 20) * sizeof(char) + 1);
-        ipPacket->other_head_fields[(headLength - 20) * sizeof(char)] = '\0';
-        readOtherHeadFields(arrays,ipPacket->other_head_fields, 20, (headLength - 20));
-    }
-    if (ipPacket->data != NULL){
-        TAG_E("data %s",ipPacket->data);
-    }
+//    if (dataLength > 0){
+//        ipPacket->other_head_fields = malloc((headLength - 20) * sizeof(char) + 1);
+//        ipPacket->other_head_fields[(headLength - 20) * sizeof(char)] = '\0';
+//        readOtherHeadFields(arrays,ipPacket->other_head_fields, 20, (headLength - 20));
+//    }
+//    if (ipPacket->data != NULL){
+//        TAG_E("data %s",ipPacket->data);
+//    }
+
+    TAG_E("other_head_fields over");
+
 
     jclass ip_object_class = (*env)->GetObjectClass(env,jobj);
 

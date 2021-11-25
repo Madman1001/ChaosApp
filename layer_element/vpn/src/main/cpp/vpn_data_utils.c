@@ -9,39 +9,16 @@
  * 读取ip数据报版本号
  */
 static unsigned char readVersion(const char *data) {
-    char version = 0;
-
-    unsigned char uc = data[0];
-    uc = uc >> 4;
-
-    char sign = 1;
-    for (int i = 0; i < 4; ++i) {
-        if (uc & (unsigned char)0x01){
-            version += sign;
-        }
-        sign *= 2;
-        uc = uc >> 1;
-    }
-    return version;
+    unsigned char version = data[0];
+    return version >> 4;
 }
 
 /**
  * 读取ip数据报头部长度
  */
 static unsigned char readHeadLength(const char *data) {
-    char len = 0;
-
-    unsigned char uc = data[0];
-
-    char sign = 1;
-    for (int i = 0; i < 4; ++i) {
-        if (uc & (unsigned char)0x01){
-            len += sign;
-        }
-        sign *= 2;
-        uc = uc >> 1;
-    }
-    return len;
+    unsigned char headLen = data[0];
+    return headLen & 0x0F;
 }
 
 /**
@@ -58,7 +35,7 @@ static unsigned short readTotalLength(const char *data){
     unsigned short totlen = (unsigned short) data[2];
 
     totlen = totlen << (unsigned short ) 8;
-    totlen += data[3];
+    totlen |= (unsigned short)data[3];
     return totlen;
 }
 
@@ -69,7 +46,7 @@ static unsigned short readIdentification(const char *data){
     unsigned short identification = (unsigned short) data[4];
 
     identification = identification << (unsigned short )8;
-    identification += (unsigned short) data[5];
+    identification |= (unsigned short) data[5];
     return identification;
 }
 
@@ -90,7 +67,7 @@ static unsigned short readOffsetFrag(const char *data){
     offsetFrag = offsetFrag << 8;
     offsetFrag = offsetFrag << 3;
     offsetFrag = offsetFrag >> 3;
-    offsetFrag += (unsigned short) data[7];
+    offsetFrag |= (unsigned short) data[7];
     return offsetFrag;
 }
 
@@ -116,7 +93,7 @@ static unsigned char readUpperProtocol(const char *data){
 static unsigned char readHeadCheckSum(const char *data){
     unsigned short hcs = (unsigned short) data[10];
     hcs = hcs << 8;
-    hcs += (unsigned short)data[11];
+    hcs |= (unsigned short)data[11];
     return hcs;
 }
 
@@ -126,7 +103,7 @@ static unsigned char readHeadCheckSum(const char *data){
 static void readSourceIpAddress(const char *data, unsigned char *sourceIp) {
     int i = 0;
     for (; i < 4; ++i) {
-        sourceIp[i] += data[12 + i];
+        sourceIp[i] = data[12 + i];
     }
 }
 
@@ -136,7 +113,7 @@ static void readSourceIpAddress(const char *data, unsigned char *sourceIp) {
 static void readTargetIpAddress(const char *data, unsigned char *targetIp){
     int i = 0;
     for (; i < 4; ++i) {
-        targetIp[i] += data[16 + i];
+        targetIp[i] = data[16 + i];
     }
 }
 

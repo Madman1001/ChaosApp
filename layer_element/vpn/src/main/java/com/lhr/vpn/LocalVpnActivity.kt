@@ -62,8 +62,15 @@ class LocalVpnActivity : AppCompatActivity {
             R.id.stop_vpn_bt ->{
                 stopVPN()
             }
-            R.id.test_vpn_bt ->{
+            R.id.http_test_vpn_bt ->{
                 LocalVpnTest.httpTest()
+            }
+            R.id.udp_test_vpn_bt -> {
+                LocalVpnTest.udpTest()
+            }
+
+            R.id.tcp_test_vpn_bt -> {
+                LocalVpnTest.tcpTest()
             }
         }
     }
@@ -77,7 +84,7 @@ class LocalVpnActivity : AppCompatActivity {
         }
     }
 
-    fun stopVPN() {
-
+    private fun stopVPN() {
+        stopService(Intent(this,LocalVpnService::class.java))
     }
 }

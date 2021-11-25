@@ -12,13 +12,14 @@
 #include <android/log.h>
 #include "vpn_java_utils.c"
 
+#define  TAG_E(...) __android_log_print(ANDROID_LOG_ERROR, "NativeLog", __VA_ARGS__)
+
 JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeGetByteBufferString
-        (JNIEnv *env, jobject jobj, jbyteArray jba, jint jstart, jint jend) {
-    int len = jend - jstart;
+        (JNIEnv *env, jobject jobj, jbyteArray jba) {
+    int len = (*env)->GetArrayLength(env,jba);
     jbyte *arrays = (jbyte *) malloc(len * sizeof(jbyte));
     unsigned char* chars = malloc(len * 8 * sizeof(unsigned char) + len + 1);
-    chars[len * 8 * sizeof(unsigned char)] = '\0';
-    (*env)->GetByteArrayRegion(env, jba, jstart, jend, arrays);
+    (*env)->GetByteArrayRegion(env, jba, 0, len, arrays);
     int byteIndex = 0;
     int charsIndex = 0;
     for (; byteIndex < len; ++byteIndex) {
@@ -32,10 +33,11 @@ JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeGetByteBufferStrin
             else{
                 chars[charsIndex++] = '0';
             }
-            uc = uc << 1;
+            sign = sign >> 1;
         }
         chars[charsIndex++] = ',';
     }
+    chars[charsIndex] = '\0';
 
     jstring message = charTojstring(env,chars);
 
