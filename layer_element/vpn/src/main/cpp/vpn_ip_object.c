@@ -1,19 +1,15 @@
 #ifndef _Included_vpn_ip_object
 #define _Included_vpn_ip_object
 
-#include <jni.h>
-#include <stdlib.h>
-#include <memory.h>
-#include <android/log.h>
-
 #include "vpn_data.h"
-#include "vpn_data_utils.c"
-#include "vpn_java_utils.c"
+#include "vpn_log.c"
+#include "vpn_ip_data_utils.c"
 
-#define  TAG_E(...) __android_log_print(ANDROID_LOG_ERROR, "NativeLog", __VA_ARGS__)
 #define IP_Packet struct IP_Packet
+#define IP_STATUS_FAIL -1
+#define IP_STATUS_SUCCESS 0
 
-void printPacket(IP_Packet *packet){
+void print_ip_packet(IP_Packet *packet){
 
     TAG_E("void* %d jlong %d",sizeof(void*), sizeof(jlong));
 
@@ -42,69 +38,57 @@ void printPacket(IP_Packet *packet){
 //    }
 }
 
-JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
-        (JNIEnv *env, jobject jobj, jbyteArray jba) {
-    IP_Packet *ipPacket = malloc(sizeof(IP_Packet));
-
-    //获取数据报长度
-    int len = (*env)->GetArrayLength(env, jba);
-    if (len == 0){
-        return;
-    }
-
-    char *arrays = (char *) malloc(len * sizeof(char));
-    (*env)->GetByteArrayRegion(env, jba, 0, len, (jbyte*)arrays);
-
+static int init_ip_packet(IP_Packet *ipPacket, const char* arrays) {
     if (arrays == NULL){
-        return;
+        return IP_STATUS_FAIL;
     }
 
-    ipPacket->version = readVersion(arrays);
+    ipPacket->version = ip_read_version(arrays);
     if (ipPacket->version == 0){
-        return;
+        return IP_STATUS_FAIL;
     }
     TAG_E("version %d",ipPacket->version);
 
-    ipPacket->head_length = readHeadLength(arrays);
+    ipPacket->head_length = ip_read_head_length(arrays);
     TAG_E("head_length %d",ipPacket->head_length);
     if (ipPacket->head_length == 0){
-        return;
+        return IP_STATUS_FAIL;
     }
 
-    ipPacket->type_of_service = readTOS(arrays);
+    ipPacket->type_of_service = ip_read_tos(arrays);
     TAG_E("type_of_service %d",ipPacket->type_of_service);
 
-    ipPacket->total_length = readTotalLength(arrays);
+    ipPacket->total_length = ip_read_total_length(arrays);
     TAG_E("total_length %d",ipPacket->total_length);
     if (ipPacket->total_length == 0){
-        return;
+        return IP_STATUS_FAIL;
     }
 
-    ipPacket->identification = readIdentification(arrays);
+    ipPacket->identification = ip_read_identification(arrays);
     TAG_E("identification %d",ipPacket->identification);
 
-    ipPacket->flag = readFlag(arrays);
+    ipPacket->flag = ip_read_flag(arrays);
     TAG_E("flag %d",ipPacket->flag);
 
-    ipPacket->offset_frag = readOffsetFrag(arrays);
+    ipPacket->offset_frag = ip_read_offset_frag(arrays);
     TAG_E("offset_frag %d",ipPacket->offset_frag);
 
-    ipPacket->time_to_live = readTTL(arrays);
+    ipPacket->time_to_live = ip_read_ttl(arrays);
     TAG_E("time_to_live %d",ipPacket->time_to_live);
 
-    ipPacket->upper_protocol = readUpperProtocol(arrays);
+    ipPacket->upper_protocol = ip_read_upper_protocol(arrays);
     TAG_E("upper_protocol %d",ipPacket->upper_protocol);
 
-    ipPacket->head_check_sum = readHeadCheckSum(arrays);
+    ipPacket->head_check_sum = ip_read_head_check_sum(arrays);
     TAG_E("head_check_sum %d",ipPacket->head_check_sum);
 
     ipPacket->source_ip_address = malloc(4 * sizeof(unsigned char));
-    readSourceIpAddress(arrays, ipPacket->source_ip_address);
+    ip_read_source_ip_address(arrays, ipPacket->source_ip_address);
     unsigned char* sourceAddress = ipPacket->source_ip_address;
     TAG_E("source_ip_address %d.%d.%d.%d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
 
     ipPacket->target_ip_address = malloc(4 * sizeof(unsigned char));
-    readTargetIpAddress(arrays, ipPacket->target_ip_address);
+    ip_read_target_ip_address(arrays, ipPacket->target_ip_address);
     unsigned char* targetAddress = ipPacket->target_ip_address;
     TAG_E("target_ip_address %d.%d.%d.%d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
 
@@ -113,43 +97,18 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
 
     ipPacket->data = NULL;
     if (headLength > 0){
-        ipPacket->data = malloc(dataLength * sizeof(char) + 1);
-        ipPacket->data[dataLength * sizeof(char)] = '\0';
-        readData(arrays, ipPacket->data, headLength, dataLength);
+        ipPacket->data = malloc(dataLength * sizeof(char));
+        ip_read_data(arrays, ipPacket->data, headLength, dataLength);
     }
-//    if (ipPacket->other_head_fields != NULL){
-//        TAG_E("other_head_fields %s",ipPacket->other_head_fields);
-//    }
-
-    TAG_E("data over");
 
     ipPacket->other_head_fields = NULL;
-//    if (dataLength > 0){
-//        ipPacket->other_head_fields = malloc((headLength - 20) * sizeof(char) + 1);
-//        ipPacket->other_head_fields[(headLength - 20) * sizeof(char)] = '\0';
-//        readOtherHeadFields(arrays,ipPacket->other_head_fields, 20, (headLength - 20));
-//    }
-//    if (ipPacket->data != NULL){
-//        TAG_E("data %s",ipPacket->data);
-//    }
-
-    TAG_E("other_head_fields over");
-
-
-    jclass ip_object_class = (*env)->GetObjectClass(env,jobj);
-
-    jfieldID ip_object_jfieldId = (*env)->GetFieldID(env,ip_object_class,"mPacketRef","I");
-
-    (*env)->SetIntField(env,jobj,ip_object_jfieldId,(jint)ipPacket);
-
+    if (dataLength > 0){
+        ipPacket->other_head_fields = malloc((headLength - 20) * sizeof(char));
+        ip_read_other_head_fields(arrays, ipPacket->other_head_fields, 20, (headLength - 20));
+    }
     TAG_E("init over");
-}
 
-JNIEXPORT jstring JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetData
-        (JNIEnv *env, jobject jobj, jint jpacket) {
-    IP_Packet* nativeIp = (IP_Packet*)jpacket;
-    printPacket(nativeIp);
-    return charTojstring(env,"test");
+    return IP_STATUS_SUCCESS;
 }
 
 #endif

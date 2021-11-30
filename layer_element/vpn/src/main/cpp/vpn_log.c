@@ -37,7 +37,7 @@ JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeGetByteBufferStrin
         }
         chars[charsIndex++] = ',';
     }
-    chars[charsIndex] = '\0';
+    chars[charsIndex - 1] = '\0';
 
     jstring message = charTojstring(env,chars);
 

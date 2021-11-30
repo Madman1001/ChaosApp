@@ -15,8 +15,15 @@
 
     <style name="Theme.MyApplication.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="Theme.MyApplication.MainActivity" parent="Theme.MyApplication.NoActionBar" >
+    <style name="Theme.MyApplication.MainActivity" parent="Theme.MyApplication.NoActionBar" />
 
+    <style name="TransparentDialog" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item> <!-- 背景色透明度 -->
+        <item name="android:windowNoTitle">true</item><!-- 无标题 -->
+        <item name="android:windowIsTranslucent">true</item><!-- 半透明,设置为false无透明效果 -->
+        <item name="android:backgroundDimEnabled">true</item><!-- 模糊 -->
+        <item name="android:windowDrawsSystemBarBackgrounds">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
 </resources>

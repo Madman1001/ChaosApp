@@ -13,7 +13,7 @@
         android:icon="@mipmap/ic_launch">
         <activity
             android:name=".MainActivity"
-            android:theme="@style/Theme.MyApplication">
+            android:theme="@style/Theme.MyApplication.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

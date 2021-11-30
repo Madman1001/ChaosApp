@@ -42,6 +42,7 @@ class LocalVpnActivity : AppCompatActivity {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(0,0)
         setContentView(R.layout.activity_local_vpn)
         _launchActivity = this.activityResultRegistry.register(
             VPN_REQUEST_KEY,

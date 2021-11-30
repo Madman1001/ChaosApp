@@ -45,4 +45,21 @@ struct IP_Packet{
     char* data;
 };
 
+struct UDP_Packet{
+    //源端口号
+    unsigned short source_port;
+
+    //目标端口号
+    unsigned short target_port;
+
+    //UDP长度(单位为：字节)
+    unsigned short udp_length;
+
+    //UDP校验和
+    unsigned short udp_check_sum;
+
+    //数据
+    char* data;
+};
+
 #endif

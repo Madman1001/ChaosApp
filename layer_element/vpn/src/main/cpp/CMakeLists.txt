@@ -17,7 +17,7 @@ add_library( # Specifies the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             vpn_data.h vpn_java_utils.c vpn_data_utils.c vpn_log.c vpn_ip_object.c)
+             vpn_data.h vpn_log.c vpn_ip_data_utils.c vpn_ip_object.c vpn_java_utils.c vpn_jni_interface.c vpn_udp_data_utils.c vpn_udp_object.c)
 
 find_library(log-lib log)
 

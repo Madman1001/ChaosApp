@@ -92,6 +92,7 @@ class LocalVpnService : VpnService() {
     }
 
     private fun disconnect() {
+        this.stopSelf()
         setConnectionThread(null)
         setConnection(null)
     }

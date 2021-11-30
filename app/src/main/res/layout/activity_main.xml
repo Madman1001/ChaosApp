@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="15dp"
     tools:context=".MainActivity">
 
 
@@ -11,5 +10,6 @@
         android:id="@+id/main_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="15dp"
         android:foregroundGravity="center"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
