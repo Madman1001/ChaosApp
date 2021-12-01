@@ -10,6 +10,9 @@ cmake_minimum_required(VERSION 3.4.1)
 # and CMake builds them for you. When you build your app, Gradle
 # automatically packages shared libraries with your APK.
 
+#查找当前目录下的所有源文件，并保存到 DIR_LIB_SRCS 变量
+aux_source_directory(. DIR_LIB_SRCS)
+
 add_library( # Specifies the name of the library.
              chaos_vpn
 
@@ -17,7 +20,7 @@ add_library( # Specifies the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             vpn_data.h vpn_log.c vpn_ip_data_utils.c vpn_ip_object.c vpn_java_utils.c vpn_jni_interface.c vpn_udp_data_utils.c vpn_udp_object.c)
+             ${DIR_LIB_SRCS})
 
 find_library(log-lib log)
 

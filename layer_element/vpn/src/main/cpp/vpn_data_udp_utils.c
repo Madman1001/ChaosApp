@@ -1,5 +1,5 @@
-#ifndef _Included_vpn_udp_data_utils
-#define _Included_vpn_udp_data_utils
+#ifndef _Included_vpn_data_udp_utils
+#define _Included_vpn_data_udp_utils
 
 /**
  * udp 协议读取工具
@@ -44,7 +44,7 @@ static unsigned short udp_read_check_sum(const char *data) {
 /**
 * 读取udp数据
 */
-static void ip_read_data(const char *data, char *udp_data, int offset, int length){
+static void udp_read_data(const char *data, char *udp_data, int offset, int length){
     int i = 0;
     for (; i < length; ++i) {
         udp_data[i] = data[offset + i];

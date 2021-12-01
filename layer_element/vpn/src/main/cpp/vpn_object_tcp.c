@@ -1,0 +1,84 @@
+#ifndef _Included_vpn_tcp_object
+#define _Included_vpn_tcp_object
+
+#include <memory.h>
+#include <stdlib.h>
+#include "vpn_data.c"
+#include "vpn_log.c"
+#include "vpn_java_utils.c"
+
+#define TCP_Packet struct TCP_Packet
+#define TCP_STATUS_FAIL -1
+#define TCP_STATUS_SUCCESS 0
+
+static void print_tcp_packet(TCP_Packet *packet){
+
+    TAG_E("tcp >> source port %d",packet->source_port);
+    TAG_E("tcp >> target port %d",packet->target_port);
+    TAG_E("tcp >> serial number 0x%08x",packet->serial_number);
+    TAG_E("tcp >> verify serial number 0x%08x",packet->verify_serial_number);
+    TAG_E("tcp >> head length %d",packet->head_length);
+    TAG_E("tcp >> control sign 0d%s",charToBinary(packet->control_sign));
+    TAG_E("tcp >> window size %d",packet->window_size);
+    TAG_E("tcp >> check sum 0x%04x",packet->check_sum);
+    TAG_E("tcp >> urgent pointer 0x%04x",packet->urgent_pointer);
+
+    if (packet->head_other_option != NULL){
+        TAG_E("tcp >> head other option %s",packet->head_other_option);
+    }
+
+    if (packet->data != NULL){
+        TAG_E("tcp >> data %s",packet->data);
+    }
+}
+
+/**
+ * 初始化tcp_packet结构体
+ * @param tcpPacket 结构体指针
+ * @param arrays tcp数据
+ * @param total_length 总长度
+ * @return 初始化结果
+ */
+static int init_tcp_packet(TCP_Packet *tcpPacket, const char* arrays, int total_length) {
+    if (arrays == NULL || total_length < 20){
+        return TCP_STATUS_FAIL;
+    }
+
+    tcpPacket->source_port = tcp_read_source_port(arrays);
+
+    tcpPacket->target_port = tcp_read_target_port(arrays);
+
+    tcpPacket->serial_number = tcp_read_serial_number(arrays);
+
+    tcpPacket->verify_serial_number = tcp_read_verify_serial_number(arrays);
+
+    tcpPacket->head_length = tcp_read_head_length(arrays);
+
+    tcpPacket->control_sign = tcp_read_control_sign(arrays);
+
+    tcpPacket->window_size = tcp_read_window_size(arrays);
+
+    tcpPacket->check_sum = tcp_read_check_sum(arrays);
+
+    tcpPacket->urgent_pointer = tcp_read_urgent_pointer(arrays);
+
+    tcpPacket->head_other_option = NULL;
+    int option_length = tcpPacket->head_length - 20;
+    if (option_length > 0){
+        tcpPacket->head_other_option = malloc(option_length * sizeof(char));
+        tcp_read_head_other_option(arrays, tcpPacket->head_other_option, 20, option_length);
+    }
+
+    tcpPacket->data = NULL;
+    int data_length = total_length - (tcpPacket->head_length * 4);
+    if (data_length > 0){
+        tcpPacket->data = malloc(data_length * sizeof(char));
+        tcp_read_data(arrays, tcpPacket->data, tcpPacket->head_length * 4, data_length);
+    }
+
+    print_tcp_packet(tcpPacket);
+
+    return TCP_STATUS_SUCCESS;
+}
+
+#endif

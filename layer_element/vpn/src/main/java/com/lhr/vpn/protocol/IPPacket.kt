@@ -13,10 +13,4 @@ class IPPacket(private val bytes: ByteArray) {
     }
 
     private external fun nativeInit(bytes: ByteArray)
-
-    private external fun nativeGetData(mPacket: Int): String
-
-    override fun toString(): String {
-        return nativeGetData(mPacketRef)
-    }
 }
