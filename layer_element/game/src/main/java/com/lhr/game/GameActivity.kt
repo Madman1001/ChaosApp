@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.ViewGroup
 import com.lhr.centre.annotation.CElement
+import com.lhr.game.snake.GreedySnakeView
 
 /**
  * @author lhr
@@ -15,10 +16,10 @@ class GameActivity : Activity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        val snakeView = GreedySnakeView(this,100,50)
-//        snakeView?.listener = SnakeScript(snakeView!!)
-//        findViewById<ViewGroup>(android.R.id.content).addView(snakeView)
+        val snakeView = GreedySnakeView(this)
+        snakeView.listener = SnakeScript(snakeView)
+        findViewById<ViewGroup>(android.R.id.content).addView(snakeView)
 
-        findViewById<ViewGroup>(android.R.id.content).addView(DemoView(this))
+//        findViewById<ViewGroup>(android.R.id.content).addView(DemoView(this))
     }
 }

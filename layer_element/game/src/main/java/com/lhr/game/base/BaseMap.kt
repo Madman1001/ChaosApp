@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Point
+import android.util.AttributeSet
 import android.view.View
 import com.lhr.game.base.BaseMap.GameViewConstant.FRAME_STROKE_WIDTH
 
@@ -13,8 +14,18 @@ import com.lhr.game.base.BaseMap.GameViewConstant.FRAME_STROKE_WIDTH
  * @date 2021/5/12
  * @des
  */
-open class BaseMap(context: Context, protected val row: Int = 20, protected val column: Int = 10) :
-    View(context) {
+open class BaseMap: View {
+    protected var column = 10
+    protected var row = 20
+
+    constructor(context: Context): super(context)
+
+    constructor(context: Context,attributeSet: AttributeSet): super(context,attributeSet)
+
+    constructor(context: Context, row: Int, column: Int): super(context){
+        this.column = column
+        this.row = row
+    }
 
     protected val BACKGROUND_COLOR = Color.parseColor("#9EAD86")
     protected val BODY_GRAY_COLOR = Color.parseColor("#879372")
@@ -50,17 +61,17 @@ open class BaseMap(context: Context, protected val row: Int = 20, protected val 
         bodyPaint.style = Paint.Style.FILL
 
         this.post {
-            val widthLen: Int = (width - 100) / column
-            val heightLen: Int = (height - 100) / row
+            val widthLen: Int = (width - 100) / this.column
+            val heightLen: Int = (height - 100) / this.row
             sideLen = if (widthLen < heightLen) {
                 widthLen
             } else {
                 heightLen
             }
             val paddingHorizontal: Int =
-                (this.width - sideLen * column + framePaint.strokeWidth).toInt()
+                (this.width - sideLen * this.column + framePaint.strokeWidth).toInt()
             val paddingVertical: Int =
-                (this.height - sideLen * row + framePaint.strokeWidth).toInt()
+                (this.height - sideLen * this.row + framePaint.strokeWidth).toInt()
             startPoint.x = paddingHorizontal / 2
             startPoint.y = paddingVertical / 2
             endPoint.x = this.width - paddingHorizontal / 2
