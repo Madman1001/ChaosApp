@@ -22,8 +22,8 @@ object LocalVpnTest {
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 mainHandler.postDelayed({
                     http.disconnect()
-                    Log.d(tag,"over http test")
-                },2000)
+                    Log.d(tag, "over http test")
+                }, 2000)
                 http.connect()
             }catch (e: Exception){
 
@@ -31,19 +31,49 @@ object LocalVpnTest {
         }
     }
 
-    fun udpTest(){
+    private var udpTestTimes = 0
+    fun udpClientTest(){
         GlobalScope.launch {
             try {
-                val buf = "test".toByteArray()
+                val buf = "test${++udpTestTimes}".toByteArray()
                 val udpSocket = DatagramSocket()
-                val address = InetAddress.getByName("14.215.177.39")
-                val packet = DatagramPacket(buf,buf.size,address,4445)
+                val address = InetSocketAddress("192.168.2.249", 10086)
+                val packet = DatagramPacket(buf, buf.size)
+                packet.socketAddress = address
                 udpSocket.send(packet)
+
+                val data = ByteArray(1024)
+                val dp = DatagramPacket(data, data.size)
+                udpSocket.receive(dp)
+                val str = String(data, 0, dp.length)
+                Log.d(tag, "udp server receive $str")
                 udpSocket.close()
-                Log.d(tag,"over udp test")
+                Log.d(tag, "over udp test")
             }catch (e: Exception){
 
             }
+        }
+    }
+
+    fun udpServerTest(){
+        GlobalScope.launch {
+            val port = 10086
+            val receive = DatagramSocket(port)
+            val data = ByteArray(1024)
+            val dp = DatagramPacket(data, data.size)
+            Log.d(tag,"udp server is ready ${InetAddress.getLocalHost().hostAddress}:${port}")
+
+            while (true) {
+                receive.receive(dp)
+                val str = String(data, 0, dp.length)
+                if (str != "exit") {
+                    Log.d(tag,str)
+                    continue
+                }
+                break
+            }
+            Log.d(tag,"socket is over!")
+            receive.close()
         }
     }
 
@@ -51,12 +81,12 @@ object LocalVpnTest {
         GlobalScope.launch {
             try {
                 val buf = "test".toByteArray()
-                val tcpSocket = Socket(InetAddress.getByName("14.215.177.39"),80)
+                val tcpSocket = Socket(InetAddress.getByName("14.215.177.39"), 80)
                 val os = tcpSocket.getOutputStream()
                 os.write(buf)
                 tcpSocket.shutdownOutput()
                 tcpSocket.close()
-                Log.d(tag,"over tcp test")
+                Log.d(tag, "over tcp test")
             }catch (e: Exception){
 
             }

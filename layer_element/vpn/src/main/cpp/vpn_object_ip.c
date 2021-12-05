@@ -23,13 +23,23 @@ static void print_ip_packet(IP_Packet *packet){
     TAG_E("ip >> upper_protocol %d",packet->upper_protocol);
     TAG_E("ip >> head_check_sum 0x%04x",packet->head_check_sum);
 
-    unsigned char* sourceAddress = packet->source_ip_address;
-    TAG_E("ip >> source_ip_address %d.%d.%d.%d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
-    unsigned char* targetAddress = packet->target_ip_address;
-    TAG_E("ip >> target_ip_address %d.%d.%d.%d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
+    unsigned int address = packet->source_ip_address;
+    unsigned char sourceAddress[4];
+    for (int i = 3; i >= 0; --i) {
+        sourceAddress[i] = address & (unsigned int)0xFF;
+        address = address >> (unsigned int)8;
+    }
+    TAG_E("ip >> source_ip_address %u %d.%d.%d.%d",packet->source_ip_address,sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
+    address = packet->target_ip_address;
+    unsigned char targetAddress[4];
+    for (int i = 3; i >= 0; --i) {
+        targetAddress[i] = address & (unsigned int)0xFF;
+        address = address >> (unsigned int)8;
+    }
+    TAG_E("ip >> target_ip_address %u %d.%d.%d.%d",packet->target_ip_address,targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
 
-//    if (packet->other_head_fields != NULL){
-//        TAG_E("other_head_fields %s",packet->other_head_fields);
+//    if (packet->head_other_data != NULL){
+//        TAG_E("head_other_data %s",packet->head_other_data);
 //    }
 
 //    if (packet->data != NULL){
@@ -71,11 +81,9 @@ static int init_ip_packet(IP_Packet *ipPacket, const char* arrays) {
 
     ipPacket->head_check_sum = ip_read_head_check_sum(arrays);
 
-    ipPacket->source_ip_address = malloc(4 * sizeof(unsigned char));
-    ip_read_source_ip_address(arrays, ipPacket->source_ip_address);
+    ipPacket->source_ip_address = ip_read_source_ip_address(arrays);
 
-    ipPacket->target_ip_address = malloc(4 * sizeof(unsigned char));
-    ip_read_target_ip_address(arrays, ipPacket->target_ip_address);
+    ipPacket->target_ip_address = ip_read_target_ip_address(arrays);
 
     int headLength = (int)ipPacket->head_length * 4;
     int dataLength = (int)ipPacket->total_length - headLength;
@@ -86,15 +94,25 @@ static int init_ip_packet(IP_Packet *ipPacket, const char* arrays) {
         ip_read_data(arrays, ipPacket->data, headLength, dataLength);
     }
 
-    ipPacket->other_head_fields = NULL;
+    ipPacket->head_other_data = NULL;
     if (dataLength > 0){
-        ipPacket->other_head_fields = malloc((headLength - 20) * sizeof(char));
-        ip_read_other_head_fields(arrays, ipPacket->other_head_fields, 20, (headLength - 20));
+        ipPacket->head_other_data = malloc((headLength - 20) * sizeof(char));
+        ip_read_other_head_fields(arrays, ipPacket->head_other_data, 20, (headLength - 20));
     }
 
     print_ip_packet(ipPacket);
 
     return IP_STATUS_SUCCESS;
+}
+
+static void release_ip_packet(IP_Packet *ipPacket) {
+    if(ipPacket->data != NULL){
+        free(ipPacket->data);
+    }
+
+    if (ipPacket->head_other_data != NULL){
+        free(ipPacket->head_other_data);
+    }
 }
 
 #endif

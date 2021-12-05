@@ -4,14 +4,15 @@ import android.content.Intent
 import android.net.VpnService
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.lhr.centre.annotation.CElement
 import com.lhr.vpn.test.LocalVpnTest
+import junit.framework.Test
 
 /**
  * @author lhr
@@ -19,21 +20,13 @@ import com.lhr.vpn.test.LocalVpnTest
  * @des
  */
 @CElement(name = "网络代理")
-class LocalVpnActivity : AppCompatActivity {
+class LocalVpnActivity : AppCompatActivity() {
 
     companion object {
         private const val VPN_REQUEST_CODE = 0xF0F
 
         private const val VPN_REQUEST_KEY = "VPN_REQUEST_KEY"
     }
-    init {
-        Log.d("LocalVpnActivity","object init")
-    }
-
-    constructor(){
-        Log.d("LocalVpnActivity","object constructor")
-    }
-
 
     /**
      * 获取权限资源
@@ -58,19 +51,23 @@ class LocalVpnActivity : AppCompatActivity {
         when(view.id){
             R.id.start_vpn_bt ->{
                 startVPN()
+                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN START"
             }
             R.id.stop_vpn_bt ->{
                 stopVPN()
+                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN STOP"
             }
-            R.id.http_test_vpn_bt ->{
-                LocalVpnTest.httpTest()
+            R.id.udp_client_test_vpn_bt -> {
+                LocalVpnTest.udpClientTest()
+                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP CLIENT TEST"
             }
-            R.id.udp_test_vpn_bt -> {
-                LocalVpnTest.udpTest()
+            R.id.udp_server_test_vpn_bt -> {
+                LocalVpnTest.udpServerTest()
+                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP SERVER TEST"
             }
-
-            R.id.tcp_test_vpn_bt -> {
-                LocalVpnTest.tcpTest()
+            R.id.tcp_client_test_vpn_bt -> {
+            }
+            R.id.tcp_server_test_vpn_bt -> {
             }
         }
     }

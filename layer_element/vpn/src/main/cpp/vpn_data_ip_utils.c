@@ -9,16 +9,14 @@
  * 读取ip数据报版本号
  */
 static unsigned char ip_read_version(const char *data) {
-    unsigned char version = data[0];
-    return version >> 4;
+    return (unsigned char)data[0] >> 4;
 }
 
 /**
  * 读取ip数据报头部长度
  */
 static unsigned char ip_read_head_length(const char *data) {
-    unsigned char headLen = data[0];
-    return headLen & 0x0F;
+    return (unsigned char)data[0] & 0x0F;
 }
 
 /**
@@ -41,6 +39,7 @@ static unsigned short ip_read_total_length(const char *data){
 
 /**
 * 读取ip标识
+* 读取出错
 */
 static unsigned short ip_read_identification(const char *data){
     unsigned short identification = (unsigned short) data[4];
@@ -88,6 +87,7 @@ static unsigned char ip_read_upper_protocol(const char *data){
 
 /**
 * 读取ip头部校验和
+* 读取出错
 */
 static unsigned char ip_read_head_check_sum(const char *data){
     unsigned short hcs = (unsigned short) data[10];
@@ -99,21 +99,27 @@ static unsigned char ip_read_head_check_sum(const char *data){
 /**
 * 读取ip源ip地址
 */
-static void ip_read_source_ip_address(const char *data, unsigned char *sourceIp) {
-    int i = 0;
-    for (; i < 4; ++i) {
-        sourceIp[i] = data[12 + i];
+static unsigned int ip_read_source_ip_address(const char *data) {
+    unsigned char * uData = (unsigned char *)data;
+    unsigned int address = 0;
+    for (int i = 0; i < 4; ++i) {
+        address = address << (unsigned int)8;
+        address |= (unsigned int)uData[12 + i];
     }
+    return address;
 }
 
 /**
 * 读取ip目标ip地址
 */
-static void ip_read_target_ip_address(const char *data, unsigned char *targetIp){
-    int i = 0;
-    for (; i < 4; ++i) {
-        targetIp[i] = data[16 + i];
+static unsigned int ip_read_target_ip_address(const char *data){
+    unsigned char * uData = (unsigned char *)data;
+    unsigned int address = 0;
+    for (int i = 0; i < 4; ++i) {
+        address = address << (unsigned int)8;
+        address |= (unsigned int)uData[16 + i];
     }
+    return address;
 }
 
 /**

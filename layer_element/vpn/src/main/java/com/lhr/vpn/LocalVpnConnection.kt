@@ -4,6 +4,8 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.lhr.vpn.protocol.IPPacket
+import com.lhr.vpn.protocol.UDPPacket
+import com.lhr.vpn.proxy.UDPProxyClient
 import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -26,6 +28,12 @@ class LocalVpnConnection(
 
         private const val MAX_PACKET_SIZE = Short.MAX_VALUE.toInt()
     }
+    private val outProxyUDPClient = UDPProxyClient(vpnService)
+
+    init {
+        Thread(outProxyUDPClient,"OutUDP").start()
+    }
+
     override fun run() {
         try {
             Log.i(TAG, "${Thread.currentThread().name} Starting")
@@ -53,8 +61,12 @@ class LocalVpnConnection(
                     for(i in 0 until len){
                         byteBuffer[i] = packet[i]
                     }
-                    Log.i(TAG, "${Thread.currentThread().name} send packet ${ByteLog.toByteBufferString(byteBuffer)}")
-                    IPPacket(byteBuffer)
+                    val ipPacket = IPPacket(byteBuffer)
+                    if (ipPacket.isUdp()){
+                        Log.i(TAG, "${Thread.currentThread().name} ip packet ${ByteLog.toByteBufferString(byteBuffer)}")
+                        outProxyUDPClient.sendPacket(UDPPacket(ipPacket))
+                        Log.i(TAG, "forward udp packet")
+                    }
                     packet.clear()
                 }
                 //读取外部发往内部的数据报，（如果有的话）

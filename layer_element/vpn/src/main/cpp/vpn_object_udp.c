@@ -14,7 +14,8 @@ static void print_udp_packet(UDP_Packet *packet){
 
     TAG_E("udp >> source port %d",packet->source_port);
     TAG_E("udp >> target port %d",packet->target_port);
-    TAG_E("udp >> length %d",packet->udp_length);
+    TAG_E("udp >> total length %d",packet->udp_total_length);
+    TAG_E("udp >> data length %d",packet->udp_data_length);
     TAG_E("udp >> check sum 0x%04x",packet->udp_check_sum);
 
     if (packet->data != NULL){
@@ -38,19 +39,24 @@ static int init_udp_packet(UDP_Packet *udpPacket, const char* arrays, int total_
 
     udpPacket->target_port = udp_read_target_port(arrays);
 
-    udpPacket->udp_length = udp_read_length(arrays);
+    udpPacket->udp_total_length = udp_read_length(arrays);
 
     udpPacket->udp_check_sum = udp_read_check_sum(arrays);
 
+    udpPacket->udp_data_length = total_length - (unsigned short)8;
+
     udpPacket->data = NULL;
-    if (total_length - 8 > 0){
-        udpPacket->data = malloc((total_length - 8) * sizeof(char));
-        udp_read_data(arrays, udpPacket->data, 8, (total_length - 8));
+    if (udpPacket->udp_data_length > 0){
+        udpPacket->data = malloc((udpPacket->udp_data_length) * sizeof(char));
+        udp_read_data(arrays, udpPacket->data, 8, udpPacket->udp_data_length);
     }
-
-    print_udp_packet(udpPacket);
-
     return UDP_STATUS_SUCCESS;
+}
+
+static void release_udp_packet(UDP_Packet *udpPacket) {
+    if(udpPacket->data != NULL){
+        free(udpPacket->data);
+    }
 }
 
 #endif

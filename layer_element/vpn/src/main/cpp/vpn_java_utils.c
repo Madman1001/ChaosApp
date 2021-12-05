@@ -32,6 +32,12 @@ static char * jstringToChar(JNIEnv *env, jstring jstr) {
     return rtn;
 }
 
+static jobject intToInteger(JNIEnv *env, int val){
+    jclass intClass = (*env)->FindClass(env, "java/lang/Integer");
+    jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(I)V");
+    return (*env)->NewObject(env, intClass, ctorId, (jint) val);
+}
+
 static char* charToBinary(char c){
     char* bin = (char*)malloc(8 * sizeof(char) + 1);
     bin[8 * sizeof(char)] = '\0';

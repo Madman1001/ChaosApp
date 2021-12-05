@@ -56,16 +56,16 @@ struct IP_Packet {
     unsigned short head_check_sum;
 
     //源ip地址 32 bit
-    unsigned char* source_ip_address;
+    unsigned int source_ip_address;
 
     //目标ip地址 32 bit
-    unsigned char* target_ip_address;
+    unsigned int target_ip_address;
 
     //可选字段 (单位 32 bit)
-    char* other_head_fields;
+    void* head_other_data;
 
     //数据
-    char* data;
+    void* data;
 };
 
 struct UDP_Packet {
@@ -76,13 +76,16 @@ struct UDP_Packet {
     unsigned short target_port;
 
     //UDP长度(单位为：字节) 16 bit
-    unsigned short udp_length;
+    unsigned short udp_total_length;
 
     //UDP校验和 16 bit
     unsigned short udp_check_sum;
 
+    //UDP数据块长度(单位：字节)
+    unsigned short udp_data_length;
+
     //数据
-    char* data;
+    void* data;
 };
 
 struct TCP_Packet {
@@ -117,10 +120,10 @@ struct TCP_Packet {
     unsigned short urgent_pointer;
 
     //其它选项
-    char* head_other_option;
+    void* head_other_data;
 
     //数据
-    char* data;
+    void* data;
 };
 
 #endif

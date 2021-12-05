@@ -23,8 +23,8 @@ static void print_tcp_packet(TCP_Packet *packet){
     TAG_E("tcp >> check sum 0x%04x",packet->check_sum);
     TAG_E("tcp >> urgent pointer 0x%04x",packet->urgent_pointer);
 
-    if (packet->head_other_option != NULL){
-        TAG_E("tcp >> head other option %s",packet->head_other_option);
+    if (packet->head_other_data != NULL){
+        TAG_E("tcp >> head other option %s",packet->head_other_data);
     }
 
     if (packet->data != NULL){
@@ -62,11 +62,11 @@ static int init_tcp_packet(TCP_Packet *tcpPacket, const char* arrays, int total_
 
     tcpPacket->urgent_pointer = tcp_read_urgent_pointer(arrays);
 
-    tcpPacket->head_other_option = NULL;
+    tcpPacket->head_other_data = NULL;
     int option_length = tcpPacket->head_length - 20;
     if (option_length > 0){
-        tcpPacket->head_other_option = malloc(option_length * sizeof(char));
-        tcp_read_head_other_option(arrays, tcpPacket->head_other_option, 20, option_length);
+        tcpPacket->head_other_data = malloc(option_length * sizeof(char));
+        tcp_read_head_other_option(arrays, tcpPacket->head_other_data, 20, option_length);
     }
 
     tcpPacket->data = NULL;
@@ -76,9 +76,17 @@ static int init_tcp_packet(TCP_Packet *tcpPacket, const char* arrays, int total_
         tcp_read_data(arrays, tcpPacket->data, tcpPacket->head_length * 4, data_length);
     }
 
-    print_tcp_packet(tcpPacket);
-
     return TCP_STATUS_SUCCESS;
+}
+
+static void release_tcp_packet(TCP_Packet *tcpPacket) {
+    if(tcpPacket->data != NULL){
+        free(tcpPacket->data);
+    }
+
+    if (tcpPacket->head_other_data != NULL){
+        free(tcpPacket->head_other_data);
+    }
 }
 
 #endif
