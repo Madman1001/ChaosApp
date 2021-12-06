@@ -42,10 +42,10 @@ static unsigned short ip_read_total_length(const char *data){
 * 读取出错
 */
 static unsigned short ip_read_identification(const char *data){
-    unsigned short identification = (unsigned short) data[4];
+    unsigned short identification = (unsigned char) data[4];
 
-    identification = identification << (unsigned short )8;
-    identification |= (unsigned short) data[5];
+    identification = identification << (unsigned char)8;
+    identification |= (unsigned char) data[5];
     return identification;
 }
 
@@ -62,10 +62,10 @@ static unsigned char ip_read_flag(const char *data){
 * 读取ip片偏移
 */
 static unsigned short ip_read_offset_frag(const char *data){
-    unsigned short offsetFrag = (unsigned short) data[6];
+    unsigned short offsetFrag = (unsigned char) data[6];
     offsetFrag = offsetFrag << 8;
     offsetFrag &= 0x1FFF;
-    offsetFrag |= (unsigned short) data[7];
+    offsetFrag |= (unsigned char) data[7];
     return offsetFrag;
 }
 
@@ -73,7 +73,7 @@ static unsigned short ip_read_offset_frag(const char *data){
 * 读取ip生存时间
 */
 static unsigned char ip_read_ttl(const char *data){
-    unsigned char ttl = (unsigned short) data[8];
+    unsigned char ttl = (unsigned char) data[8];
     return ttl;
 }
 
@@ -81,7 +81,7 @@ static unsigned char ip_read_ttl(const char *data){
 * 读取ip上层协议
 */
 static unsigned char ip_read_upper_protocol(const char *data){
-    unsigned char up = (unsigned short) data[9];
+    unsigned char up = (unsigned char) data[9];
     return up;
 }
 

@@ -70,14 +70,17 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
             }
         }
     }
+    print_ip_packet(ip_packet);
 
     TAG_E("init over");
 
     jclass ip_object_class = (*env)->GetObjectClass(env, jobj);
 
-    jfieldID ip_object_jfieldId = (*env)->GetFieldID(env, ip_object_class, "mPacketRef", "I");
+    jfieldID ip_object_jfieldId = (*env)->GetFieldID(env, ip_object_class, "mPacketRef", "J");
 
-    (*env)->SetIntField(env, jobj, ip_object_jfieldId, (jint) ip_packet);
+    TAG_E("void* %d %d", sizeof(&ip_packet),sizeof(*ip_packet));
+
+    (*env)->SetLongField(env, jobj, ip_object_jfieldId, (jlong) ip_packet);
 }
 
 JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeRelease
@@ -99,13 +102,12 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeRelease
 }
 
 JNIEXPORT jobject JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetData
-        (JNIEnv *env, jobject jobj, jint dataRef, jint dataType) {
+        (JNIEnv *env, jobject jobj, jlong dataRef, jint dataType) {
     if (dataRef == 0) {
         //数据处理异常
         (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "数据为空");
         return NULL;
     }
-
 
     IP_Packet *ipPacket = (IP_Packet *) dataRef;
 

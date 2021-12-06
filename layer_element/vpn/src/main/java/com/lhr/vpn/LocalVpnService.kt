@@ -13,6 +13,7 @@ import com.lhr.vpn.LocalVpnConfig.PROXY_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_ADDRESS
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_SESSION_NAME
+import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
@@ -28,6 +29,8 @@ class LocalVpnService : VpnService() {
         const val VPN_CONTROL_ACTION_START = "VPN_START"
 
         const val VPN_CONTROL_ACTION_STOP = "VPN_STOP"
+
+        var vpnService: WeakReference<VpnService?> = WeakReference(null)
     }
 
     private val connectionThread = AtomicReference<Thread>()
@@ -49,6 +52,7 @@ class LocalVpnService : VpnService() {
 
     override fun onCreate() {
         super.onCreate()
+        vpnService = WeakReference(this)
         Log.e(TAG, "onCreate")
         mPendingIntent = PendingIntent.getActivity(this,0,Intent(this,LocalVpnActivity::class.java),PendingIntent.FLAG_UPDATE_CURRENT)
         connect()

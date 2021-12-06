@@ -2,6 +2,7 @@ package com.lhr.chaos;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class UDPServer{
     private static final int PORT_SERVER = 10086;
@@ -9,7 +10,7 @@ public class UDPServer{
         DatagramSocket receive = new DatagramSocket(PORT_SERVER);
         byte[] data = new byte[1024];
         DatagramPacket dp = new DatagramPacket(data,data.length);
-        System.out.println("UDP SERVER IS READY " + receive.getLocalAddress().getHostAddress() + ":" + receive.getLocalPort());
+        System.out.println("UDP SERVER IS READY " + InetAddress.getLocalHost().getHostAddress() + ":" + receive.getLocalPort());
 
         while(true){
         	receive.receive(dp);

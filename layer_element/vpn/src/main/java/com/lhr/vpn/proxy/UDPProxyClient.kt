@@ -26,14 +26,10 @@ class UDPProxyClient(vpnService: VpnService) : Runnable {
         currentUdpThread = Thread.currentThread()
         while (true){
             if (packetList.isNotEmpty()){
+                Log.d(tag, "start proxy udp send")
                 val packet = packetList.removeFirst()
                 udpSocket.send(packet)
-
-                val data = ByteArray(1024)
-                val dp = DatagramPacket(data, data.size)
-                udpSocket.receive(dp)
-                val str = String(data, 0, dp.length)
-                Log.d(tag, "udp server receive $str")
+                Log.d(tag, "end proxy udp send")
             }else{
                 try {
                     Thread.sleep(Long.MAX_VALUE)

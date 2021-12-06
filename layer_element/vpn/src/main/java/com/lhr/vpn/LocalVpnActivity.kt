@@ -62,8 +62,8 @@ class LocalVpnActivity : AppCompatActivity() {
                 this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP CLIENT TEST"
             }
             R.id.udp_server_test_vpn_bt -> {
-                LocalVpnTest.udpServerTest()
-                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP SERVER TEST"
+//                LocalVpnTest.udpServerTest()
+//                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP SERVER TEST"
             }
             R.id.tcp_client_test_vpn_bt -> {
             }
@@ -82,6 +82,6 @@ class LocalVpnActivity : AppCompatActivity() {
     }
 
     private fun stopVPN() {
-        stopService(Intent(this,LocalVpnService::class.java))
+        LocalVpnService.vpnService.get()?.stopSelf()
     }
 }

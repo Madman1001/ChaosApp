@@ -29,14 +29,14 @@ static void print_ip_packet(IP_Packet *packet){
         sourceAddress[i] = address & (unsigned int)0xFF;
         address = address >> (unsigned int)8;
     }
-    TAG_E("ip >> source_ip_address %u %d.%d.%d.%d",packet->source_ip_address,sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
+    TAG_E("ip >> source_ip_address %d.%d.%d.%d",sourceAddress[0],sourceAddress[1],sourceAddress[2],sourceAddress[3]);
     address = packet->target_ip_address;
     unsigned char targetAddress[4];
     for (int i = 3; i >= 0; --i) {
         targetAddress[i] = address & (unsigned int)0xFF;
         address = address >> (unsigned int)8;
     }
-    TAG_E("ip >> target_ip_address %u %d.%d.%d.%d",packet->target_ip_address,targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
+    TAG_E("ip >> target_ip_address %d.%d.%d.%d",targetAddress[0],targetAddress[1],targetAddress[2],targetAddress[3]);
 
 //    if (packet->head_other_data != NULL){
 //        TAG_E("head_other_data %s",packet->head_other_data);
@@ -99,8 +99,6 @@ static int init_ip_packet(IP_Packet *ipPacket, const char* arrays) {
         ipPacket->head_other_data = malloc((headLength - 20) * sizeof(char));
         ip_read_other_head_fields(arrays, ipPacket->head_other_data, 20, (headLength - 20));
     }
-
-    print_ip_packet(ipPacket);
 
     return IP_STATUS_SUCCESS;
 }

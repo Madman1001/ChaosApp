@@ -67,6 +67,7 @@ class LocalVpnConnection(
                         outProxyUDPClient.sendPacket(UDPPacket(ipPacket))
                         Log.i(TAG, "forward udp packet")
                     }
+
                     packet.clear()
                 }
                 //读取外部发往内部的数据报，（如果有的话）

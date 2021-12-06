@@ -35,20 +35,15 @@ object LocalVpnTest {
     fun udpClientTest(){
         GlobalScope.launch {
             try {
+                Log.d(tag, "start udp test")
                 val buf = "test${++udpTestTimes}".toByteArray()
                 val udpSocket = DatagramSocket()
-                val address = InetSocketAddress("192.168.2.249", 10086)
+                val address = InetSocketAddress("192.168.4.62", 10086)
                 val packet = DatagramPacket(buf, buf.size)
                 packet.socketAddress = address
                 udpSocket.send(packet)
-
-                val data = ByteArray(1024)
-                val dp = DatagramPacket(data, data.size)
-                udpSocket.receive(dp)
-                val str = String(data, 0, dp.length)
-                Log.d(tag, "udp server receive $str")
                 udpSocket.close()
-                Log.d(tag, "over udp test")
+                Log.d(tag, "end udp test")
             }catch (e: Exception){
 
             }
@@ -61,18 +56,18 @@ object LocalVpnTest {
             val receive = DatagramSocket(port)
             val data = ByteArray(1024)
             val dp = DatagramPacket(data, data.size)
-            Log.d(tag,"udp server is ready ${InetAddress.getLocalHost().hostAddress}:${port}")
+            Log.d(tag, "udp server is ready ${InetAddress.getLocalHost().hostAddress}:${port}")
 
             while (true) {
                 receive.receive(dp)
                 val str = String(data, 0, dp.length)
                 if (str != "exit") {
-                    Log.d(tag,str)
+                    Log.d(tag, str)
                     continue
                 }
                 break
             }
-            Log.d(tag,"socket is over!")
+            Log.d(tag, "socket is over!")
             receive.close()
         }
     }

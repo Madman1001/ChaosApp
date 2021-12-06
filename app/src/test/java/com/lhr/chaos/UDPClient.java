@@ -1,8 +1,12 @@
 package com.lhr.chaos;
 
+import org.junit.Test;
+
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 
 public class UDPClient{
     public static void main(String[] args) throws Exception{
@@ -17,6 +21,16 @@ public class UDPClient{
         // client.receive(receiveDp);
         // String str = new String(receiveData,0,receiveDp.getLength());
         // System.out.println(str);
+        client.close();
+    }
+
+    @Test
+    public void udpTest() throws IOException {
+        DatagramSocket client = new DatagramSocket();
+        byte[] data = "Hello, java UDP.".getBytes();
+        DatagramPacket dp = new DatagramPacket(data,data.length);
+        dp.setSocketAddress(new InetSocketAddress("192.168.102.45",10086));
+        client.send(dp);
         client.close();
     }
 }

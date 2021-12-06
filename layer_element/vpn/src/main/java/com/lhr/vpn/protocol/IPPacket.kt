@@ -6,7 +6,7 @@ package com.lhr.vpn.protocol
  * @des ip 数据报
  */
 class IPPacket(private val bytes: ByteArray) {
-    protected var mPacketRef: Int = 0
+    protected @Volatile var mPacketRef: Long = 0L
 
     init {
         nativeInit(bytes)
@@ -40,6 +40,6 @@ class IPPacket(private val bytes: ByteArray) {
 
     private external fun nativeInit(bytes: ByteArray)
     private external fun nativeRelease(nativeRef: Int)
-    private external fun nativeGetData(nativeRef: Int, dataType: Int): Any?
+    private external fun nativeGetData(nativeRef: Long, dataType: Int): Any?
 
 }
