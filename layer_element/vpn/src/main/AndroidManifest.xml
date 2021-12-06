@@ -10,7 +10,8 @@
 
     <application
         android:usesCleartextTraffic="true">
-        <activity android:name=".LocalVpnActivity"/>
+        <activity android:name=".LocalVpnActivity"
+            android:windowSoftInputMode="adjustPan"/>
 
         <service
             android:name=".LocalVpnService"

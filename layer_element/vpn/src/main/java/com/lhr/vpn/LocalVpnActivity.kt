@@ -5,12 +5,14 @@ import android.net.VpnService
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.lhr.centre.annotation.CElement
+import com.lhr.utils.NetworkUtils
 import com.lhr.vpn.test.LocalVpnTest
 import junit.framework.Test
 
@@ -45,21 +47,24 @@ class LocalVpnActivity : AppCompatActivity() {
                     startService(Intent(this, LocalVpnService::class.java))
                 }
             })
+
+        this.findViewById<TextView>(R.id.vpn_tv).text = "Local IP: ${NetworkUtils.getHostIp()}"
     }
 
     fun onClick(view: View){
+        val address = this.findViewById<EditText>(R.id.test_ip_edit_text).text.toString()
+        val port = this.findViewById<EditText>(R.id.test_port_edit_text).text.toString()
         when(view.id){
             R.id.start_vpn_bt ->{
                 startVPN()
-                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN START"
             }
             R.id.stop_vpn_bt ->{
                 stopVPN()
-                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN STOP"
             }
             R.id.udp_client_test_vpn_bt -> {
-                LocalVpnTest.udpClientTest()
-                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP CLIENT TEST"
+                if (address.isNotEmpty() || port.isNotEmpty()){
+                    LocalVpnTest.udpClientTest(address,port.toInt())
+                }
             }
             R.id.udp_server_test_vpn_bt -> {
 //                LocalVpnTest.udpServerTest()

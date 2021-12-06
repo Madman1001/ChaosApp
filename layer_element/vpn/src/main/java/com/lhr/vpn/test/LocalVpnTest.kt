@@ -32,13 +32,13 @@ object LocalVpnTest {
     }
 
     private var udpTestTimes = 0
-    fun udpClientTest(){
+    fun udpClientTest(address: String, port: Int){
         GlobalScope.launch {
             try {
                 Log.d(tag, "start udp test")
                 val buf = "test${++udpTestTimes}".toByteArray()
                 val udpSocket = DatagramSocket()
-                val address = InetSocketAddress("192.168.4.62", 10086)
+                val address = InetSocketAddress(address, port)
                 val packet = DatagramPacket(buf, buf.size)
                 packet.socketAddress = address
                 udpSocket.send(packet)
@@ -72,11 +72,11 @@ object LocalVpnTest {
         }
     }
 
-    fun tcpTest(){
+    fun tcpTest(address: String, port: Int){
         GlobalScope.launch {
             try {
                 val buf = "test".toByteArray()
-                val tcpSocket = Socket(InetAddress.getByName("14.215.177.39"), 80)
+                val tcpSocket = Socket(InetAddress.getByName(address), port)
                 val os = tcpSocket.getOutputStream()
                 os.write(buf)
                 tcpSocket.shutdownOutput()
