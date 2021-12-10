@@ -27,6 +27,10 @@ class LocalVpnActivity : AppCompatActivity() {
         private const val VPN_REQUEST_CODE = 0xF0F
 
         private const val VPN_REQUEST_KEY = "VPN_REQUEST_KEY"
+
+        init {
+            System.loadLibrary("chaos_vpn")
+        }
     }
 
     /**
@@ -47,12 +51,13 @@ class LocalVpnActivity : AppCompatActivity() {
                 }
             })
 
-        this.findViewById<TextView>(R.id.vpn_tv).text = "Local IP: ${NetworkUtils.getHostIp()}"
+        this.findViewById<TextView>(R.id.vpn_edit_text).text = "Local IP: ${NetworkUtils.getHostIp()}"
     }
 
     fun onClick(view: View){
         val address = this.findViewById<EditText>(R.id.test_ip_edit_text).text.toString()
         val port = this.findViewById<EditText>(R.id.test_port_edit_text).text.toString()
+        val data = this.findViewById<EditText>(R.id.vpn_edit_text).text.toString()
         when(view.id){
             R.id.start_vpn_bt ->{
                 startVPN()
@@ -62,7 +67,7 @@ class LocalVpnActivity : AppCompatActivity() {
             }
             R.id.udp_client_test_vpn_bt -> {
                 if (address.isNotEmpty() || port.isNotEmpty()){
-                    LocalVpnTest.udpClientTest(address,port.toInt())
+                    LocalVpnTest.udpClientTest(address,port.toInt(),data)
                 }
             }
             R.id.udp_server_test_vpn_bt -> {

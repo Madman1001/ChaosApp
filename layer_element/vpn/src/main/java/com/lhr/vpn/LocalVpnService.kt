@@ -33,10 +33,6 @@ class LocalVpnService : VpnService() {
 
     private val vpnConnection = AtomicReference<LocalVpnConnection>()
 
-    init {
-        System.loadLibrary("chaos_vpn")
-    }
-
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
         }

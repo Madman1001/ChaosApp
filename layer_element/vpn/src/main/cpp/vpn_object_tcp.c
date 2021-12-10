@@ -13,22 +13,22 @@
 
 static void print_tcp_packet(TCP_Packet *packet){
 
-    TAG_E("tcp >> source port %d",packet->source_port);
-    TAG_E("tcp >> target port %d",packet->target_port);
-    TAG_E("tcp >> serial number 0x%08x",packet->serial_number);
-    TAG_E("tcp >> verify serial number 0x%08x",packet->verify_serial_number);
-    TAG_E("tcp >> head length %d",packet->head_length);
-    TAG_E("tcp >> control sign 0d%s",charToBinary(packet->control_sign));
-    TAG_E("tcp >> window size %d",packet->window_size);
-    TAG_E("tcp >> check sum 0x%04x",packet->check_sum);
-    TAG_E("tcp >> urgent pointer 0x%04x",packet->urgent_pointer);
+    TAG_D("tcp >> source port %d",packet->source_port);
+    TAG_D("tcp >> target port %d",packet->target_port);
+    TAG_D("tcp >> serial number 0x%08x",packet->serial_number);
+    TAG_D("tcp >> verify serial number 0x%08x",packet->verify_serial_number);
+    TAG_D("tcp >> head length %d",packet->head_length);
+    TAG_D("tcp >> control sign 0d%s",charToBinary(packet->control_sign));
+    TAG_D("tcp >> window size %d",packet->window_size);
+    TAG_D("tcp >> check sum 0x%04x",packet->check_sum);
+    TAG_D("tcp >> urgent pointer 0x%04x",packet->urgent_pointer);
 
     if (packet->head_other_data != NULL){
-        TAG_E("tcp >> head other option %s",packet->head_other_data);
+        TAG_D("tcp >> head other option %s",packet->head_other_data);
     }
 
     if (packet->data != NULL){
-        TAG_E("tcp >> data %s",packet->data);
+        TAG_D("tcp >> data %s",packet->data);
     }
 }
 
@@ -39,10 +39,12 @@ static void print_tcp_packet(TCP_Packet *packet){
  * @param total_length 总长度
  * @return 初始化结果
  */
-static int init_tcp_packet(TCP_Packet *tcpPacket, const char* arrays, int total_length) {
+static int init_tcp_packet(TCP_Packet *tcpPacket, unsigned const char* arrays, int total_length) {
     if (arrays == NULL || total_length < 20){
         return TCP_STATUS_FAIL;
     }
+
+    tcpPacket->total_length = total_length;
 
     tcpPacket->source_port = tcp_read_source_port(arrays);
 

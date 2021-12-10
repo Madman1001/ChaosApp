@@ -24,6 +24,9 @@
 //用户数据报协议
 #define PACKET_TYPE_UDP 17
 
+#define IP_VERSION_V4 4
+#define IP_VERSION_V6 6
+
 struct IP_Packet {
     //版本号 4 bit
     unsigned char version;
@@ -76,13 +79,13 @@ struct UDP_Packet {
     unsigned short target_port;
 
     //UDP长度(单位为：字节) 16 bit
-    unsigned short udp_total_length;
+    unsigned short total_length;
 
     //UDP校验和 16 bit
-    unsigned short udp_check_sum;
+    unsigned short check_sum;
 
     //UDP数据块长度(单位：字节)
-    unsigned short udp_data_length;
+    unsigned short data_length;
 
     //数据
     void* data;
@@ -103,6 +106,9 @@ struct TCP_Packet {
 
     //首部长度 4 bit (以 4 字节为单位)
     unsigned char head_length;
+
+    //UDP长度(单位为：字节) 16 bit
+    unsigned int total_length;
 
     //保留位 6 bit
     unsigned char keep_position;

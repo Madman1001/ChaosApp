@@ -3,7 +3,7 @@ package com.lhr.test
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.lhr.vpn.util.ByteLog
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.*
@@ -32,23 +32,29 @@ object LocalVpnTest {
         }
     }
 
-    private var udpTestTimes = 0
-    fun udpClientTest(address: String, port: Int){
-        GlobalScope.launch {
+    fun udpClientTest(address: String, port: Int, data: String){
+        GlobalScope.launch(IO) {
             try {
-                Log.d(tag, "start udp test")
-                val times = ++udpTestTimes
-                val buf = "test${times}".toByteArray()
+                val buf = data.toByteArray()
+
+                Log.d(tag, "udp test send $data")
+
                 val udpSocket = DatagramSocket()
+                udpSocket.soTimeout = 5000
                 val address = InetSocketAddress(address, port)
                 val packet = DatagramPacket(buf, buf.size)
                 packet.socketAddress = address
-
                 udpSocket.send(packet)
-                udpSocket.close()
-                Log.d(tag, "end udp ${ByteLog.toByteBufferString(packet.data)}")
-            }catch (e: Exception){
 
+                val data = ByteArray(1024)
+                val dp = DatagramPacket(data, data.size)
+                udpSocket.receive(dp)
+                val str = String(dp.data, 0, dp.length)
+                Log.d(tag, "udp test receive $str")
+
+                udpSocket.close()
+            }catch (e: Exception){
+                Log.d(tag, "udp test Exception ", e)
             }
         }
     }

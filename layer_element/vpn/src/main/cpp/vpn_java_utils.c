@@ -38,6 +38,18 @@ static jobject intToInteger(JNIEnv *env, int val){
     return (*env)->NewObject(env, intClass, ctorId, (jint) val);
 }
 
+static jobject charToByte(JNIEnv *env, char val){
+    jclass intClass = (*env)->FindClass(env, "java/lang/Byte");
+    jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(B)V");
+    return (*env)->NewObject(env, intClass, ctorId, (jint) val);
+}
+
+static jobject shortToShort(JNIEnv *env, short val){
+    jclass intClass = (*env)->FindClass(env, "java/lang/Short");
+    jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(S)V");
+    return (*env)->NewObject(env, intClass, ctorId, (jint) val);
+}
+
 static char* charToBinary(char c){
     char* bin = (char*)malloc(8 * sizeof(char) + 1);
     bin[8 * sizeof(char)] = '\0';

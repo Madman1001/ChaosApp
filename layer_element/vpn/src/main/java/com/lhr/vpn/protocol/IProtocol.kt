@@ -7,4 +7,6 @@ package com.lhr.vpn.protocol
  */
 interface IProtocol{
     fun getRawData(): ByteArray
+
+    fun setRawData(byteArray: ByteArray)
 }

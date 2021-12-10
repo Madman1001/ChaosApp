@@ -3,12 +3,13 @@ package com.lhr.vpn
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.lhr.vpn.handle.IProxyTun
+import com.lhr.vpn.handle.NetworkProxyHandle
+import com.lhr.vpn.handle.TransportProxyHandle
 import com.lhr.vpn.handle.VpnProxyHandle
 import com.lhr.vpn.protocol.IPPacket
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import com.lhr.vpn.protocol.IProtocol
+import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -24,20 +25,17 @@ import java.util.*
 class LocalVpnConnection(
     private val vpnService: VpnService,
     private val tunInterface: ParcelFileDescriptor
-) {
+): VpnProxyHandle() {
 
     companion object {
         private const val TAG = "LocalVpnConnection"
 
-        private const val MAX_PACKET_SIZE = Short.MAX_VALUE.toInt()
+        private const val MAX_PACKET_SIZE = 65535
     }
 
-    // vpn分层代理入口
-    private val vpnHandle = VpnProxyHandle(vpnService, tunInterface)
+    private var proxyInputJob: Thread? = null
 
-    private var proxyInputJob: Job? = null
-
-    private var proxyOutputJob: Job? = null
+    private var proxyOutputJob: Thread? = null
 
     //发送数据报到VPN通道接口
     private var packetInput: FileInputStream? = null
@@ -51,17 +49,30 @@ class LocalVpnConnection(
     // 输入到应用的ip数据包队列
     private val outPacketList: Vector<ByteArray> = Vector<ByteArray>()
 
+    @Volatile
+    private var isRunning = false
+
+    init {
+        val networkHandle = NetworkProxyHandle(vpnService)
+        val transportHandle = TransportProxyHandle(vpnService)
+        networkHandle.setNextHandle(transportHandle)
+        this.setNextHandle(networkHandle)
+    }
+
     @Synchronized
     fun startProxy() {
-        proxyInputJob?.cancel()
+        isRunning = true
 
         packetInput = FileInputStream(tunInterface.fileDescriptor)
 
         packetOutput = FileOutputStream(tunInterface.fileDescriptor)
 
         proxyInputJob = realInputProxy()
+        proxyInputJob?.start()
 
         proxyOutputJob = realOutputProxy()
+        proxyOutputJob?.start()
+
     }
 
     @Synchronized
@@ -71,70 +82,79 @@ class LocalVpnConnection(
             packetInput = null
             packetOutput?.close()
             packetOutput = null
-            proxyInputJob?.cancel()
+
+            isRunning = false
             proxyInputJob = null
+            proxyOutputJob = null
+
             tunInterface.close()
             Log.e(TAG, "${Thread.currentThread().name} Connection close")
         } catch (e: IOException) {
         }
     }
 
-    private fun realInputProxy(): Job {
-        return GlobalScope.launch(CoroutineName("VpnProxy-Input")) {
+    private fun realInputProxy(): Thread {
+        return Thread({
             try {
-                Log.i(TAG, "${Thread.currentThread().name} Vpn Input Starting")
-                while (true) {
-                    packetInput?.let {
-                        readToTun(it)?.let { data ->
-                            IPPacket(data)
+                Log.i(TAG, "${Thread.currentThread().name} Starting")
+                while (isRunning) {
+                    //读取输入数据
+                    val len = readToTun(packet, packetInput)
+                    if (len > 0) {
+                        packet.limit(len)
+                        //可以进行拦截、修改、转发处理
+                        val byteBuffer = ByteArray(len)
+                        for (i in 0 until len) {
+                            byteBuffer[i] = packet[i]
                         }
+                        val ipPacket = IPPacket(byteBuffer)
+                        if (ipPacket.isValid()){
+                            this.inputData(ipPacket)
+                        }
+                        packet.clear()
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "${Thread.currentThread().name} Connection failed, exiting", e)
+                Log.e(TAG, "${Thread.currentThread().name} exception, exiting", e)
             }
-        }
+        }, "VpnProxy-Input")
     }
 
-    private fun realOutputProxy(): Job {
-        return GlobalScope.launch(CoroutineName("VpnProxy-Output")) {
+    private fun realOutputProxy(): Thread {
+        return Thread({
             try {
-                Log.i(TAG, "${Thread.currentThread().name} Vpn Output Starting")
-                while (true) {
-                    packetInput?.let {
-                        readToTun(it)?.let { data ->
-                            IPPacket(data)
+                Log.d(TAG, "${Thread.currentThread().name} Starting")
+                while (isRunning) {
+                    if (outPacketList.isNotEmpty()){
+                        Log.d(TAG, "start proxy")
+                        val packet = outPacketList.removeFirst()
+                        writeToTun(packet,packetOutput)
+                    }else{
+                        try {
+                            Thread.sleep(Long.MAX_VALUE)
+                        }catch (e: InterruptedException){
                         }
+                        Log.e(TAG,"线程被唤醒")
                     }
+
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "${Thread.currentThread().name} Connection failed, exiting", e)
+                Log.e(TAG, "${Thread.currentThread().name} exception, exiting", e)
             }
-        }
+        }, "VpnProxy-Output")
     }
 
     /**
      * 读取虚拟网卡数据
      */
-    private fun readToTun(input: FileInputStream?): ByteArray? {
+    private fun readToTun(buffer: ByteBuffer, input: FileInputStream?): Int {
         synchronized(tunInterface){
             try {
                 //读取内部发往外部的数据报
-                val len = input?.read(packet.array()) ?: 0
-                if (len > 0) {
-                    packet.limit(len)
-                    //可以进行拦截、修改、转发处理
-                    val byteBuffer = ByteArray(len)
-                    for (i in 0 until len) {
-                        byteBuffer[i] = packet[i]
-                    }
-                    packet.clear()
-                    return byteBuffer
-                }
+                return input?.read(buffer.array()) ?: 0
             }catch (e: Exception){
-
+                return -1
             }
-            return null
         }
     }
 
@@ -142,19 +162,30 @@ class LocalVpnConnection(
     /**
      * 写入虚拟网卡数据
      */
-    private fun writeToTun(bytes: ByteArray, output: FileOutputStream?): Boolean {
+    private fun writeToTun(bytes: ByteArray, output: FileOutputStream?): Int {
         synchronized(tunInterface){
             try {
                 //写入外部发往内部的数据报
                 if (output != null){
                     output.write(bytes)
-                    return true
+                    return 0
                 }else{
-                    return false
+                    return -1
                 }
             } catch (e: Exception) {
-                return false
+                return -1
             }
+        }
+    }
+
+    override fun inputData(data: IProtocol) {
+        this.chain.nextHandle?.inputData(data)
+    }
+
+    override fun outputData(data: IProtocol) {
+        outPacketList.add(data.getRawData())
+        if (proxyOutputJob?.state == Thread.State.TIMED_WAITING){
+            proxyOutputJob?.interrupt()
         }
     }
 }
