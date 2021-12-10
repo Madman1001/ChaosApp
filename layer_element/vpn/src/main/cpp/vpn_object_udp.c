@@ -56,6 +56,7 @@ static int init_udp_packet(UDP_Packet *udpPacket, const char* arrays, int total_
 static void release_udp_packet(UDP_Packet *udpPacket) {
     if(udpPacket->data != NULL){
         free(udpPacket->data);
+        udpPacket->data = NULL;
     }
 }
 

@@ -106,10 +106,12 @@ static int init_ip_packet(IP_Packet *ipPacket, const char* arrays) {
 static void release_ip_packet(IP_Packet *ipPacket) {
     if(ipPacket->data != NULL){
         free(ipPacket->data);
+        ipPacket->data = NULL;
     }
 
     if (ipPacket->head_other_data != NULL){
         free(ipPacket->head_other_data);
+        ipPacket->head_other_data = NULL;
     }
 }
 

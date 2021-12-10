@@ -1,5 +1,6 @@
 package com.lhr.vpn.protocol
 
+import com.lhr.vpn.constant.PacketConstant
 import java.lang.StringBuilder
 
 /**
@@ -7,21 +8,17 @@ import java.lang.StringBuilder
  * @date 2021/12/4
  * @des UDP数据类
  */
-class UDPPacket(private val ipPacket: IPPacket) {
-    fun getHostname(): String{
-        val hostname = ipPacket.getData(PacketConstant.DataOperateType.IP_TARGET_ADDRESS.type) ?: 0
-        val sb = StringBuilder()
-        if (hostname != 0){
-            var address = hostname as Int
-            for (i in 0 until 4) {
-                sb.insert(0,address and 0xFF)
-                if (i != 3){
-                    sb.insert(0,'.')
-                }
-                address = address ushr 8
-            }
-        }
-        return sb.toString()
+class UDPPacket: IProtocol{
+    private lateinit var ipPacket: IPPacket
+
+    constructor(bytes: ByteArray): this(IPPacket(bytes))
+
+    constructor(ipPacket: IPPacket){
+        this.ipPacket = ipPacket
+    }
+
+    fun getHostname(): String {
+        return ipPacket.getTargetAddress()
     }
 
     fun getSourcePort(): Int{
@@ -37,5 +34,9 @@ class UDPPacket(private val ipPacket: IPPacket) {
     fun getData(): ByteArray{
         val data = ipPacket.getData(PacketConstant.DataOperateType.UDP_DATA.type) ?: ByteArray(0)
         return data as ByteArray
+    }
+
+    override fun getRawData(): ByteArray {
+        return ipPacket.getRawData()
     }
 }

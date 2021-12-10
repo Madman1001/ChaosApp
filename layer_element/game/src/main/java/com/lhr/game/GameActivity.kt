@@ -16,7 +16,7 @@ class GameActivity : Activity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val snakeView = GreedySnakeView(this)
+        val snakeView = GreedySnakeView(this, 40, 20)
         snakeView.listener = SnakeScript(snakeView)
         findViewById<ViewGroup>(android.R.id.content).addView(snakeView)
 

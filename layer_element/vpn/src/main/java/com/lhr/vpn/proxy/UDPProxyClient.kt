@@ -18,6 +18,7 @@ class UDPProxyClient(vpnService: VpnService) : Runnable {
     private val packetList = Vector<DatagramPacket>()
     private val udpSocket = DatagramSocket()
     private var currentUdpThread: Thread? = null
+
     init {
         vpnService.protect(udpSocket)
     }

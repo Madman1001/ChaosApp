@@ -1,4 +1,4 @@
-package com.lhr.vpn.protocol
+package com.lhr.vpn.constant
 
 /**
  * @author lhr

@@ -15,7 +15,6 @@ class SnakeScript(private val snake: GreedySnakeView) : GreedySnakeView.SnakeLis
         super.generateFruit(x, y)
         fruit.x = x
         fruit.y = y
-        Log.e("Test","fruit $fruit")
     }
 
     override fun updateView(snakeX: Int, snakeY: Int) {

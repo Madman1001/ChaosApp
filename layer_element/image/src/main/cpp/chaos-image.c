@@ -9,6 +9,9 @@
 #include <android/log.h>
 #include <android/bitmap.h>
 
+#include <sys/types.h>
+#include <dirent.h>
+
 #define const char* LOG_TAG = "chaos-image";
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG,"%s", __VA_ARGS__)
 
@@ -129,6 +132,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved){
     //生成方法映射结构体
     JNINativeMethod methods_Mains[] = { { "nativeBlurBitmap", "(Landroid/graphics/Bitmap;)Landroid/graphics/Bitmap;", (void*)_nativeBlurBitmap } };
     (*env)->RegisterNatives(env, jclazz, methods_Mains, sizeof(methods_Mains) / sizeof(methods_Mains[0]));
+
     return JNI_VERSION_1_6;
 }
 

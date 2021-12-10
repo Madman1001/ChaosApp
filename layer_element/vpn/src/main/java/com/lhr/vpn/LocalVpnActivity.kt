@@ -13,8 +13,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.lhr.centre.annotation.CElement
 import com.lhr.utils.NetworkUtils
-import com.lhr.vpn.test.LocalVpnTest
-import junit.framework.Test
+import com.lhr.test.LocalVpnTest
 
 /**
  * @author lhr
@@ -67,8 +66,6 @@ class LocalVpnActivity : AppCompatActivity() {
                 }
             }
             R.id.udp_server_test_vpn_bt -> {
-//                LocalVpnTest.udpServerTest()
-//                this.findViewById<TextView>(R.id.vpn_tv).text = "VPN UDP SERVER TEST"
             }
             R.id.tcp_client_test_vpn_bt -> {
             }

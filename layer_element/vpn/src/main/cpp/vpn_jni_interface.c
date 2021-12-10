@@ -84,21 +84,22 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
 }
 
 JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeRelease
-        (JNIEnv *env, jobject jobj, jint dataRef) {
+        (JNIEnv *env, jobject jobj, jlong dataRef) {
     if (dataRef == 0) {
         return;
     }
 
     IP_Packet *ipPacket = (IP_Packet *) dataRef;
-    if (ipPacket->data != NULL) {
-        if (ipPacket->upper_protocol == PACKET_TYPE_TCP) {
-            release_tcp_packet((TCP_Packet *) ipPacket->data);
-        } else if (ipPacket->upper_protocol == PACKET_TYPE_UDP) {
-            release_udp_packet((UDP_Packet *) ipPacket->data);
-        }
-    }
-
-    release_ip_packet(ipPacket);
+//    if (ipPacket->data != NULL) {
+//        if (ipPacket->upper_protocol == PACKET_TYPE_TCP) {
+//            release_tcp_packet((TCP_Packet *) ipPacket->data);
+//        } else if (ipPacket->upper_protocol == PACKET_TYPE_UDP) {
+//            release_udp_packet((UDP_Packet *) ipPacket->data);
+//        }
+//        ipPacket->data = NULL;
+//    }
+//    release_ip_packet(ipPacket);
+    free(ipPacket);
 }
 
 JNIEXPORT jobject JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetData

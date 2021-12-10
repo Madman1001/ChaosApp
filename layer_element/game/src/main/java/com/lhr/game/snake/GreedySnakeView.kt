@@ -1,5 +1,6 @@
 package com.lhr.game.snake
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
 import com.lhr.game.base.BaseMap
@@ -11,8 +12,9 @@ import com.lhr.game.power.ActionPower
  * @date 2021/5/7
  * @des 贪吃蛇
  */
+@SuppressLint("ViewConstructor")
 class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseMap(context,row, column), IActionInput {
-    private var snake = GreedySnakeComponent(9)
+    private var snake = GreedySnakeComponent((0 .. row*column).random())
     var direction = Direction.GO_UP
     var listener: SnakeListener? = null
     private var fruit: Int = -1
@@ -39,6 +41,7 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
         if (fruit == -1){
             //win
             ActionPower.stopRun()
+            return
         }
         when (direction) {
             Direction.GO_LEFT -> goLeft()
@@ -46,16 +49,25 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
             Direction.GO_UP -> goUp()
             Direction.GO_DOWN -> goDown()
         }
-        listener?.updateView(snake.array[0] % column,snake.array[0] / column)
-        if (checkImpact()) {
+        listener?.updateView(snake.getHead() % column,snake.getHead() / column)
+
+        if (checkImpactFruit()) {
+            //碰撞到果实
             eatFruit()
             fruit = generateFruit()
         }
 
         spaceArray.fill(false)
-        snake.array.forEach {
-            spaceArray[it] = true
+        if (checkImpactSelf()){
+            //碰撞到自身
+            fruit = generateFruit()
+            snake = GreedySnakeComponent((0 until row*column).random())
         }
+
+        for (i in 0 until snake.getLength()){
+            spaceArray[snake.getNode(i)] = true
+        }
+
         if (fruit in spaceArray.indices) {
             spaceArray[fruit] = true
         }
@@ -64,7 +76,7 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
     }
 
     override fun goLeft() {
-        val step = if (snake.array[0] % column <= 0) {
+        val step = if (snake.getHead() % column <= 0) {
             column - 1
         } else {
             -1
@@ -73,7 +85,7 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
     }
 
     override fun goRight() {
-        val step = if (snake.array[0] % column >= column - 1) {
+        val step = if (snake.getHead() % column >= column - 1) {
             -(column - 1)
         } else {
             1
@@ -82,8 +94,8 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
     }
 
     override fun goDown() {
-        val step = if (snake.array[0] / column >= row - 1) {
-            snake.array[0] % column - snake.array[0]
+        val step = if (snake.getHead() / column >= row - 1) {
+            snake.getHead() % column - snake.getHead()
         } else {
             column
         }
@@ -91,7 +103,7 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
     }
 
     override fun goUp() {
-        val step = if (snake.array[0] / column <= 0) {
+        val step = if (snake.getHead() / column <= 0) {
             (row - 1) * column
         } else {
             -column
@@ -100,18 +112,30 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
     }
 
     private fun move(step: Int) {
-        previousTail = snake.array.last()
-        var pre = snake.array[0] + step
-        for (i in 0 until snake.array.size) {
-            val temp = snake.array[i]
-            snake.array[i] = pre
+        previousTail = snake.getTail()
+        var pre = snake.getHead() + step
+        for (i in 0 until snake.getLength()) {
+            val temp = snake.getNode(i)
+            snake.setNode(i,pre)
             pre = temp
         }
     }
 
-    private fun checkImpact(): Boolean {
-        snake.array.forEach {
-            if (it == fruit) {
+    private fun checkImpactSelf(): Boolean {
+        if (snake.getLength() >= 5){
+            val head = snake.getHead()
+            for (i in 1 until snake.getLength())
+                if (head == snake.getNode(i)){
+                    return true
+                }
+        }
+
+        return false
+    }
+    
+    private fun checkImpactFruit(): Boolean {
+        for (i in 0 until snake.getLength()){
+            if (snake.getNode(i) == fruit) {
                 return true
             }
         }
@@ -119,7 +143,7 @@ class GreedySnakeView(context: Context, row: Int = 20, column: Int = 10) : BaseM
     }
 
     private fun eatFruit() {
-        snake.array.add(previousTail)
+        snake.addBody(previousTail)
     }
 
     private fun generateFruit(): Int {

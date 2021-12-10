@@ -82,10 +82,12 @@ static int init_tcp_packet(TCP_Packet *tcpPacket, const char* arrays, int total_
 static void release_tcp_packet(TCP_Packet *tcpPacket) {
     if(tcpPacket->data != NULL){
         free(tcpPacket->data);
+        tcpPacket->data = NULL;
     }
 
     if (tcpPacket->head_other_data != NULL){
         free(tcpPacket->head_other_data);
+        tcpPacket->head_other_data = NULL;
     }
 }
 

@@ -18,13 +18,18 @@ open class BaseMap: View {
     protected var column = 10
     protected var row = 20
 
-    constructor(context: Context): super(context)
+    constructor(context: Context): super(context){
+        spaceArray = Array<Boolean>(row * column) { false }
+    }
 
-    constructor(context: Context,attributeSet: AttributeSet): super(context,attributeSet)
+    constructor(context: Context,attributeSet: AttributeSet): super(context,attributeSet){
+        spaceArray = Array<Boolean>(row * column) { false }
+    }
 
     constructor(context: Context, row: Int, column: Int): super(context){
         this.column = column
         this.row = row
+        spaceArray = Array<Boolean>(row * column) { false }
     }
 
     protected val BACKGROUND_COLOR = Color.parseColor("#9EAD86")
@@ -34,7 +39,7 @@ open class BaseMap: View {
     /**
      * 像素矩阵
      */
-    protected val spaceArray = Array<Boolean>(row * column) { false }
+    protected val spaceArray: Array<Boolean>
 
     /**
      * 开始坐标
