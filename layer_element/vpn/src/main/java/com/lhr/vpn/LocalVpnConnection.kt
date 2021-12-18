@@ -3,13 +3,11 @@ package com.lhr.vpn
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import com.lhr.vpn.handle.IProxyTun
 import com.lhr.vpn.handle.NetworkProxyHandle
 import com.lhr.vpn.handle.TransportProxyHandle
 import com.lhr.vpn.handle.VpnProxyHandle
 import com.lhr.vpn.protocol.IPPacket
 import com.lhr.vpn.protocol.IProtocol
-import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -55,8 +53,8 @@ class LocalVpnConnection(
     init {
         val networkHandle = NetworkProxyHandle(vpnService)
         val transportHandle = TransportProxyHandle(vpnService)
-        networkHandle.setNextHandle(transportHandle)
-        this.setNextHandle(networkHandle)
+        networkHandle.addHandle(transportHandle)
+        this.addHandle(networkHandle)
     }
 
     @Synchronized
@@ -178,14 +176,15 @@ class LocalVpnConnection(
         }
     }
 
-    override fun inputData(data: IProtocol) {
-        this.chain.nextHandle?.inputData(data)
+    override fun onInput(data: IProtocol): IProtocol {
+        return data
     }
 
-    override fun outputData(data: IProtocol) {
+    override fun onOutput(data: IProtocol): IProtocol? {
         outPacketList.add(data.getRawData())
         if (proxyOutputJob?.state == Thread.State.TIMED_WAITING){
             proxyOutputJob?.interrupt()
         }
+        return null
     }
 }

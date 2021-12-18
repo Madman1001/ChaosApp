@@ -109,7 +109,7 @@ class UDPProxyClient(vpnService: VpnService,
                 udpSocket.receive(receivePacket)
                 val str = String(receivePacket.data, 0, receivePacket.length)
                 handleTun.outputData(datagramPacket2Packet(receivePacket))
-                Log.d(tag, "end proxy udp receive: $str")
+                Log.d(tag, "end proxy udp receive:$str")
             }catch (e: Exception){
             }
         }

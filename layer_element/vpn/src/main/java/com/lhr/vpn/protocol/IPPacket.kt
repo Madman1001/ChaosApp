@@ -1,6 +1,5 @@
 package com.lhr.vpn.protocol
 
-import android.util.Log
 import com.lhr.vpn.constant.PacketConstant
 
 /**
@@ -9,8 +8,10 @@ import com.lhr.vpn.constant.PacketConstant
  * @des ip 数据报
  */
 open class IPPacket : IProtocol {
-    protected @Volatile
+
+    @Volatile
     var mPacketRef: Long = 0L
+        protected set
 
     private external fun nativeInit()
     private external fun nativeSetRawData(nativeRef: Long, bytes: ByteArray)
@@ -34,7 +35,7 @@ open class IPPacket : IProtocol {
         mPacketRef = 0
     }
 
-    fun isValid(): Boolean {
+    open fun isValid(): Boolean {
         return if (mPacketRef != 0L) {
             getIpVersion() != 0
         } else {
@@ -42,29 +43,29 @@ open class IPPacket : IProtocol {
         }
     }
 
-    fun getAttribute(dataType: PacketConstant.DataOperateType): Any? {
+    open fun getAttribute(dataType: PacketConstant.DataOperateType): Any? {
         return nativeGetAttribute(mPacketRef, dataType.value)
     }
 
-    fun setAttribute(dataType: PacketConstant.DataOperateType, data: Any) {
+    open fun setAttribute(dataType: PacketConstant.DataOperateType, data: Any) {
         nativeSetAttribute(mPacketRef, dataType.value, data)
     }
 
-    fun getIpVersion(): Int {
+    open fun getIpVersion(): Int {
         val version = getAttribute(PacketConstant.DataOperateType.IP_VERSION) ?: 0
         return version as Int
     }
 
-    fun getUpperProtocol(): Int {
+    open fun getUpperProtocol(): Int {
         val protocol = getAttribute(PacketConstant.DataOperateType.IP_UPPER_PROTOCOL) ?: 0
         return protocol as Int
     }
 
-    fun setUpperProtocol(upperProtocol: Int) {
+    open fun setUpperProtocol(upperProtocol: Int) {
         setAttribute(PacketConstant.DataOperateType.IP_UPPER_PROTOCOL, upperProtocol)
     }
 
-    fun getSourceAddress(): String {
+    open fun getSourceAddress(): String {
         val hostname = getAttribute(PacketConstant.DataOperateType.IP_SOURCE_ADDRESS) ?: 0
         val sb = StringBuilder()
         if (hostname != 0) {
@@ -80,7 +81,7 @@ open class IPPacket : IProtocol {
         return sb.toString()
     }
 
-    fun setSourceAddress(address: String) {
+    open fun setSourceAddress(address: String) {
         if (address.contains(".")) {
             val addressList = address.split(".")
             if (addressList.size == 4) {
@@ -98,7 +99,7 @@ open class IPPacket : IProtocol {
         }
     }
 
-    fun getTargetAddress(): String {
+    open fun getTargetAddress(): String {
         val hostname = getAttribute(PacketConstant.DataOperateType.IP_TARGET_ADDRESS) ?: 0
         val sb = StringBuilder()
         if (hostname != 0) {
@@ -114,7 +115,7 @@ open class IPPacket : IProtocol {
         return sb.toString()
     }
 
-    fun setTargetAddress(address: String) {
+    open fun setTargetAddress(address: String) {
         if (address.contains(".")) {
             val addressList = address.split(".")
             if (addressList.size == 4) {
@@ -132,39 +133,39 @@ open class IPPacket : IProtocol {
         }
     }
 
-    fun getTimeToLive(): Int{
+    open fun getTimeToLive(): Int{
         val ttl = getAttribute(PacketConstant.DataOperateType.IP_TIME_TO_LIVE) ?: 0
         return ttl as Int
     }
 
-    fun setTimeToLive(ttl: Int){
+    open fun setTimeToLive(ttl: Int){
         setAttribute(PacketConstant.DataOperateType.IP_TIME_TO_LIVE, ttl)
     }
 
-    fun getFlag(): Byte {
+    open fun getFlag(): Byte {
         val flag = getAttribute(PacketConstant.DataOperateType.IP_FLAG) ?: 0
         return flag as Byte
     }
 
-    fun setFlag(flag: Byte){
+    open fun setFlag(flag: Byte){
         setAttribute(PacketConstant.DataOperateType.IP_FLAG, flag)
     }
 
-    fun getIdentification(): Short{
+    open fun getIdentification(): Short{
         val identification = getAttribute(PacketConstant.DataOperateType.IP_IDENTIFICATION) ?: 0
         return identification as Short
     }
 
-    fun setIdentification(identification: Short){
+    open fun setIdentification(identification: Short){
        setAttribute(PacketConstant.DataOperateType.IP_IDENTIFICATION, identification)
     }
 
-    fun getOffsetFrag(): Int{
+    open fun getOffsetFrag(): Int{
         val offsetFrag = getAttribute(PacketConstant.DataOperateType.IP_OFFSET_FRAG) ?: 0
         return offsetFrag as Int
     }
 
-    fun setOffsetFrag(offsetFrag: Int) {
+    open fun setOffsetFrag(offsetFrag: Int) {
         setAttribute(PacketConstant.DataOperateType.IP_OFFSET_FRAG, offsetFrag)
     }
 
@@ -184,7 +185,7 @@ open class IPPacket : IProtocol {
         return getUpperProtocol() == PacketConstant.DataType.IGMP.value
     }
 
-    override fun getRawData(): ByteArray {
+    final override fun getRawData(): ByteArray {
         return if (mPacketRef != 0L) {
             try {
                 nativeGetRawData(mPacketRef)
@@ -196,7 +197,7 @@ open class IPPacket : IProtocol {
         }
     }
 
-    override fun setRawData(byteArray: ByteArray) {
+    final override fun setRawData(byteArray: ByteArray) {
         if (mPacketRef != 0L) {
             nativeSetRawData(mPacketRef, byteArray)
         }

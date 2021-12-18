@@ -275,9 +275,18 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetAttribute
                 jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
                 ipPacket->upper_protocol = (unsigned char) ((*env)->CallIntMethod(env, data, mid));
             }
-            if (ipPacket->data == NULL) {
-                if (ipPacket->upper_protocol == PACKET_TYPE_UDP) {
-                    ipPacket->data = generate_udp_packet();
+            if (ipPacket->data != NULL) {
+                free(ipPacket->data);
+            }
+            switch (ipPacket->upper_protocol) {
+                case PACKET_TYPE_UDP:{
+                    UDP_Packet * udpPacket = generate_udp_packet();
+                    ipPacket->data = udpPacket;
+                    ipPacket->total_length = ipPacket->head_length * 4 + udpPacket->total_length;
+                    break;
+                }
+                case PACKET_TYPE_TCP:{
+
                 }
             }
             break;
@@ -367,8 +376,12 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetAttribute
                     int diff = dataLength - udpPacket->data_length;
                     udpPacket->data_length = dataLength;
                     udpPacket->total_length += diff;
-                    udpPacket->data = realloc(udpPacket->data, udpPacket->data_length);
-                    ipPacket->total_length += ipPacket->head_length * 4 + udpPacket->total_length;
+                    if (udpPacket->data == NULL){
+                        udpPacket->data = malloc(udpPacket->data_length);
+                    }else{
+                        udpPacket->data = realloc(udpPacket->data, udpPacket->data_length);
+                    }
+                    ipPacket->total_length += diff;
                     (*env)->GetByteArrayRegion(env, byteData, 0, dataLength,
                                                (jbyte *) udpPacket->data);
                 }

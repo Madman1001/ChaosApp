@@ -1,7 +1,6 @@
 package com.lhr.vpn.pool
 
 import android.net.VpnService
-import android.util.LruCache
 import com.lhr.vpn.handle.IProxyTun
 import com.lhr.vpn.protocol.UDPPacket
 import com.lhr.vpn.proxy.UDPProxyClient

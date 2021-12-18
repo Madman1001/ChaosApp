@@ -1,6 +1,7 @@
 package com.lhr.vpn.protocol
 
 import com.lhr.vpn.constant.PacketConstant
+import java.lang.RuntimeException
 
 /**
  * @author lhr
@@ -12,9 +13,17 @@ class UDPPacket : IPPacket {
         super.setUpperProtocol(PacketConstant.DataType.UDP.value)
     }
 
-    constructor(bytes: ByteArray): super(bytes)
+    constructor(bytes: ByteArray){
+        super.setRawData(bytes)
+        if (!super.isUdp()){
+            throw RuntimeException("The ip packet upper protocol is no UDP")
+        }
+    }
 
-    constructor(ipPacket: IPPacket) {
+    constructor(ipPacket: IPPacket){
+        if (!ipPacket.isUdp()){
+            throw RuntimeException("The ip packet upper protocol is no UDP")
+        }
         super.setRawData(ipPacket.getRawData())
     }
 
