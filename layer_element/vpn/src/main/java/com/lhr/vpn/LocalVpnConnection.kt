@@ -8,6 +8,8 @@ import com.lhr.vpn.handle.TransportProxyHandle
 import com.lhr.vpn.handle.VpnProxyHandle
 import com.lhr.vpn.protocol.IPPacket
 import com.lhr.vpn.protocol.IProtocol
+import com.lhr.vpn.protocol.TCPPacket
+import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
@@ -99,6 +101,7 @@ class LocalVpnConnection(
                     //读取输入数据
                     val len = readToTun(packet, packetInput)
                     if (len > 0) {
+                        Log.d(TAG, "虚拟网卡读取:${len}byte")
                         packet.limit(len)
                         //可以进行拦截、修改、转发处理
                         val byteBuffer = ByteArray(len)
@@ -106,7 +109,7 @@ class LocalVpnConnection(
                             byteBuffer[i] = packet[i]
                         }
                         val ipPacket = IPPacket(byteBuffer)
-                        if (ipPacket.isValid()){
+                        if (ipPacket.isValid()) {
                             this.inputData(ipPacket)
                         }
                         packet.clear()
@@ -124,7 +127,7 @@ class LocalVpnConnection(
                 Log.d(TAG, "${Thread.currentThread().name} Starting")
                 while (isRunning) {
                     if (outPacketList.isNotEmpty()){
-                        Log.d(TAG, "start proxy")
+                        Log.d(TAG, "虚拟网卡写入")
                         val packet = outPacketList.removeFirst()
                         writeToTun(packet,packetOutput)
                     }else{

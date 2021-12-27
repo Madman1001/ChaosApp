@@ -1,10 +1,6 @@
 #ifndef _Included_vpn_data
 #define _Included_vpn_data
 
-#include "vpn_data_ip_utils.c"
-#include "vpn_data_tcp_utils.c"
-#include "vpn_data_udp_utils.c"
-
 //网际控制报文协议
 #define PACKET_TYPE_ICPM 1
 //网际组管理协议
@@ -91,6 +87,13 @@ struct UDP_Packet {
     void* data;
 };
 
+
+struct TCP_Option {
+    unsigned char kind;
+    unsigned char length;
+    char* data;
+};
+
 struct TCP_Packet {
     //源端口号 16 bit
     unsigned short source_port;
@@ -107,8 +110,11 @@ struct TCP_Packet {
     //首部长度 4 bit (以 4 字节为单位)
     unsigned char head_length;
 
-    //UDP长度(单位为：字节) 16 bit
+    //TCP长度(单位为：字节)
     unsigned int total_length;
+
+    //TCP数据长度(单位为：字节)
+    unsigned int data_length;
 
     //保留位 6 bit
     unsigned char keep_position;
@@ -126,7 +132,10 @@ struct TCP_Packet {
     unsigned short urgent_pointer;
 
     //其它选项
-    void* head_other_data;
+    struct TCP_Option* options;
+
+    //TCP选项结构体数组长度(单位为：TCP_Option)
+    unsigned int options_length;
 
     //数据
     void* data;

@@ -96,37 +96,15 @@
             app:layout_constraintStart_toEndOf="@id/start_vpn_bt"/>
 
         <Button
-            android:id="@+id/udp_server_test_vpn_bt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test UDP Server"
-            android:onClick="onClick"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/start_vpn_bt"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/udp_client_test_vpn_bt"/>
-
-        <Button
             android:id="@+id/udp_client_test_vpn_bt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:onClick="onClick"
             android:text="Test UDP Client"
-            android:onClick="onClick"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/start_vpn_bt"
-            app:layout_constraintStart_toEndOf="@id/udp_server_test_vpn_bt"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <Button
-            android:id="@+id/tcp_server_test_vpn_bt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test Server TCP"
-            android:onClick="onClick"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/udp_server_test_vpn_bt"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tcp_client_test_vpn_bt"/>
+            app:layout_constraintTop_toBottomOf="@id/start_vpn_bt" />
 
         <Button
             android:id="@+id/tcp_client_test_vpn_bt"
@@ -135,8 +113,19 @@
             android:text="Test Client TCP"
             android:onClick="onClick"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@id/udp_server_test_vpn_bt"
-            app:layout_constraintStart_toEndOf="@id/tcp_server_test_vpn_bt"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/udp_client_test_vpn_bt"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tcp_server_test_vpn_bt"/>
+
+        <Button
+            android:id="@+id/tcp_server_test_vpn_bt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:onClick="onClick"
+            android:text="Test Server TCP"
+            app:layout_constraintEnd_toStartOf="@id/tcp_client_test_vpn_bt"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/udp_client_test_vpn_bt" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

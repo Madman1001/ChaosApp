@@ -70,12 +70,13 @@ class LocalVpnActivity : AppCompatActivity() {
                     LocalVpnTest.udpClientTest(address, port.toInt(), data)
                 }
             }
-            R.id.udp_server_test_vpn_bt -> {
-
-            }
             R.id.tcp_client_test_vpn_bt -> {
+                if (address.isNotEmpty() || port.isNotEmpty()){
+                    LocalVpnTest.tcpClientTest(address, port.toInt(), data)
+                }
             }
             R.id.tcp_server_test_vpn_bt -> {
+                LocalVpnTest.tcpServerTest()
             }
         }
     }

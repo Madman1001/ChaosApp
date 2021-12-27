@@ -32,22 +32,55 @@ static char * jstringToChar(JNIEnv *env, jstring jstr) {
     return rtn;
 }
 
-static jobject intToInteger(JNIEnv *env, int val){
+static jobject int2Integer(JNIEnv *env, int val){
     jclass intClass = (*env)->FindClass(env, "java/lang/Integer");
     jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(I)V");
     return (*env)->NewObject(env, intClass, ctorId, (jint) val);
 }
 
-static jobject charToByte(JNIEnv *env, char val){
+static int Integer2int(JNIEnv *env, jobject jobj){
+    jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
+    if ((*env)->IsInstanceOf(env, jobj, dataClass) == JNI_TRUE) {
+        jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
+        return ((*env)->CallIntMethod(env, jobj,mid));
+    } else {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "Integer转int出现异常");
+        return 0;
+    }
+}
+
+static jobject char2Byte(JNIEnv *env, char val){
     jclass intClass = (*env)->FindClass(env, "java/lang/Byte");
     jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(B)V");
     return (*env)->NewObject(env, intClass, ctorId, (jint) val);
 }
 
-static jobject shortToShort(JNIEnv *env, short val){
+static jchar Byte2char(JNIEnv *env, jobject jobj){
+    jclass dataClass = (*env)->FindClass(env, "java/lang/Byte");
+    if ((*env)->IsInstanceOf(env, jobj, dataClass) == JNI_TRUE) {
+        jmethodID mid = (*env)->GetMethodID(env, dataClass, "byteValue", "()B");
+        return  ((*env)->CallByteMethod(env, jobj, mid));
+    } else {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "Byte转char出现异常");
+        return 0;
+    }
+}
+
+static jobject short2Short(JNIEnv *env, short val){
     jclass intClass = (*env)->FindClass(env, "java/lang/Short");
     jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(S)V");
     return (*env)->NewObject(env, intClass, ctorId, (jint) val);
+}
+
+static int Short2short(JNIEnv *env, jobject jobj){
+    jclass dataClass = (*env)->FindClass(env, "java/lang/Short");
+    if ((*env)->IsInstanceOf(env, jobj, dataClass) == JNI_TRUE) {
+        jmethodID mid = (*env)->GetMethodID(env, dataClass, "shortValue", "()S");
+        return ((*env)->CallShortMethod(env, jobj,mid));
+    } else {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "Short转short出现异常");
+        return 0;
+    }
 }
 
 static char* charToBinary(char c){

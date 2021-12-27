@@ -3,6 +3,7 @@ package com.lhr.vpn.handle
 import android.net.VpnService
 import com.lhr.vpn.protocol.IPPacket
 import com.lhr.vpn.protocol.IProtocol
+import com.lhr.vpn.protocol.TCPPacket
 import com.lhr.vpn.protocol.UDPPacket
 
 /**
@@ -16,6 +17,8 @@ class NetworkProxyHandle(private val vpnService: VpnService): VpnProxyHandle() {
         if (data is IPPacket){
             if (data.isUdp()){
                 return UDPPacket(data)
+            }else if (data.isTcp()){
+                return TCPPacket(data)
             }
         }
         return null

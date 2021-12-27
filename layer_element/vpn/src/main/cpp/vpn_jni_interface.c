@@ -19,15 +19,24 @@ enum DATA_TYPE {
     IP_DATA = 3,
     IP_SOURCE_ADDRESS = 4,
     IP_TARGET_ADDRESS = 5,
-    UDP_SOURCE_PORT = 6,
-    UDP_TARGET_PORT = 7,
-    UDP_DATA = 8,
-    TCP_SOURCE_PORT = 9,
-    TCP_TARGET_PORT = 10,
-    IP_FLAG = 11,
-    IP_OFFSET_FRAG = 12,
-    IP_TIME_TO_LIVE = 13,
-    IP_IDENTIFICATION = 14
+    IP_FLAG = 6,
+    IP_OFFSET_FRAG = 7,
+    IP_TIME_TO_LIVE = 8,
+    IP_IDENTIFICATION = 9,
+
+    UDP_SOURCE_PORT = 10,
+    UDP_TARGET_PORT = 11,
+    UDP_DATA = 12,
+
+    TCP_SOURCE_PORT = 13,
+    TCP_TARGET_PORT = 14,
+    TCP_SERIAL_NUMBER = 15,
+    TCP_VERIFY_SERIAL_NUMBER = 16,
+    TCP_CONTROL_SIGN = 17,
+    TCP_WINDOW_SIZE = 18,
+    TCP_URGENT_POINTER = 19,
+    TCP_OPTIONS = 20,
+    TCP_DATA = 21
 };
 
 JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeInit
@@ -75,7 +84,6 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetRawData
 
     if (status == IP_STATUS_SUCCESS && ip_packet->data != NULL) {
         // 解析运输层协议
-        // 此处存在内存泄露问题 ip_packet->data
         switch (ip_packet->upper_protocol) {
             case PACKET_TYPE_UDP : {
                 UDP_Packet *udp_packet = generate_udp_packet();
@@ -87,7 +95,7 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetRawData
                 break;
             }
             case PACKET_TYPE_TCP : {
-                TCP_Packet *tcp_packet = malloc(sizeof(TCP_Packet));
+                TCP_Packet *tcp_packet = generate_tcp_packet();
                 init_tcp_packet(tcp_packet, ip_packet->data,
                                 ip_packet->total_length - ip_packet->head_length * 4);
                 free(ip_packet->data);
@@ -131,15 +139,31 @@ JNIEXPORT jbyteArray JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetRawData
 
     void *temp_data = ip_packet->data;
 
-    if (ip_packet->upper_protocol == PACKET_TYPE_UDP) {
-        UDP_Packet *udpPacket = (UDP_Packet *) temp_data;
-        udpPacket->check_sum = 0x0000;
-        ip_packet->data = udp_packet_to_binary(udpPacket);
-        udpPacket->check_sum = get_udp_check_sum(ip_packet->source_ip_address,
-                                                 ip_packet->target_ip_address,
-                                                 udpPacket->total_length,
-                                                 ip_packet->data);
-        udp_write_check_sum(ip_packet->data, udpPacket->check_sum);
+    switch (ip_packet->upper_protocol) {
+        case PACKET_TYPE_UDP: {
+            UDP_Packet *udpPacket = (UDP_Packet *) temp_data;
+            udpPacket->check_sum = 0x0000;
+            ip_packet->data = udp_packet_to_binary(udpPacket);
+            udpPacket->check_sum = get_udp_check_sum(ip_packet->source_ip_address,
+                                                     ip_packet->target_ip_address,
+                                                     udpPacket->total_length,
+                                                     ip_packet->data);
+            udp_write_check_sum(ip_packet->data, udpPacket->check_sum);
+            break;
+        }
+        case PACKET_TYPE_TCP: {
+            TCP_Packet *tcpPacket = (TCP_Packet *) temp_data;
+            TAG_D("tcp >> old check sum 0x%04x", tcpPacket->check_sum);
+            tcpPacket->check_sum = 0x0000;
+            ip_packet->data = tcp_packet_to_binary(tcpPacket);
+            tcpPacket->check_sum = get_tcp_check_sum(ip_packet->source_ip_address,
+                                                     ip_packet->target_ip_address,
+                                                     tcpPacket->total_length,
+                                                     ip_packet->data);
+            tcp_write_check_sum(ip_packet->data, tcpPacket->check_sum);
+            TAG_D("tcp >> new check sum 0x%04x", tcpPacket->check_sum);
+            break;
+        }
     }
 
     ip_packet->head_check_sum = 0x0000;
@@ -163,15 +187,20 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeRelease
     }
 
     IP_Packet *ipPacket = (IP_Packet *) dataRef;
-//    if (ipPacket->data != NULL) {
-//        if (ipPacket->upper_protocol == PACKET_TYPE_TCP) {
-//            release_tcp_packet((TCP_Packet *) ipPacket->data);
-//        } else if (ipPacket->upper_protocol == PACKET_TYPE_UDP) {
-//            release_udp_packet((UDP_Packet *) ipPacket->data);
-//        }
-//        ipPacket->data = NULL;
-//    }
-//    release_ip_packet(ipPacket);
+    if (ipPacket->data != NULL) {
+        switch (ipPacket->upper_protocol) {
+            case PACKET_TYPE_TCP: {
+                release_tcp_packet((TCP_Packet *) ipPacket->data);
+                break;
+            }
+            case PACKET_TYPE_UDP: {
+                release_udp_packet((UDP_Packet *) ipPacket->data);
+                break;
+            }
+        }
+        ipPacket->data = NULL;
+    }
+    release_ip_packet(ipPacket);
     free(ipPacket);
 }
 
@@ -189,11 +218,11 @@ JNIEXPORT jobject JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetAttribute
 
     switch (dataType) {
         case IP_VERSION: {
-            result = intToInteger(env, (int) ipPacket->version);
+            result = int2Integer(env, (int) ipPacket->version);
             break;
         }
         case IP_UPPER_PROTOCOL: {
-            result = intToInteger(env, (int) ipPacket->upper_protocol);
+            result = int2Integer(env, (int) ipPacket->upper_protocol);
             break;
         }
         case IP_DATA: {
@@ -206,40 +235,40 @@ JNIEXPORT jobject JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetAttribute
             break;
         }
         case IP_SOURCE_ADDRESS: {
-            result = intToInteger(env, (int) ipPacket->source_ip_address);
+            result = int2Integer(env, (int) ipPacket->source_ip_address);
             break;
         }
         case IP_TARGET_ADDRESS: {
-            result = intToInteger(env, (int) ipPacket->target_ip_address);
+            result = int2Integer(env, (int) ipPacket->target_ip_address);
             break;
         }
         case IP_FLAG: {
-            result = charToByte(env, ipPacket->flag);
+            result = char2Byte(env, ipPacket->flag);
             break;
         }
         case IP_IDENTIFICATION: {
-            result = shortToShort(env, ipPacket->identification);
+            result = short2Short(env, ipPacket->identification);
             break;
         }
         case IP_TIME_TO_LIVE: {
-            result = intToInteger(env, (int )ipPacket->time_to_live);
+            result = int2Integer(env, (int) ipPacket->time_to_live);
             break;
         }
         case IP_OFFSET_FRAG: {
-            result = intToInteger(env, (int )ipPacket->offset_frag);
+            result = int2Integer(env, (int) ipPacket->offset_frag);
             break;
         }
         case UDP_SOURCE_PORT: {
             if (ipPacket->upper_protocol == PACKET_TYPE_UDP && ipPacket->data != NULL) {
                 UDP_Packet *udpPacket = (UDP_Packet *) ipPacket->data;
-                result = intToInteger(env, (int) udpPacket->source_port);
+                result = int2Integer(env, (int) udpPacket->source_port);
             }
             break;
         }
         case UDP_TARGET_PORT: {
             if (ipPacket->upper_protocol == PACKET_TYPE_UDP && ipPacket->data != NULL) {
                 UDP_Packet *udpPacket = (UDP_Packet *) ipPacket->data;
-                result = intToInteger(env, (int) udpPacket->target_port);
+                result = int2Integer(env, (int) udpPacket->target_port);
             }
             break;
         }
@@ -252,6 +281,105 @@ JNIEXPORT jobject JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetAttribute
                     (*env)->SetByteArrayRegion(env, bytes, 0, dataLength,
                                                (jbyte *) udpPacket->data);
                     result = bytes;
+                }
+            }
+            break;
+        }
+        case TCP_CONTROL_SIGN: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = char2Byte(env, tcpPacket->control_sign);
+            }
+            break;
+        }
+        case TCP_SOURCE_PORT: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = int2Integer(env, (int) tcpPacket->source_port);
+            }
+            break;
+        }
+        case TCP_TARGET_PORT: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = int2Integer(env, (int) tcpPacket->target_port);
+            }
+            break;
+        }
+        case TCP_SERIAL_NUMBER: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = int2Integer(env, (int) tcpPacket->serial_number);
+            }
+            break;
+        }
+        case TCP_VERIFY_SERIAL_NUMBER: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = int2Integer(env, (int) tcpPacket->verify_serial_number);
+            }
+            break;
+        }
+        case TCP_WINDOW_SIZE: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = int2Integer(env, (int) tcpPacket->window_size);
+            }
+            break;
+        }
+        case TCP_URGENT_POINTER: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                result = int2Integer(env, (int) tcpPacket->urgent_pointer);
+            }
+            break;
+        }
+        case TCP_DATA: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                if (tcpPacket->data != NULL) {
+                    int dataLength = (unsigned short) tcpPacket->data_length;
+                    jbyteArray bytes = (*env)->NewByteArray(env, dataLength);
+                    (*env)->SetByteArrayRegion(env, bytes, 0, dataLength,
+                                               (jbyte *) tcpPacket->data);
+                    result = bytes;
+                }
+            }
+            break;
+        }
+        case TCP_OPTIONS: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                if (tcpPacket->options != NULL) {
+                    int dataLength = 0;
+                    for (int i = 0; i < tcpPacket->options_length; ++i) {
+                        dataLength += tcpPacket->options[i].length;
+                    }
+                    if (dataLength > 0) {
+                        unsigned char *optionData = malloc(dataLength);
+                        int index = 0;
+                        for (int i = 0; i < tcpPacket->options_length; ++i) {
+                            TCP_Option *tcpOption = &tcpPacket->options[i];
+                            optionData[index++] = tcpOption->kind;
+                            if (tcpOption->kind == (unsigned char) 0x00 ||
+                                tcpOption->kind == (unsigned char) 0x01) {
+                                continue;
+                            }
+                            optionData[index++] = tcpOption->length;
+                            if (tcpOption->length - 2 <= 0) {
+                                continue;
+                            }
+                            int len = tcpOption->length - 2;
+                            for (int j = 0; j < len; ++j) {
+                                optionData[index++] = tcpOption->data[j];
+                            }
+                        }
+                        jbyteArray bytes = (*env)->NewByteArray(env, dataLength);
+                        (*env)->SetByteArrayRegion(env, bytes, 0, dataLength,
+                                                   (jbyte *) optionData);
+                        result = bytes;
+                        free(optionData);
+                    }
                 }
             }
             break;
@@ -270,99 +398,61 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetAttribute
     IP_Packet *ipPacket = (IP_Packet *) dataRef;
     switch (dataType) {
         case IP_UPPER_PROTOCOL: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                ipPacket->upper_protocol = (unsigned char) ((*env)->CallIntMethod(env, data, mid));
-            }
+            ipPacket->upper_protocol = (unsigned char) Integer2int(env, data);
             if (ipPacket->data != NULL) {
                 free(ipPacket->data);
             }
             switch (ipPacket->upper_protocol) {
-                case PACKET_TYPE_UDP:{
-                    UDP_Packet * udpPacket = generate_udp_packet();
+                case PACKET_TYPE_UDP: {
+                    UDP_Packet *udpPacket = generate_udp_packet();
                     ipPacket->data = udpPacket;
                     ipPacket->total_length = ipPacket->head_length * 4 + udpPacket->total_length;
                     break;
                 }
-                case PACKET_TYPE_TCP:{
-
+                case PACKET_TYPE_TCP: {
+                    TCP_Packet *tcpPacket = generate_tcp_packet();
+                    ipPacket->data = tcpPacket;
+                    ipPacket->total_length = ipPacket->head_length * 4 + tcpPacket->total_length;
+                    break;
                 }
             }
             break;
         }
         case IP_SOURCE_ADDRESS: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                ipPacket->source_ip_address = (unsigned int) ((*env)->CallIntMethod(env, data,
-                                                                                    mid));
-            }
+            ipPacket->source_ip_address = (unsigned int) Integer2int(env, data);
             break;
         }
         case IP_TARGET_ADDRESS: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                ipPacket->target_ip_address = (unsigned int) ((*env)->CallIntMethod(env, data,
-                                                                                    mid));
-            }
+            ipPacket->target_ip_address = (unsigned int) Integer2int(env, data);
             break;
         }
         case IP_FLAG: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Byte");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "byteValue", "()B");
-                ipPacket->flag = (unsigned char) ((*env)->CallByteMethod(env, data, mid));
-            }
+            ipPacket->flag = Byte2char(env, data);
             break;
         }
         case IP_IDENTIFICATION: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Short");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "shortValue", "()S");
-                ipPacket->identification = (unsigned short) ((*env)->CallShortMethod(env, data,
-                                                                                     mid));
-            }
+            ipPacket->identification = Short2short(env, data);
             break;
         }
         case IP_TIME_TO_LIVE: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                ipPacket->time_to_live = (unsigned char) ((*env)->CallIntMethod(env, data, mid));
-            }
+            ipPacket->time_to_live = (unsigned char) Integer2int(env, data);
             break;
         }
         case IP_OFFSET_FRAG: {
-            jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-            if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                ipPacket->time_to_live = (unsigned char) ((*env)->CallIntMethod(env, data, mid));
-            }
+            ipPacket->offset_frag = (unsigned short) Integer2int(env, data);
             break;
         }
         case UDP_TARGET_PORT: {
             if (ipPacket->upper_protocol == PACKET_TYPE_UDP && ipPacket->data != NULL) {
                 UDP_Packet *udpPacket = (UDP_Packet *) ipPacket->data;
-                jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-                if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                    jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                    udpPacket->target_port = (unsigned short) ((*env)->CallIntMethod(env, data,
-                                                                                     mid));
-                }
+                udpPacket->target_port = (unsigned short) Integer2int(env, data);
             }
             break;
         }
         case UDP_SOURCE_PORT: {
             if (ipPacket->upper_protocol == PACKET_TYPE_UDP && ipPacket->data != NULL) {
                 UDP_Packet *udpPacket = (UDP_Packet *) ipPacket->data;
-                jclass dataClass = (*env)->FindClass(env, "java/lang/Integer");
-                if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
-                    jmethodID mid = (*env)->GetMethodID(env, dataClass, "intValue", "()I");
-                    udpPacket->source_port = (unsigned short) ((*env)->CallIntMethod(env, data,
-                                                                                     mid));
-                }
+                udpPacket->source_port = (unsigned short) Integer2int(env, data);
             }
             break;
         }
@@ -376,9 +466,9 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetAttribute
                     int diff = dataLength - udpPacket->data_length;
                     udpPacket->data_length = dataLength;
                     udpPacket->total_length += diff;
-                    if (udpPacket->data == NULL){
+                    if (udpPacket->data == NULL) {
                         udpPacket->data = malloc(udpPacket->data_length);
-                    }else{
+                    } else {
                         udpPacket->data = realloc(udpPacket->data, udpPacket->data_length);
                     }
                     ipPacket->total_length += diff;
@@ -388,10 +478,105 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetAttribute
             }
             break;
         }
+        case TCP_CONTROL_SIGN: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->control_sign = (unsigned char) Byte2char(env, data);
+            }
+            break;
+        }
+        case TCP_SOURCE_PORT: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->source_port = (unsigned short) Integer2int(env, data);
+            }
+            break;
+        }
+        case TCP_TARGET_PORT: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->target_port = (unsigned short) Integer2int(env, data);
+            }
+            break;
+        }
+        case TCP_SERIAL_NUMBER: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->serial_number = (unsigned int) Integer2int(env, data);
+            }
+            break;
+        }
+        case TCP_VERIFY_SERIAL_NUMBER: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->verify_serial_number = (unsigned int) Integer2int(env, data);
+            }
+            break;
+        }
+        case TCP_WINDOW_SIZE: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->window_size = (unsigned short) Integer2int(env, data);
+            }
+            break;
+        }
+        case TCP_URGENT_POINTER: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                tcpPacket->urgent_pointer = (unsigned short) Integer2int(env, data);
+            }
+            break;
+        }
+        case TCP_DATA: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                jclass dataClass = (*env)->FindClass(env, "[B");
+                if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
+                    jbyteArray byteData = (jbyteArray) data;
+                    jint dataLength = (*env)->GetArrayLength(env, byteData);
+                    int diff = dataLength - tcpPacket->data_length;
+                    tcpPacket->data_length = dataLength;
+                    tcpPacket->total_length = tcpPacket->head_length * 4 + tcpPacket->data_length;
+                    if (tcpPacket->data == NULL) {
+                        tcpPacket->data = malloc(tcpPacket->data_length);
+                    } else {
+                        tcpPacket->data = realloc(tcpPacket->data, tcpPacket->data_length);
+                    }
+                    ipPacket->total_length += diff;
+                    (*env)->GetByteArrayRegion(env, byteData, 0, dataLength,
+                                               (jbyte *) tcpPacket->data);
+                }
+            }
+            break;
+        }
+        case TCP_OPTIONS: {
+            if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
+                TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
+                jclass dataClass = (*env)->FindClass(env, "[B");
+                if ((*env)->IsInstanceOf(env, data, dataClass) == JNI_TRUE) {
+                    jbyteArray byteData = (jbyteArray) data;
+                    jint dataLength = (*env)->GetArrayLength(env, byteData);
+                    release_tcp_option(tcpPacket);
+                    if ((20 + dataLength) % 4 != 0) {
+                        tcpPacket->head_length = (20 + dataLength) / 4 + 1;
+                    } else {
+                        tcpPacket->head_length = (20 + dataLength) / 4;
+                    }
+                    tcpPacket->total_length = tcpPacket->head_length * 4 + tcpPacket->data_length;
+                    ipPacket->total_length = ipPacket->head_length * 4 + tcpPacket->total_length;
+                    unsigned char *tempData = malloc(dataLength);
+                    (*env)->GetByteArrayRegion(env, byteData, 0, dataLength, (jbyte *) tempData);
+                    tcpPacket->options = tcp_read_options(tempData, 0, dataLength,
+                                                          &(tcpPacket->options_length));
+                    free(tempData);
+                }
+            }
+            break;
+        }
     }
 }
 
-JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeGetByteBufferString
+JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeBinaryToString
         (JNIEnv *env, jobject jobj, jbyteArray jba) {
     int len = (*env)->GetArrayLength(env, jba);
     jbyte *arrays = (jbyte *) malloc(len * sizeof(jbyte));
@@ -411,6 +596,43 @@ JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeGetByteBufferStrin
             }
             sign = sign >> 1;
         }
+        chars[charsIndex++] = ',';
+    }
+    chars[charsIndex - 1] = '\0';
+
+    jstring message = charTojstring(env, (const char *) chars);
+
+    //检查是否有异常
+    jboolean has_exception = (*env)->ExceptionCheck(env);
+    if (has_exception) {
+        (*env)->ExceptionDescribe(env);
+        //清空异常
+        (*env)->ExceptionClear(env);
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "创建字符串出现异常");
+        return NULL;
+    }
+
+    free(chars);
+
+    free(arrays);
+
+    return message;
+}
+
+JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeHexToString
+        (JNIEnv *env, jobject jobj, jbyteArray jba) {
+    int len = (*env)->GetArrayLength(env, jba);
+    jbyte *arrays = (jbyte *) malloc(len * sizeof(jbyte));
+    unsigned char *chars = malloc(len * 2 * sizeof(unsigned char) + len + 1);
+    (*env)->GetByteArrayRegion(env, jba, 0, len, arrays);
+    int byteIndex = 0;
+    int charsIndex = 0;
+
+    char hexTable[] = "0123456789abcdef";
+    for (int i = 0; i < len; i++) {
+        unsigned char uc = (unsigned char) arrays[byteIndex++];
+        chars[charsIndex++] = hexTable[0x0f & (uc >> 4)];
+        chars[charsIndex++] = hexTable[0x0f & uc];
         chars[charsIndex++] = ',';
     }
     chars[charsIndex - 1] = '\0';

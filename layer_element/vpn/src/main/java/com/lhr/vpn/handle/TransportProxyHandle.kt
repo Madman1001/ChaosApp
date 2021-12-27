@@ -2,9 +2,12 @@ package com.lhr.vpn.handle
 
 import android.net.VpnService
 import android.util.Log
+import com.lhr.vpn.pool.TCPProxyClientPool
 import com.lhr.vpn.pool.UDPProxyClientPool
 import com.lhr.vpn.protocol.IProtocol
+import com.lhr.vpn.protocol.TCPPacket
 import com.lhr.vpn.protocol.UDPPacket
+import com.lhr.vpn.util.ByteLog
 
 /**
  * @author lhr
@@ -16,11 +19,14 @@ class TransportProxyHandle(private val vpnService: VpnService): VpnProxyHandle()
         Log.d(tag,"inputData")
         if (data is UDPPacket){
             UDPProxyClientPool.sendPacket(vpnService, this, data)
+        }else if (data is TCPPacket){
+            TCPProxyClientPool.sendPacket(vpnService,this, data)
         }
         return null
     }
 
     override fun onOutput(data: IProtocol): IProtocol {
+        Log.e(tag,"onOutput " + ByteLog.hexToString(data.getRawData()))
         return data
     }
 }

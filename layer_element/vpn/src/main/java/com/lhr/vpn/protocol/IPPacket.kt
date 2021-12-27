@@ -1,5 +1,6 @@
 package com.lhr.vpn.protocol
 
+import android.util.Log
 import com.lhr.vpn.constant.PacketConstant
 
 /**
@@ -8,6 +9,7 @@ import com.lhr.vpn.constant.PacketConstant
  * @des ip 数据报
  */
 open class IPPacket : IProtocol {
+    protected val tag = this.javaClass.simpleName
 
     @Volatile
     var mPacketRef: Long = 0L
@@ -15,7 +17,7 @@ open class IPPacket : IProtocol {
 
     private external fun nativeInit()
     private external fun nativeSetRawData(nativeRef: Long, bytes: ByteArray)
-    private external fun nativeGetRawData(nativeRef: Long): ByteArray
+    private external fun nativeGetRawData(nativeRef: Long): ByteArray?
     private external fun nativeRelease(nativeRef: Long)
     private external fun nativeGetAttribute(nativeRef: Long, dataType: Int): Any?
     private external fun nativeSetAttribute(nativeRef: Long, dataType: Int, data: Any)
@@ -133,7 +135,7 @@ open class IPPacket : IProtocol {
         }
     }
 
-    open fun getTimeToLive(): Int{
+    open fun getTimeToLive(): Int {
         val ttl = getAttribute(PacketConstant.DataOperateType.IP_TIME_TO_LIVE) ?: 0
         return ttl as Int
     }
@@ -188,7 +190,7 @@ open class IPPacket : IProtocol {
     final override fun getRawData(): ByteArray {
         return if (mPacketRef != 0L) {
             try {
-                nativeGetRawData(mPacketRef)
+                nativeGetRawData(mPacketRef) ?: ByteArray(0)
             } catch (e: Exception) {
                 ByteArray(0)
             }

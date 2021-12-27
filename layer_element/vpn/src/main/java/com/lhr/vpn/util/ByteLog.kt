@@ -6,9 +6,15 @@ package com.lhr.vpn.util
  * @des 日志打印工具
  */
 object ByteLog {
-    fun toByteBufferString(array: ByteArray): String{
-        return nativeGetByteBufferString(array)
+    fun binaryToString(array: ByteArray): String {
+        return nativeBinaryToString(array)
     }
 
-    private external fun nativeGetByteBufferString(bytes: ByteArray): String
+    fun hexToString(array: ByteArray): String {
+        return nativeHexToString(array)
+    }
+
+    private external fun nativeBinaryToString(bytes: ByteArray): String
+
+    private external fun nativeHexToString(bytes: ByteArray): String
 }

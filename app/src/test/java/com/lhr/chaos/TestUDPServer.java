@@ -3,8 +3,9 @@ package com.lhr.chaos;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 
-public class UDPServer{
+public class TestUDPServer {
     private static final int PORT_SERVER = 10086;
     public static void main(String[] args) throws Exception{
         DatagramSocket receive = new DatagramSocket(PORT_SERVER);
@@ -14,7 +15,7 @@ public class UDPServer{
 
         while(true){
         	receive.receive(dp);
-        	String str = new String(data,0,dp.getLength());
+        	String str = new String(data,0,dp.getLength(), StandardCharsets.UTF_8);
         	if (!str.equals("exit")) {
         		System.out.println(dp.getAddress().getHostAddress() + ":" + dp.getPort() + " -- " + str);
                 byte[] receiveData = "Server is receive".getBytes();

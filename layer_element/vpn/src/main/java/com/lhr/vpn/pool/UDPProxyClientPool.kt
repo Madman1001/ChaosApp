@@ -4,6 +4,8 @@ import android.net.VpnService
 import com.lhr.vpn.handle.IProxyTun
 import com.lhr.vpn.protocol.UDPPacket
 import com.lhr.vpn.proxy.UDPProxyClient
+import java.lang.RuntimeException
+import java.net.DatagramSocket
 
 /**
  * @author lhr
@@ -12,11 +14,19 @@ import com.lhr.vpn.proxy.UDPProxyClient
  */
 object UDPProxyClientPool {
     private val tableClient = HashMap<Int, UDPProxyClient>()
+    private val proxySocketPort = HashSet<Int>()
 
     fun sendPacket(vpnService: VpnService, handleTun: IProxyTun, packet: UDPPacket){
         val sourcePort = packet.getSourcePort()
+        if (proxySocketPort.contains(sourcePort)){
+            throw RuntimeException("udp socket 出现环路")
+        }
+
         if (tableClient[sourcePort] == null){
-            tableClient[sourcePort] = UDPProxyClient(vpnService, handleTun).apply {
+            val datagramSocket = DatagramSocket()
+            vpnService.protect(datagramSocket)
+            proxySocketPort.add(datagramSocket.localPort)
+            tableClient[sourcePort] = UDPProxyClient(handleTun, datagramSocket).apply {
                 this.bind(sourcePort)
             }
         }

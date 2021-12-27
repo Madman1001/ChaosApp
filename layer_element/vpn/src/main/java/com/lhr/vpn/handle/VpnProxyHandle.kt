@@ -31,7 +31,7 @@ abstract class VpnProxyHandle: IProxyTun {
 
     final override fun outputData(data: IProtocol) {
         onOutput(data)?.let {
-            chain.preHandle?.inputData(it)
+            chain.preHandle?.outputData(it)
         }
     }
 

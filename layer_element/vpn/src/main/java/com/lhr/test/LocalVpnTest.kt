@@ -3,10 +3,12 @@ package com.lhr.test
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.*
+import java.nio.charset.StandardCharsets
 
 /**
  * @author lhr
@@ -59,38 +61,30 @@ object LocalVpnTest {
         }
     }
 
-    fun udpServerTest(){
+    fun tcpClientTest(address: String, port: Int, data: String){
         GlobalScope.launch {
-            val port = 10086
-            val receive = DatagramSocket(port)
-            val data = ByteArray(1024)
-            val dp = DatagramPacket(data, data.size)
-            Log.d(tag, "udp server is ready ${InetAddress.getLocalHost().hostAddress}:${port}")
+            try {
+                val tcpSocket = Socket(InetAddress.getByName(address), port)
+                val os = tcpSocket.getOutputStream()
+                os.write(data.toByteArray(StandardCharsets.UTF_8))
+                os.flush()
+                tcpSocket.close()
+                Log.d(tag, "over tcp test")
+            }catch (e: Exception){
 
-            while (true) {
-                receive.receive(dp)
-                val str = String(dp.data, 0, dp.length)
-                if (str != "exit") {
-                    Log.d(tag, str)
-                    continue
-                }
-                break
             }
-            Log.d(tag, "socket is over!")
-            receive.close()
         }
     }
 
-    fun tcpTest(address: String, port: Int){
+    fun tcpServerTest(){
         GlobalScope.launch {
             try {
-                val buf = "test".toByteArray()
-                val tcpSocket = Socket(InetAddress.getByName(address), port)
-                val os = tcpSocket.getOutputStream()
-                os.write(buf)
-                tcpSocket.shutdownOutput()
-                tcpSocket.close()
-                Log.d(tag, "over tcp test")
+                Log.d(tag, "tcpServerSocket start")
+                val tcpServerSocket = ServerSocket(10086)
+                val socket = tcpServerSocket.accept()
+                Log.d(tag, "tcpServerSocket accept ${socket.inetAddress.hostAddress}:${socket.port}")
+                socket.close()
+                tcpServerSocket.close()
             }catch (e: Exception){
 
             }
