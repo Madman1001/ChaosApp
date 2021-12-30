@@ -3,7 +3,6 @@ package com.lhr.test
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -61,13 +60,49 @@ object LocalVpnTest {
         }
     }
 
+    fun udpServerTest() {
+        GlobalScope.launch(IO) {
+            try {
+                Log.d(tag, "udpServerTest start")
+                val udpServerSocket = DatagramSocket(10086)
+                val data = ByteArray(1024)
+                val dp = DatagramPacket(data, data.size)
+                while (true){
+                    udpServerSocket.receive(dp)
+                    val str = String(data, 0, dp.length, StandardCharsets.UTF_8)
+                    if (str != "exit") {
+                        Log.d(tag, dp.address.hostAddress + ":" + dp.port + " -- " + str)
+                        val receiveData = str.toByteArray()
+                        val receivePacket = DatagramPacket(receiveData, receiveData.size)
+                        receivePacket.socketAddress = dp.socketAddress
+                        udpServerSocket.send(receivePacket)
+                        continue
+                    }
+                    break
+                }
+                udpServerSocket.close()
+                Log.d(tag, "over udp test")
+            }catch (e: Exception){
+
+            }
+        }
+    }
+
     fun tcpClientTest(address: String, port: Int, data: String){
         GlobalScope.launch {
             try {
                 val tcpSocket = Socket(InetAddress.getByName(address), port)
-                val os = tcpSocket.getOutputStream()
-                os.write(data.toByteArray(StandardCharsets.UTF_8))
-                os.flush()
+                val output = tcpSocket.getOutputStream()
+                output.write(data.toByteArray(StandardCharsets.UTF_8))
+                output.flush()
+                tcpSocket.shutdownOutput()
+
+                val buffer = ByteArray(1024)
+                val len = tcpSocket.getInputStream().read(buffer)
+                val str = String(buffer,0,len, StandardCharsets.UTF_8)
+                Log.d(tag, "receive: $str")
+                tcpSocket.shutdownInput()
+
                 tcpSocket.close()
                 Log.d(tag, "over tcp test")
             }catch (e: Exception){
@@ -82,7 +117,18 @@ object LocalVpnTest {
                 Log.d(tag, "tcpServerSocket start")
                 val tcpServerSocket = ServerSocket(10086)
                 val socket = tcpServerSocket.accept()
-                Log.d(tag, "tcpServerSocket accept ${socket.inetAddress.hostAddress}:${socket.port}")
+                Log.d(
+                    tag,
+                    "tcpServerSocket accept ${socket.inetAddress.hostAddress}:${socket.port}"
+                )
+                val data = ByteArray(1024)
+                while (true){
+                    val len = socket.getInputStream().read(data, 0, data.size)
+                    if (!socket.isOutputShutdown){
+                        socket.getOutputStream().write(data, 0, len)
+                        socket.getOutputStream().flush()
+                    }
+                }
                 socket.close()
                 tcpServerSocket.close()
             }catch (e: Exception){

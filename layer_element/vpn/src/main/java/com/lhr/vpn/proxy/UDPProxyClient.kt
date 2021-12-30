@@ -1,10 +1,12 @@
 package com.lhr.vpn.proxy
 
 import android.util.Log
-import com.lhr.vpn.constant.LocalVpnConfig
 import com.lhr.vpn.handle.IProxyTun
-import com.lhr.vpn.protocol.IProtocol
+import com.lhr.vpn.protocol.IPPacket
 import com.lhr.vpn.protocol.UDPPacket
+import com.lhr.vpn.proxy.state.SocketAction
+import com.lhr.vpn.proxy.state.UDPListenAction
+import com.lhr.vpn.proxy.state.UselessAction
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
@@ -19,30 +21,26 @@ import kotlin.random.Random
 class UDPProxyClient(
     private val handleTun: IProxyTun,
     private val udpSocket: DatagramSocket,
-    private val liveTime: Long = Long.MAX_VALUE
-) : IProxyBind {
+    private val proxyConfig: ProxyConfig
+) : IProxyClient {
     private val tag = "UDPProxyClient"
     private val packetList = Vector<UDPPacket>()
     private var currentUdpSendThread: Thread? = null
     private var currentUdpReceiveThread: Thread? = null
 
-    @Volatile
-    private var bindProxyPort = 0
+    private var action: SocketAction = UselessAction(tag)
+    /**
+     * 连接的最大等待时长
+     */
+    private val liveTime: Long = 5000
 
     @Volatile
     private var isStart = false
 
-    override fun getStatus(): IProxyBind.BindStatus {
-        return if (bindProxyPort == 0) {
-            IProxyBind.BindStatus.UNBOUND
-        } else {
-            IProxyBind.BindStatus.BOUND
-        }
-    }
-
     @Synchronized
-    override fun bind(port: Int) {
+    fun start(){
         if (!isStart) {
+            action = UDPListenAction(this)
             isStart = true
             Thread({
                 sendRun()
@@ -51,28 +49,47 @@ class UDPProxyClient(
                 receiveRun()
             }, tag).start()
         }
-        bindProxyPort = port
     }
 
     @Synchronized
-    override fun unbind() {
-        bindProxyPort = 0
-    }
-
-    fun release() {
-        if (currentUdpSendThread != null) {
+    fun stop() {
+        if (isStart){
             isStart = false
-            if (currentUdpSendThread?.state == Thread.State.TIMED_WAITING) {
-                currentUdpSendThread?.interrupt()
+            action = UselessAction(tag)
+            if (currentUdpSendThread != null) {
+                if (currentUdpSendThread?.state == Thread.State.TIMED_WAITING) {
+                    currentUdpSendThread?.interrupt()
+                }
+            }
+
+            if (currentUdpReceiveThread != null){
+                if (currentUdpReceiveThread?.state == Thread.State.TIMED_WAITING) {
+                    currentUdpReceiveThread?.interrupt()
+                }
             }
         }
     }
 
-    fun sendPacket(packet: UDPPacket) {
+    fun pushPacket(packet: UDPPacket) {
+        if (!isStart){
+            start()
+        }
+
         packetList.add(packet)
         if (currentUdpSendThread?.state == Thread.State.TIMED_WAITING) {
             currentUdpSendThread?.interrupt()
         }
+    }
+
+    override fun internalToExternal(packet: IPPacket) {
+        val buf = packet.getData()
+        val address = InetSocketAddress(packet.getTargetAddress(), packet.getTargetPort())
+        val udpPacket = DatagramPacket(buf, buf.size, address)
+        udpSocket.send(udpPacket)
+    }
+
+    override fun externalToInternal(packet: IPPacket) {
+        handleTun.outputData(packet)
     }
 
     private fun sendRun() {
@@ -84,59 +101,44 @@ class UDPProxyClient(
                 if (packet.getSourcePort() == udpSocket.localPort) {
                     throw RuntimeException("udp socket 出现环路")
                 }
-                udpSocket.send(packet2DatagramPacket(packet))
+                action.send(packet)
                 Log.d(tag, "end proxy udp send")
             } else {
                 try {
                     Thread.sleep(liveTime)
+                    stop()
                     break
                 } catch (e: InterruptedException) {
+                    Log.e(tag, "线程被唤醒")
                 }
-                Log.e(tag, "线程被唤醒")
             }
         }
     }
 
     private fun receiveRun() {
         currentUdpReceiveThread = Thread.currentThread()
+        val data = ByteArray(1024)
+        val receivePacket = DatagramPacket(data, data.size)
+        Log.d(tag, "start proxy udp receive")
         while (isStart) {
-            val data = ByteArray(1024)
-            val receivePacket = DatagramPacket(data, data.size)
             try {
-                Log.d(tag, "start proxy udp receive")
                 udpSocket.receive(receivePacket)
                 val str = String(receivePacket.data, 0, receivePacket.length)
-                handleTun.outputData(datagramPacket2Packet(receivePacket))
-                Log.d(tag, "end proxy udp receive:$str")
+                Log.d(tag, "proxy udp receive:$str")
+                val packet = UDPPacket().apply {
+                    this.setData(receivePacket.data, receivePacket.offset, receivePacket.length)
+                    this.setTargetPort(proxyConfig.sourcePort)
+                    this.setTargetAddress(proxyConfig.sourceAddress)
+                    this.setSourcePort(proxyConfig.targetPort)
+                    this.setSourceAddress(proxyConfig.targetAddress)
+                    this.setOffsetFrag(0)
+                    this.setFlag(2)
+                    this.setTimeToLive(64)
+                    this.setIdentification(Random(System.currentTimeMillis()).nextInt().toShort())
+                }
+                action.receive(packet)
             } catch (e: Exception) {
             }
         }
-    }
-
-    private fun packet2DatagramPacket(packet: UDPPacket): DatagramPacket {
-        Log.e(tag, "UDPPacket hostname ${packet.getTargetAddress()} port ${packet.getTargetPort()}")
-        val buf = packet.getData()
-        val address = InetSocketAddress(packet.getTargetAddress(), packet.getTargetPort())
-        val udpPacket = DatagramPacket(buf, buf.size)
-        udpPacket.socketAddress = address
-        return udpPacket
-    }
-
-    private fun datagramPacket2Packet(datagramPacket: DatagramPacket): IProtocol {
-        Log.e(
-            tag,
-            "DatagramPacket hostname ${datagramPacket.address.hostAddress} port ${datagramPacket.port}"
-        )
-        val packet = UDPPacket()
-        packet.setData(datagramPacket.data, datagramPacket.offset, datagramPacket.length)
-        packet.setTargetPort(bindProxyPort)
-        packet.setTargetAddress(LocalVpnConfig.PROXY_ADDRESS)
-        packet.setSourcePort(datagramPacket.port)
-        packet.setSourceAddress(datagramPacket.address.hostAddress)
-        packet.setOffsetFrag(0)
-        packet.setFlag(2)
-        packet.setTimeToLive(64)
-        packet.setIdentification(Random(System.currentTimeMillis()).nextInt().toShort())
-        return packet
     }
 }

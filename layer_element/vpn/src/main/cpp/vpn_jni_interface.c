@@ -74,8 +74,9 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetRawData
         return;
     }
 
-    if (ip_read_version(arrays) != IP_VERSION_V4) {
-        TAG_E("Unable to parse data, ip version is %d", ip_read_version(arrays));
+    ip_packet->version = ip_read_version(arrays);
+    if (ip_packet->version != IP_VERSION_V4) {
+        TAG_E("Unable to parse data, ip version is %d", ip_packet->version);
         return;
     }
 
@@ -309,14 +310,14 @@ JNIEXPORT jobject JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeGetAttribute
         case TCP_SERIAL_NUMBER: {
             if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
                 TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
-                result = int2Integer(env, (int) tcpPacket->serial_number);
+                result = long2Long(env, (unsigned long) tcpPacket->serial_number);
             }
             break;
         }
         case TCP_VERIFY_SERIAL_NUMBER: {
             if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
                 TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
-                result = int2Integer(env, (int) tcpPacket->verify_serial_number);
+                result = long2Long(env, (unsigned long) tcpPacket->verify_serial_number);
             }
             break;
         }
@@ -502,14 +503,14 @@ JNIEXPORT void JNICALL Java_com_lhr_vpn_protocol_IPPacket_nativeSetAttribute
         case TCP_SERIAL_NUMBER: {
             if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
                 TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
-                tcpPacket->serial_number = (unsigned int) Integer2int(env, data);
+                tcpPacket->serial_number = (unsigned int) Long2long(env, data);
             }
             break;
         }
         case TCP_VERIFY_SERIAL_NUMBER: {
             if (ipPacket->upper_protocol == PACKET_TYPE_TCP && ipPacket->data != NULL) {
                 TCP_Packet *tcpPacket = (TCP_Packet *) ipPacket->data;
-                tcpPacket->verify_serial_number = (unsigned int) Integer2int(env, data);
+                tcpPacket->verify_serial_number = (unsigned int) Long2long(env, data);
             }
             break;
         }

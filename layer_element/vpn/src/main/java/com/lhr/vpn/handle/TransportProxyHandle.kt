@@ -16,7 +16,6 @@ import com.lhr.vpn.util.ByteLog
  */
 class TransportProxyHandle(private val vpnService: VpnService): VpnProxyHandle() {
     override fun onInput(data: IProtocol): IProtocol? {
-        Log.d(tag,"inputData")
         if (data is UDPPacket){
             UDPProxyClientPool.sendPacket(vpnService, this, data)
         }else if (data is TCPPacket){
@@ -26,7 +25,6 @@ class TransportProxyHandle(private val vpnService: VpnService): VpnProxyHandle()
     }
 
     override fun onOutput(data: IProtocol): IProtocol {
-        Log.e(tag,"onOutput " + ByteLog.hexToString(data.getRawData()))
         return data
     }
 }

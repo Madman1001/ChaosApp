@@ -52,21 +52,21 @@ class TCPPacket : IPPacket {
         super.setRawData(ipPacket.getRawData())
     }
 
-    fun getSourcePort(): Int {
+    override fun getSourcePort(): Int {
         val sourcePort = super.getAttribute(PacketConstant.DataOperateType.TCP_SOURCE_PORT) ?: 0
         return sourcePort as Int
     }
 
-    fun setSourcePort(port: Int){
+    override fun setSourcePort(port: Int){
         super.setAttribute(PacketConstant.DataOperateType.TCP_SOURCE_PORT, port)
     }
 
-    fun getTargetPort(): Int {
+    override fun getTargetPort(): Int {
         val targetPort = super.getAttribute(PacketConstant.DataOperateType.TCP_TARGET_PORT) ?: 0
         return targetPort as Int
     }
 
-    fun setTargetPort(port: Int){
+    override fun setTargetPort(port: Int){
         super.setAttribute(PacketConstant.DataOperateType.TCP_TARGET_PORT, port)
     }
 
@@ -85,22 +85,31 @@ class TCPPacket : IPPacket {
         }
     }
 
-    fun getSerialNumber(): Int {
-        val serialNumber = super.getAttribute(PacketConstant.DataOperateType.TCP_SERIAL_NUMBER) ?: 0
-        return serialNumber as Int
+    fun getSerialNumber(): Long {
+        val serialNumber = super.getAttribute(PacketConstant.DataOperateType.TCP_SERIAL_NUMBER) ?: 0L
+        return serialNumber as Long
     }
 
-    fun setSerialNumber(serialNumber: Int){
+    fun setSerialNumber(serialNumber: Long){
         super.setAttribute(PacketConstant.DataOperateType.TCP_SERIAL_NUMBER, serialNumber)
     }
 
-    fun getVerifySerialNumber(): Int {
-        val serialNumber = super.getAttribute(PacketConstant.DataOperateType.TCP_VERIFY_SERIAL_NUMBER) ?: 0
-        return serialNumber as Int
+    fun getVerifySerialNumber(): Long {
+        val serialNumber = super.getAttribute(PacketConstant.DataOperateType.TCP_VERIFY_SERIAL_NUMBER) ?: 0L
+        return serialNumber as Long
     }
 
-    fun setVerifySerialNumber(serialNumber: Int){
+    fun setVerifySerialNumber(serialNumber: Long){
         super.setAttribute(PacketConstant.DataOperateType.TCP_VERIFY_SERIAL_NUMBER, serialNumber)
+    }
+
+    fun getWindowSize(): Int{
+        val windowSize = super.getAttribute(PacketConstant.DataOperateType.TCP_WINDOW_SIZE) ?: 0
+        return windowSize as Int
+    }
+
+    fun setWindowSize(windowSize: Int){
+        super.setAttribute(PacketConstant.DataOperateType.TCP_WINDOW_SIZE, windowSize)
     }
 
     fun getOptionsData(): ByteArray {
@@ -279,12 +288,12 @@ class TCPPacket : IPPacket {
         addOption(Option.WSOPT, byteArrayOf(size))
     }
 
-    fun getData(): ByteArray {
+    override fun getData(): ByteArray {
         val data = super.getAttribute(PacketConstant.DataOperateType.TCP_DATA) ?: ByteArray(0)
         return data as ByteArray
     }
 
-    fun setData(data: ByteArray, offset: Int = -1, length: Int = -1) {
+    override fun setData(data: ByteArray, offset: Int, length: Int) {
         val dataOffset = if (offset == -1){
             0
         }else{
@@ -313,7 +322,7 @@ class TCPPacket : IPPacket {
             getTSOPT().takeIf { it.size == 2 && it[0] != 0L }?.let {
                 sb.append("tsopt : ${it[0]}:${it[1]} \n")
             }
-            getWSOPT().takeIf { it > 0 }?.let {
+            getWSOPT().takeIf { it != 0 }?.let {
                 sb.append("wsopt : ${it} \n")
             }
             return sb.toString()

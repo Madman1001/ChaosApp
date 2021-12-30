@@ -1,6 +1,5 @@
 package com.lhr.vpn.protocol
 
-import android.util.Log
 import com.lhr.vpn.constant.PacketConstant
 
 /**
@@ -39,7 +38,8 @@ open class IPPacket : IProtocol {
 
     open fun isValid(): Boolean {
         return if (mPacketRef != 0L) {
-            getIpVersion() != 0
+            //暂时只支持IPv4
+            getIpVersion() == 4
         } else {
             false
         }
@@ -133,6 +133,30 @@ open class IPPacket : IProtocol {
         } else {
             throw RuntimeException("Set Target Address Exception, address:$address")
         }
+    }
+
+    open fun getSourcePort(): Int {
+        throw RuntimeException("Method not implemented Exception:getSourcePort")
+    }
+
+    open fun setSourcePort(port: Int){
+        throw RuntimeException("Method not implemented Exception:setSourcePort")
+    }
+
+    open fun getTargetPort(): Int {
+        throw RuntimeException("Method not implemented Exception:getTargetPort")
+    }
+
+    open fun setTargetPort(port: Int){
+        throw RuntimeException("Method not implemented Exception:setTargetPort")
+    }
+
+    open fun getData(): ByteArray {
+        throw RuntimeException("Method not implemented Exception:getData")
+    }
+
+    open fun setData(data: ByteArray, offset: Int, length: Int) {
+        throw RuntimeException("Method not implemented Exception:setData")
     }
 
     open fun getTimeToLive(): Int {

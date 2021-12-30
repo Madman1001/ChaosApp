@@ -27,30 +27,30 @@ class UDPPacket : IPPacket {
         super.setRawData(ipPacket.getRawData())
     }
 
-    fun getSourcePort(): Int {
+    override fun getSourcePort(): Int {
         val sourcePort = super.getAttribute(PacketConstant.DataOperateType.UDP_SOURCE_PORT) ?: 0
         return sourcePort as Int
     }
 
-    fun setSourcePort(port: Int){
+    override fun setSourcePort(port: Int){
         super.setAttribute(PacketConstant.DataOperateType.UDP_SOURCE_PORT, port)
     }
 
-    fun getTargetPort(): Int {
+    override fun getTargetPort(): Int {
         val targetPort = super.getAttribute(PacketConstant.DataOperateType.UDP_TARGET_PORT) ?: 0
         return targetPort as Int
     }
 
-    fun setTargetPort(port: Int){
+    override fun setTargetPort(port: Int){
         super.setAttribute(PacketConstant.DataOperateType.UDP_TARGET_PORT, port)
     }
 
-    fun getData(): ByteArray {
+    override fun getData(): ByteArray {
         val data = super.getAttribute(PacketConstant.DataOperateType.UDP_DATA) ?: ByteArray(0)
         return data as ByteArray
     }
 
-    fun setData(data: ByteArray, offset: Int = -1, length: Int = -1) {
+    override fun setData(data: ByteArray, offset: Int, length: Int) {
         val dataOffset = if (offset == -1){
             0
         }else{

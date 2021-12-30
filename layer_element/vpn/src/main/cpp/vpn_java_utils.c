@@ -32,6 +32,24 @@ static char * jstringToChar(JNIEnv *env, jstring jstr) {
     return rtn;
 }
 
+static jobject long2Long(JNIEnv *env, unsigned long val){
+    jclass longClass = (*env)->FindClass(env, "java/lang/Long");
+    jmethodID ctorId = (*env)->GetMethodID(env, longClass, "<init>", "(J)V");
+    return (*env)->NewObject(env, longClass, ctorId, (jlong) val);
+}
+
+static unsigned long Long2long(JNIEnv *env, jobject jobj){
+    jclass dataClass = (*env)->FindClass(env, "java/lang/Long");
+    jmethodID mid = (*env)->GetMethodID(env, dataClass, "longValue", "()J");
+
+    if ((*env)->IsInstanceOf(env, jobj, dataClass) == JNI_TRUE) {
+        return ((*env)->CallLongMethod(env, jobj,mid));
+    } else {
+        (*env)->ThrowNew(env, (*env)->FindClass(env, "java/lang/Exception"), "Integer转int出现异常");
+        return 0;
+    }
+}
+
 static jobject int2Integer(JNIEnv *env, int val){
     jclass intClass = (*env)->FindClass(env, "java/lang/Integer");
     jmethodID ctorId = (*env)->GetMethodID(env, intClass, "<init>", "(I)V");

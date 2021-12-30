@@ -1,11 +1,12 @@
 package com.lhr.vpn.proxy
 
 import android.util.Log
-import com.lhr.vpn.constant.LocalVpnConfig
 import com.lhr.vpn.handle.IProxyTun
+import com.lhr.vpn.protocol.IPPacket
 import com.lhr.vpn.protocol.TCPPacket
-import com.lhr.vpn.util.ByteLog
-import java.lang.RuntimeException
+import com.lhr.vpn.proxy.state.SocketAction
+import com.lhr.vpn.proxy.state.TCPListenAction
+import com.lhr.vpn.proxy.state.UselessAction
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.*
@@ -19,35 +20,36 @@ import kotlin.random.Random
 class TCPProxyClient(
     private val handleTun: IProxyTun,
     private val tcpSocket: Socket,
-    private val liveTime: Long = Long.MAX_VALUE
-) : IProxyBind {
+    internal val proxyConfig: ProxyConfig
+) : IProxyClient {
     private val tag = "TCPProxyClient"
     private val packetList = Vector<TCPPacket>()
 
     private var currentTcpSendThread: Thread? = null
+
     private var currentTcpReceiveThread: Thread? = null
 
-    private var serverSerialNumber = 0
+    internal var serverSerialNumber = 0L
 
-    private var clientSerialNumber = 0
+    internal var clientSerialNumber = 0L
 
     @Volatile
-    private var bindProxyPort = 0
+    internal var action: SocketAction = UselessAction(tag)
+
+    /**
+     * 连接的最大等待时长
+     */
+    internal var liveTime: Long = Long.MAX_VALUE
+
+    internal var windowSize: Int = 0
 
     @Volatile
     private var isStart = false
 
-    override fun getStatus(): IProxyBind.BindStatus {
-        return if (bindProxyPort == 0) {
-            IProxyBind.BindStatus.UNBOUND
-        } else {
-            IProxyBind.BindStatus.BOUND
-        }
-    }
-
     @Synchronized
-    override fun bind(port: Int) {
+    fun start() {
         if (!isStart) {
+            action = TCPListenAction(this)
             isStart = true
             Thread({
                 sendRun()
@@ -56,24 +58,38 @@ class TCPProxyClient(
                 receiveRun()
             }, tag).start()
         }
-        bindProxyPort = port
     }
 
     @Synchronized
-    override fun unbind() {
-        bindProxyPort = 0
-    }
-
-    fun release() {
-        if (currentTcpSendThread != null) {
+    fun stop() {
+        if (isStart) {
             isStart = false
-            if (currentTcpSendThread?.state == Thread.State.TIMED_WAITING) {
-                currentTcpSendThread?.interrupt()
+            action = UselessAction(tag)
+            if (currentTcpSendThread != null) {
+                if (currentTcpSendThread?.state == Thread.State.TIMED_WAITING) {
+                    currentTcpSendThread?.interrupt()
+                }
             }
+
+            if (currentTcpReceiveThread != null) {
+                if (currentTcpReceiveThread?.state == Thread.State.TIMED_WAITING) {
+                    currentTcpReceiveThread?.interrupt()
+                }
+            }
+        }
+
+        if (tcpSocket.isConnected){
+            tcpSocket.shutdownInput()
+            tcpSocket.shutdownOutput()
+            tcpSocket.close()
         }
     }
 
-    fun sendPacket(packet: TCPPacket) {
+    fun pushPacket(packet: TCPPacket) {
+        if (!isStart) {
+            start()
+        }
+
         packetList.add(packet)
         if (currentTcpSendThread?.state == Thread.State.TIMED_WAITING) {
             currentTcpSendThread?.interrupt()
@@ -85,24 +101,7 @@ class TCPProxyClient(
         while (isStart) {
             if (packetList.isNotEmpty()) {
                 val packet = packetList.removeFirst()
-                val targetAddress = packet.getTargetAddress()
-                val targetPort = packet.getTargetPort()
-                if (packet.isControlFlag(TCPPacket.ControlFlag.SYN)){
-                    if (connect(targetAddress, targetPort)) {
-                        sendSynAckPacket(packet, targetAddress, targetPort)
-                    }
-                }else if (packet.isControlFlag(TCPPacket.ControlFlag.RST)){
-                    Log.e(tag, "客户端重定向")
-                    sendRstAckPacket(packet, targetAddress, targetPort)
-                    Thread.sleep(200)
-                    throw RuntimeException("调试失败")
-                }else if (packet.isControlFlag(TCPPacket.ControlFlag.FIN)){
-                    throw RuntimeException("调试失败")
-                }
-                else if (packet.isControlFlag(TCPPacket.ControlFlag.ACK) && packet.getVerifySerialNumber() == serverSerialNumber + 1){
-                    Log.e(tag, "客户端确认接收到${serverSerialNumber}")
-                    throw RuntimeException("调试成功")
-                }
+                action.send(packet)
             } else {
                 try {
                     Thread.sleep(liveTime)
@@ -116,87 +115,68 @@ class TCPProxyClient(
 
     private fun receiveRun() {
         currentTcpReceiveThread = Thread.currentThread()
+        Log.d(tag, "start proxy tcp receive")
         while (isStart) {
+            if (tcpSocket.isConnected
+                && !tcpSocket.isInputShutdown
+            ) {
+                try {
+                    val buffer = ByteArray(tcpSocket.receiveBufferSize)
+                    val input = tcpSocket.getInputStream()
+                    val len = input.read(buffer)
+                    val str = String(buffer, 0, len)
+                    Log.d(tag, "proxy tcp receive:$str")
+                    val packet = TCPPacket().apply {
+                        this.setData(buffer, 0, len)
+                        this.setTargetPort(proxyConfig.sourcePort)
+                        this.setTargetAddress(proxyConfig.sourceAddress)
+                        this.setSourcePort(proxyConfig.targetPort)
+                        this.setSourceAddress(proxyConfig.targetAddress)
+                        this.setOffsetFrag(0)
+                        this.setFlag(2)
+                        this.setTimeToLive(64)
+                        this.setIdentification(Random(System.currentTimeMillis()).nextInt().toShort())
+                    }
+                    action.receive(packet)
+                }catch (e: Exception){
 
+                }
+            }
         }
     }
 
-    private fun connect(address: String, port: Int): Boolean{
-        if (!tcpSocket.isConnected){
+    /**
+     * 连接目标服务器
+     */
+    internal fun connect(): Boolean {
+        if (!tcpSocket.isConnected) {
             //未连接，进行三次握手
-            val remoteAddr = InetSocketAddress(address, port)
+            val remoteAddr = InetSocketAddress(proxyConfig.targetAddress, proxyConfig.targetPort)
             try {
-                tcpSocket.connect(remoteAddr, 2000)
-            }catch (e: Exception){
+                tcpSocket.connect(remoteAddr, 3000)
+            } catch (e: Exception) {
                 e.printStackTrace()
                 //连接失败
             }
             return tcpSocket.isConnected
-        }else{
+        } else {
             return false
         }
     }
 
-    private fun sendRstAckPacket(tcpPacket: TCPPacket, address: String, port: Int){
-        serverSerialNumber++
-        clientSerialNumber = tcpPacket.getSerialNumber()
-        val packet = TCPPacket()
-        packet.setTargetPort(bindProxyPort)
-        packet.setTargetAddress(LocalVpnConfig.PROXY_ADDRESS)
-        packet.setSourcePort(port)
-        packet.setSourceAddress(address)
-        packet.setOffsetFrag(0)
-        packet.setFlag(2)
-        packet.setTimeToLive(64)
-        packet.setIdentification(Random(System.currentTimeMillis()).nextInt().toShort())
-        packet.setVerifySerialNumber(clientSerialNumber + 1)
-        packet.setSerialNumber(serverSerialNumber)
-        packet.setControlFlag(TCPPacket.ControlFlag.ACK)
-        packet.setRawData(packet.getRawData())
-        handleTun.outputData(packet)
+    override fun internalToExternal(packet: IPPacket) {
+        if (tcpSocket.isConnected && !tcpSocket.isOutputShutdown) {
+            val data = packet.getData()
+            if (data.isNotEmpty()) {
+                tcpSocket.getOutputStream().apply {
+                    this.write(data)
+                    this.flush()
+                }
+            }
+        }
     }
 
-    private fun sendSynAckPacket(tcpPacket: TCPPacket, address: String, port: Int) {
-        serverSerialNumber = Random.nextInt()
-        clientSerialNumber = tcpPacket.getSerialNumber()
-        val packet = TCPPacket()
-        packet.setTargetPort(bindProxyPort)
-        packet.setTargetAddress(LocalVpnConfig.PROXY_ADDRESS)
-        packet.setSourcePort(port)
-        packet.setSourceAddress(address)
-        packet.setOffsetFrag(0)
-        packet.setFlag(2)
-        packet.setTimeToLive(64)
-        packet.setIdentification(Random(System.currentTimeMillis()).nextInt().toShort())
-        packet.setVerifySerialNumber(clientSerialNumber + 1)
-        packet.setSerialNumber(serverSerialNumber)
-        packet.setControlFlag(TCPPacket.ControlFlag.ACK)
-        packet.setControlFlag(TCPPacket.ControlFlag.SYN)
-
-        val packetMss = tcpPacket.getMSS()
-        if (packetMss != 0){
-            packet.setMSS(packetMss)
-        }
-
-        val packetWsopt = tcpPacket.getWSOPT()
-        if (packetWsopt != 0){
-            packet.setWSOPT(packetWsopt.toByte())
-        }
-
-        if (tcpPacket.getSACK_P()){
-            packet.setSACK_P(true)
-        }
-
-//        val packetTsopt = tcpPacket.getTSOPT()
-//        if (packetTsopt[0] != 0L){
-//            packet.setTSOPT(packetTsopt[0])
-//        }
-
-        tcpPacket.setRawData(tcpPacket.getRawData())
-        Log.e("Test","sny \n ${tcpPacket.optionsToString()}")
-
-        Log.e("Test","sny ack \n ${packet.optionsToString()}")
-
+    override fun externalToInternal(packet: IPPacket) {
         handleTun.outputData(packet)
     }
 }

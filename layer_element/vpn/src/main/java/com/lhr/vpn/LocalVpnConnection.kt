@@ -101,15 +101,16 @@ class LocalVpnConnection(
                     //读取输入数据
                     val len = readToTun(packet, packetInput)
                     if (len > 0) {
-                        Log.d(TAG, "虚拟网卡读取:${len}byte")
                         packet.limit(len)
                         //可以进行拦截、修改、转发处理
                         val byteBuffer = ByteArray(len)
                         for (i in 0 until len) {
                             byteBuffer[i] = packet[i]
                         }
+                        Log.d(TAG, "虚拟网卡读取:${len}byte")
                         val ipPacket = IPPacket(byteBuffer)
                         if (ipPacket.isValid()) {
+                            Log.d(TAG, "in packet: ${ByteLog.binaryToString(byteBuffer)}")
                             this.inputData(ipPacket)
                         }
                         packet.clear()
@@ -127,9 +128,12 @@ class LocalVpnConnection(
                 Log.d(TAG, "${Thread.currentThread().name} Starting")
                 while (isRunning) {
                     if (outPacketList.isNotEmpty()){
-                        Log.d(TAG, "虚拟网卡写入")
                         val packet = outPacketList.removeFirst()
-                        writeToTun(packet,packetOutput)
+                        if (packet.isNotEmpty()){
+                            Log.d(TAG, "虚拟网卡写入:${packet.size}byte")
+                            Log.d(TAG, "out packet: ${ByteLog.binaryToString(packet)}")
+                            writeToTun(packet,packetOutput)
+                        }
                     }else{
                         try {
                             Thread.sleep(Long.MAX_VALUE)

@@ -52,30 +52,46 @@ static void tcp_write_target_port(unsigned char *data, unsigned short target_por
 * 读取tcp序号
 */
 static unsigned int tcp_read_serial_number(unsigned const char *data) {
-    unsigned int serial_number = ((int *) data)[1];
+    unsigned char * uData = (unsigned char *)data;
+    unsigned int serial_number = 0;
+    for (int i = 0; i < 4; ++i) {
+        serial_number = serial_number << (unsigned int)8;
+        serial_number |= (unsigned int)uData[4 + i];
+    }
     return serial_number;
 }
 
 /**
 * 写入tcp序号
 */
-static void tcp_write_serial_number(unsigned const char *data, unsigned int serial_number) {
-    ((int *) data)[1] = serial_number;
+static void tcp_write_serial_number(unsigned char *data, unsigned int serial_number) {
+    data[4] = (unsigned char)((serial_number >> 24) & 0x000000FF);
+    data[5] = (unsigned char)((serial_number >> 16) & 0x000000FF);
+    data[6] = (unsigned char)((serial_number >> 8) & 0x000000FF);
+    data[7] = (unsigned char)(serial_number & 0x000000FF);
 }
 
 /**
 * 读取tcp确认序号
 */
 static unsigned int tcp_read_verify_serial_number(unsigned const char *data) {
-    unsigned int verify_serial_number = ((int *) data)[2];
+    unsigned char * uData = (unsigned char *)data;
+    unsigned int verify_serial_number = 0;
+    for (int i = 0; i < 4; ++i) {
+        verify_serial_number = verify_serial_number << (unsigned int)8;
+        verify_serial_number |= (unsigned int)uData[8 + i];
+    }
     return verify_serial_number;
 }
 
 /**
 * 写入tcp确认序号
 */
-static void tcp_write_verify_serial_number(unsigned const char *data, unsigned int verify_serial_number) {
-    ((int *) data)[2] = verify_serial_number;
+static void tcp_write_verify_serial_number(unsigned char *data, unsigned int verify_serial_number) {
+    data[8] = (unsigned char)((verify_serial_number >> 24) & 0x000000FF);
+    data[9] = (unsigned char)((verify_serial_number >> 16) & 0x000000FF);
+    data[10] = (unsigned char)((verify_serial_number >> 8) & 0x000000FF);
+    data[11] = (unsigned char)(verify_serial_number & 0x000000FF);
 }
 
 /**
@@ -268,7 +284,7 @@ static void print_tcp_packet(TCP_Packet *packet){
     TAG_D("tcp >> head length %d",packet->head_length);
     TAG_D("tcp >> total length %d",packet->total_length);
     TAG_D("tcp >> control sign 0b%s",charToBinary(packet->control_sign));
-    TAG_D("tcp >> window size %ud",packet->window_size);
+    TAG_D("tcp >> window size %u",packet->window_size);
     TAG_D("tcp >> check sum 0x%04x",packet->check_sum);
     TAG_D("tcp >> urgent pointer 0x%04x",packet->urgent_pointer);
 
@@ -288,6 +304,7 @@ static void print_tcp_packet(TCP_Packet *packet){
     }
 
     if (packet->data_length > 0 && packet->data != NULL){
+        TAG_D("tcp >> data length %d",packet->data_length);
         TAG_D("tcp >> data %s",packet->data);
     }
 }

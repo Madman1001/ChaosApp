@@ -3,6 +3,7 @@ package com.lhr.vpn.pool
 import android.net.VpnService
 import com.lhr.vpn.handle.IProxyTun
 import com.lhr.vpn.protocol.UDPPacket
+import com.lhr.vpn.proxy.ProxyConfig
 import com.lhr.vpn.proxy.UDPProxyClient
 import java.lang.RuntimeException
 import java.net.DatagramSocket
@@ -26,10 +27,13 @@ object UDPProxyClientPool {
             val datagramSocket = DatagramSocket()
             vpnService.protect(datagramSocket)
             proxySocketPort.add(datagramSocket.localPort)
-            tableClient[sourcePort] = UDPProxyClient(handleTun, datagramSocket).apply {
-                this.bind(sourcePort)
-            }
+            val proxyConfig = ProxyConfig(
+                packet.getSourceAddress(),
+                packet.getSourcePort(),
+                packet.getTargetAddress(),
+                packet.getTargetPort())
+            tableClient[sourcePort] = UDPProxyClient(handleTun, datagramSocket, proxyConfig)
         }
-        tableClient[sourcePort]?.sendPacket(packet)
+        tableClient[sourcePort]?.pushPacket(packet)
     }
 }

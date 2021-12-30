@@ -1,11 +1,12 @@
 package com.lhr.vpn.pool
 
 import android.net.VpnService
+import android.util.Log
 import com.lhr.vpn.handle.IProxyTun
 import com.lhr.vpn.protocol.TCPPacket
+import com.lhr.vpn.proxy.ProxyConfig
 import com.lhr.vpn.proxy.TCPProxyClient
 import java.lang.RuntimeException
-import java.net.InetSocketAddress
 import java.net.Socket
 
 /**
@@ -28,10 +29,13 @@ object TCPProxyClientPool {
             socket.bind(null)
             vpnService.protect(socket)
             proxySocketPort.add(socket.localPort)
-            tableClient[sourcePort] = TCPProxyClient(handleTun, socket).apply {
-                this.bind(sourcePort)
-            }
+            val proxyConfig = ProxyConfig(
+                packet.getSourceAddress(),
+                packet.getSourcePort(),
+                packet.getTargetAddress(),
+                packet.getTargetPort())
+            tableClient[sourcePort] = TCPProxyClient(handleTun, socket, proxyConfig)
         }
-        tableClient[sourcePort]?.sendPacket(packet)
+        tableClient[sourcePort]?.pushPacket(packet)
     }
 }
