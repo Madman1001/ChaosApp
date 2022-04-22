@@ -21,76 +21,78 @@ object AccessibilityUtils {
     private val tag = "AS_${this::class.java.simpleName}"
 
     @SuppressLint("NewApi")
-    fun backAction(service: AccessibilityService){
+    fun backAction(service: AccessibilityService) {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
     }
 
     @SuppressLint("NewApi")
-    fun homeAction(service: AccessibilityService){
+    fun homeAction(service: AccessibilityService) {
         service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
     }
 
     @SuppressLint("NewApi")
-    fun scrollForwardView(service: AccessibilityService, className: String = ""):Boolean{
-        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
+    fun scrollForwardView(service: AccessibilityService, className: String = ""): Boolean {
+        val info: AccessibilityNodeInfo? = service.rootInActiveWindow
         val scroll = findNode(info) {
-            val isScroll = it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD)
+            val isScroll =
+                it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD)
             if (className.isNotEmpty()) {
                 isScroll && className == it.className
-            }else{
+            } else {
                 isScroll
             }
         }
         Log.e(tag, "scrollForwardView $scroll")
-        if (scroll != null){
+        if (scroll != null) {
             scroll.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD.id)
             return true
-        }else{
+        } else {
             return false
         }
     }
 
     @SuppressLint("NewApi")
-    fun scrollBackwardView(service: AccessibilityService, className: String = ""):Boolean{
-        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
+    fun scrollBackwardView(service: AccessibilityService, className: String = ""): Boolean {
+        val info: AccessibilityNodeInfo? = service.rootInActiveWindow
         val scroll = findNode(info) {
-            val isScroll = it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD)
+            val isScroll =
+                it.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD)
             if (className.isNotEmpty()) {
                 isScroll && className == it.className
-            }else{
+            } else {
                 isScroll
             }
         }
         Log.e(tag, "scrollBackwardView $scroll")
-        if (scroll != null){
+        if (scroll != null) {
             scroll.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD.id)
             return true
-        }else{
+        } else {
             return false
         }
     }
 
     @SuppressLint("NewApi")
-    fun clickViewByName(service: AccessibilityService, name: String):Boolean {
+    fun clickViewByName(service: AccessibilityService, name: String): Boolean {
         val click = findViewByName(
             service,
             name
         )
-        if (click != null){
+        if (click != null) {
             return clickView(
                 service,
                 click
             )
-        }else{
+        } else {
             return false
         }
     }
 
     @SuppressLint("NewApi")
-    fun clickView(service: AccessibilityService,info: AccessibilityNodeInfo):Boolean {
+    fun clickView(service: AccessibilityService, info: AccessibilityNodeInfo): Boolean {
         Log.e(tag, "clickView find $info")
         //可点击，直接调用点击方法
-        if (!performView(info)){
+        if (!performView(info)) {
             //不可点击，调用屏幕点击方法 ，24版本以上可用
             val rect = Rect()
             info.getBoundsInScreen(rect)
@@ -103,36 +105,47 @@ object AccessibilityUtils {
                 )
             ) {
                 //所以点击均失败
-                Log.e(tag,"点击失败")
+                Log.e(tag, "点击失败")
                 return false
-            }else{
+            } else {
                 return true
             }
-        }else{
+        } else {
             return true
         }
     }
 
     fun findViewByName(service: AccessibilityService, name: String): AccessibilityNodeInfo? {
-        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
-        return if (info != null){
+        val info: AccessibilityNodeInfo? = service.rootInActiveWindow
+        return if (info != null) {
             findNode(info) {
-                Log.e(tag,"${name.equals(it.text?.toString(), true)}:${name.equals(it.contentDescription?.toString(),true)}")
+                Log.e(
+                    tag,
+                    "${
+                        name.equals(
+                            it.text?.toString(),
+                            true
+                        )
+                    }:${name.equals(it.contentDescription?.toString(), true)}"
+                )
                 name.equals(it.text?.toString(), true)
-                        || name.equals(it.contentDescription?.toString(),true)
+                        || name.equals(it.contentDescription?.toString(), true)
             }
-        }else{
+        } else {
             null
         }
     }
 
-    fun findViewByClassName(service: AccessibilityService, className: String): AccessibilityNodeInfo? {
-        val info:AccessibilityNodeInfo? = service.rootInActiveWindow
-        return if (info != null){
+    fun findViewByClassName(
+        service: AccessibilityService,
+        className: String
+    ): AccessibilityNodeInfo? {
+        val info: AccessibilityNodeInfo? = service.rootInActiveWindow
+        return if (info != null) {
             findNode(info) {
                 className.equals(it.className?.toString(), false)
             }
-        }else{
+        } else {
             null
         }
     }
@@ -146,7 +159,10 @@ object AccessibilityUtils {
         deque.add(root)
         while (!deque.isEmpty()) {
             val node: AccessibilityNodeInfo = deque.removeFirst() ?: continue
-            Log.e(tag, "findNode:>>>>> text:${node.text}; description:${node.contentDescription}; className:${node.className}; childCount:${node.childCount}")
+            Log.e(
+                tag,
+                "findNode:>>>>> text:${node.text}; description:${node.contentDescription}; className:${node.className}; childCount:${node.childCount}"
+            )
             if (contain.invoke(node)) {
                 return node
             }
@@ -182,19 +198,47 @@ object AccessibilityUtils {
     fun performView(info: AccessibilityNodeInfo): Boolean {
         if (info.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
             info.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id)
-            Log.e(tag,"view 点击成功")
+            Log.e(tag, "view 点击成功")
             return true
         }
 
-        var temp:AccessibilityNodeInfo? = info.parent
+        var temp: AccessibilityNodeInfo? = info.parent
         while (temp != null) {
             if (temp.actionList.contains(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK)) {
                 temp.performAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK.id)
-                Log.e(tag,"父类view；${temp.className} 点击成功")
+                Log.e(tag, "父类view；${temp.className} 点击成功")
                 return true
             }
             temp = temp.parent
         }
         return false
+    }
+
+    /**
+     * 遍历顶层窗体
+     */
+    fun traverseTopWindow(service: AccessibilityService): String {
+        val root = service.rootInActiveWindow ?: return ""
+        val sb = StringBuilder()
+        var gap = ">"
+        var count = 1
+        sb.append("#${count++} ${gap}windowId: ${root.windowId}\n")
+        val deque: Deque<AccessibilityNodeInfo?> = ArrayDeque()
+        deque.add(root)
+        sb.append("#${count++} ${gap}class: ${root.className}\n")
+        while (!deque.isEmpty()) {
+            val node: AccessibilityNodeInfo = deque.removeFirst() ?: continue
+            for (i in 0 until node.childCount) {
+                val child = node.getChild(i)
+                if (child == null) {
+                    sb.append("#${count++} ${gap}class: null\n")
+                    continue
+                }
+                sb.append("#${count++} ${gap}class: {${child.packageName}/${child.className}} text: ${child.text}\n")
+                deque.addLast(child)
+            }
+            gap += ">"
+        }
+        return sb.toString()
     }
 }

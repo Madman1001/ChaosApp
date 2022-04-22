@@ -1,22 +1,27 @@
-    package com.lhr.access
+package com.lhr.access
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo.*
 import android.content.Context
 import android.graphics.PixelFormat
-import android.graphics.Rect
 import android.os.Build
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.FrameLayout
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import com.lhr.access.executor.TaskExecutor
-import com.lhr.access.factory.DemoFactory
 import com.lhr.access.utils.AccessibilityUtils
+import com.lhr.utils.visible
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 /**
@@ -24,14 +29,18 @@ import com.lhr.access.utils.AccessibilityUtils
  * @date 2021/7/2
  * @des
  */
-class AccessibilityTestService: AccessibilityService() {
+class ChaosAccessibilityService: AccessibilityService() {
     private val tag = "AS_${this::class.java.simpleName}"
 
+    private var hintView: TextView? = null
     override fun onServiceConnected() {
         super.onServiceConnected()
         //获取所有view需要添加FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
         this.serviceInfo.flags = this.serviceInfo.flags or FLAG_INCLUDE_NOT_IMPORTANT_VIEWS or FLAG_RETRIEVE_INTERACTIVE_WINDOWS
+        addTestWm()
+    }
 
+    private fun addTestWm(){
         // 创建测试按钮
         val wm =
             getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -46,59 +55,53 @@ class AccessibilityTestService: AccessibilityService() {
         lp.flags = lp.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.gravity = Gravity.LEFT or Gravity.CENTER_VERTICAL
+        lp.gravity = Gravity.START or Gravity.TOP
         val inflater = LayoutInflater.from(this)
-        inflater.inflate(R.layout.action_bar, mLayout)
+        inflater.inflate(R.layout.hint_window_view, mLayout)
         wm.addView(mLayout, lp)
-
-        mLayout.findViewById<View>(R.id.accessibility_scroll_forward_action).setOnClickListener {
-            AccessibilityUtils.scrollForwardView(this)
-        }
-        mLayout.findViewById<View>(R.id.accessibility_scroll_backward_action).setOnClickListener {
-            AccessibilityUtils.scrollBackwardView(this)
-        }
-        mLayout.findViewById<View>(R.id.accessibility_click_action).setOnClickListener {
-            AccessibilityUtils.clickViewByName(this,"始终允许")
-            val info = AccessibilityUtils.findViewByName(this,"悬浮窗")
-            info?.let {
-                val nodeParent = info.parent
-                val infoRect = Rect()
-                info.getBoundsInScreen(infoRect)
-                val parentRect = Rect()
-                nodeParent.getBoundsInScreen(parentRect)
-                AccessibilityUtils.clickScreen(
-                    this,
-                    parentRect.right - infoRect.left,
-                    infoRect.centerY())
+        mLayout.findViewById<ImageButton>(R.id.accessibility_window_btn).apply {
+            //setOnTouchListener(DragTouchListener())
+            setOnClickListener {
+                hintView?.let {
+                    it.visible(!it.visible())
+                }
             }
-
         }
-        mLayout.findViewById<View>(R.id.accessibility_back_action).setOnClickListener {
-            AccessibilityUtils.backAction(this)
-        }
-        mLayout.findViewById<View>(R.id.accessibility_home_action).setOnClickListener {
-            AccessibilityUtils.homeAction(this)
-        }
-        mLayout.findViewById<View>(R.id.accessibility_run_action).setOnClickListener {
-//            Log.e(tag,"accessibility_run_action")
-//            for (systemAction in this.systemActions) {
-//                Log.e(tag,systemAction.toString())
-//                if (systemAction.label == "所有应用"){
-//                    this.performGlobalAction(systemAction.id)
-//                }
-//            }
-            TaskExecutor.postTask(DemoFactory.uninstallSelfTask(this))
-            TaskExecutor.startExecuteTask(this)
-        }
-
+        hintView = mLayout.findViewById(R.id.accessibility_window_tv)
     }
 
+
+    private var times = 0
+    private var topActivity = ""
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
 //        Log.e(tag,"event type ${AccessibilityEvent.eventTypeToString(event.eventType)}")
-        Log.e(tag,"event type ${event}")
+        Log.e(tag,"event type ${event.toString()}")
 
-        event.contentChangeTypes
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){
+            topActivity = event.className.toString()
+        }
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){
+            hintView?.let {
+                Log.e("AS_Access", "start traverseTopWindow: ${times++}")
+                val run_times = times
+                val time = System.currentTimeMillis()
+                GlobalScope.launch(Dispatchers.Default) {
+                    val id = this@ChaosAccessibilityService?.rootInActiveWindow?.windowId ?: 0
+                    val str = AccessibilityUtils.traverseTopWindow(this@ChaosAccessibilityService)
+                    withContext(Main){
+                        if (id == this@ChaosAccessibilityService?.rootInActiveWindow?.windowId ?: 0){
+                            it.text = "top window: <<${topActivity}>>\n${str}"
+                        }
+                        times--
+                        Log.e("AS_Access", "end traverseTopWindow: ${run_times} ${System.currentTimeMillis() - time}")
+                    }
+                }
+            }
+        }
+
+
         TaskExecutor.acceptActionEvent(this,event)
         /*
         视图获得焦点 AccessibilityEvent.TYPE_VIEW_FOCUSED打开一个新界面时以此事件为开始

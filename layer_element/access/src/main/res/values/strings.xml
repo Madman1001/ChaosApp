@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="accessibility_name">MyTestAccessServices</string>
-    <string name="accessibility_desc">AccessServices is Running</string>
+    <string name="accessibility_name">ChaosAccessibilityServices</string>
+    <string name="accessibility_desc">Accessibility Tool</string>
 </resources>
