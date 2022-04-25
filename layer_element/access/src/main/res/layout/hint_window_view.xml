@@ -27,13 +27,4 @@
                 android:background="#5E000000" />
         </HorizontalScrollView>
     </androidx.core.widget.NestedScrollView>
-
-
-    <ImageButton
-        android:id="@+id/accessibility_window_btn"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:scaleType="fitXY"
-        android:background="@android:color/transparent"
-        android:src="@mipmap/ic_launch"/>
 </FrameLayout>

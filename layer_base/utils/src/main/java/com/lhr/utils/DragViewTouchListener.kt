@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlin.math.abs
 
-class DragTouchListener(private val isReturn: Boolean = false): View.OnTouchListener{
+class DragViewTouchListener(private val isReturn: Boolean = false): View.OnTouchListener{
     private val MAX_DISTANCE = 10
     private var distanceX = 0f
     private var distanceY = 0f
