@@ -1,10 +1,11 @@
 
 //基础层
-include ':sys',':utils',':anim',':view'
+include ':sys',':utils',':anim',':view',':crash'
 project(':sys').projectDir = new File("layer_base/sys")
 project(':utils').projectDir = new File("layer_base/utils")
 project(':anim').projectDir = new File("layer_base/anim")
 project(':view').projectDir = new File("layer_base/view")
+project(':crash').projectDir = new File("layer_base/crash")
 
 //中间层
 include ':centre',':centre_processor',':centre_annotation'
@@ -23,8 +24,5 @@ project(':vpn').projectDir = new File("layer_element/vpn")
 
 //应用层
 include ':app'
-
-
-
 
 

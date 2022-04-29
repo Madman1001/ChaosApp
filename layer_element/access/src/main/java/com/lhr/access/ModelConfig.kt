@@ -1,6 +1,7 @@
 package com.lhr.access
 
 import com.lhr.access.model.analysis.AnalysisModule
+import com.lhr.access.model.task.TaskModule
 
 /**
  * @CreateDate: 2022/4/24
@@ -9,5 +10,6 @@ import com.lhr.access.model.analysis.AnalysisModule
  */
 
 val ModelClassList:Array<Class<*>> = arrayOf(
-    AnalysisModule::class.java
+    AnalysisModule::class.java,
+    TaskModule::class.java
 )

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.crash">
+
+    <application>
+        <activity
+            android:name=".CrashActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"/>
+
+        <provider
+            android:name=".InitCrashProvider"
+            android:authorities="chaos-crash"
+            android:enabled="true"
+            android:exported="false" />
+    </application>
+
+</manifest>

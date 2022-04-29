@@ -62,8 +62,10 @@ class AnalysisModule: IHandleModule {
 
     private fun analysisWindow(service: AccessibilityService, event: AccessibilityEvent){
         val root = service.rootInActiveWindow ?: return
-        topWindowClass = root.className.toString()
-        topWindowPackage = root.packageName.toString()
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){
+            topWindowClass = event.className?.toString() ?: ""
+            topWindowPackage = root.packageName.toString()
+        }
 
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
             || event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED){

@@ -14,7 +14,7 @@ class AccessActivity : AppCompatActivity() {
 //        setContentView(R.layout.activity_access)
 
         this.overridePendingTransition(0,0)
-        if (!PermissionUtils.isAccessibilityEnable(this,"com.example.access.AccessibilityTestService")) {
+        if (!PermissionUtils.isAccessibilityEnable(this,"com.lhr.access.ChaosAccessibilityService")) {
             PermissionUtils.gotoAccessibilitySetting(this)
         }else{
             finish()

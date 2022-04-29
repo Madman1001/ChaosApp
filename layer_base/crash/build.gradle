@@ -1,7 +1,8 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-kapt'
+
 }
 
 android {
@@ -9,7 +10,6 @@ android {
     buildToolsVersion rootProject.ext.android['buildToolsVersion']
 
     defaultConfig {
-        applicationId rootProject.ext.android['applicationId']
         minSdkVersion rootProject.ext.android['minSdkVersion']
         targetSdkVersion rootProject.ext.android['targetSdkVersion']
         versionCode rootProject.ext.android['versionCode']
@@ -29,21 +29,16 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    kapt {
+        arguments {
+            arg("ELEMENT_MODULE_NAME", project.name)
+        }
+    }
 }
 
 dependencies {
     implementation project(':centre')
-
-    implementation project(':anim')
-    implementation project(':sys')
-    implementation project(':utils')
-    implementation project(':view')
-
-    implementation project(':access')
-    implementation project(':game')
-//    implementation project(':sound')
-    implementation project(':image')
-    implementation project(':adb')
-    implementation project(':vpn')
-    implementation project(':crash')
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'com.google.android.material:material:1.4.0'
+    kapt project(':centre_processor')
 }
