@@ -17,5 +17,5 @@ Just coding
   * adb adb服务访问库---未完成
   * game 游戏库---未完成
   * image 图像库---未完成
-  * sound 音频库---未完成
-  * vpn 本地网络代理库---未实现
+  * vpn 本地网络代理库---实现udp转发
+  * learn Android 基础学习库，展示Android常用组件、控件和工具---未完成

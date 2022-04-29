@@ -14,15 +14,13 @@ project(':centre_processor').projectDir = new File("layer_inter/centre_processor
 project(':centre_annotation').projectDir = new File("layer_inter/centre_annotation")
 
 //组件层
-include ':access', ':image',':game',':adb',':vpn'
+include ':access', ':image',':game',':adb',':vpn','learn'
 project(':access').projectDir = new File("layer_element/access")
 project(':image').projectDir = new File("layer_element/image")
 project(':game').projectDir = new File("layer_element/game")
 project(':adb').projectDir = new File("layer_element/adb")
-//project(':sound').projectDir = new File("layer_element/sound")
+project(':learn').projectDir = new File("layer_element/learn")
 project(':vpn').projectDir = new File("layer_element/vpn")
 
 //应用层
 include ':app'
-
-

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.lhr.learn">
+    <application>
+        <activity android:name="com.lhr.learn.LearnActivity"
+            android:theme="@style/Theme.AppCompat"
+            android:label="Learn"/>
+    </application>
+</manifest>
