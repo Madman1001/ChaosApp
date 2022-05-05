@@ -11,10 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lhr.adb.adapter.ResultAdapter
 import com.lhr.adb.exec.DefaultActuator
-import com.lhr.adb.script.OpenAdbScript
-import com.lhr.adb.script.ShowIpScript
-import com.lhr.adb.script.ShowPackagesScript
-import com.lhr.adb.script.TestScript
+import com.lhr.adb.script.*
 import com.lhr.centre.annotation.CElement
 import kotlinx.coroutines.*
 import java.util.*
@@ -44,54 +41,21 @@ class AdbActivity : AppCompatActivity(){
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
-            R.id.adb_open_connect -> {
-                OpenAdbScript("5555").apply {
-                    this.listener = { command, result, message ->
-                        Log.d(tag, "$command: $result : $message")
-                        GlobalScope.launch(Dispatchers.Main) {
-                            adapter.addItem(message)
-                            findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
-                        }
-                    }
-                    this.start()
+            R.id.adb_open_connect -> OpenAdbScript("5555")
+            R.id.adb_show_ip -> ShowIpScript()
+            R.id.adb_show_packages -> ShowPackagesScript()
+            R.id.adb_dump -> DumpScript()
+            R.id.adb_test -> TestScript()
+            else -> null
+        }?.run {
+            this.listener = { command, result, message ->
+                Log.d(tag, "$command: $result : $message")
+                GlobalScope.launch(Dispatchers.Main) {
+                    adapter.addItem(message)
+                    findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
                 }
             }
-            R.id.adb_show_ip -> {
-                ShowIpScript().apply {
-                    this.listener = { command, result, message ->
-                        Log.d(tag, "$command: $result : $message")
-                        GlobalScope.launch(Dispatchers.Main) {
-                            adapter.addItem(message)
-                            findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
-                        }
-                    }
-                    this.start()
-                }
-            }
-            R.id.adb_show_packages -> {
-                ShowPackagesScript().apply {
-                    this.listener = { command, result, message ->
-                        Log.d(tag, "$command: $result : $message")
-                        GlobalScope.launch(Dispatchers.Main) {
-                            adapter.addItem(message)
-                            findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
-                        }
-                    }
-                    this.start()
-                }
-            }
-            R.id.adb_test ->{
-                TestScript().apply {
-                    this.listener = { command, result, message ->
-                        Log.d(tag, "$command: $result : $message")
-                        GlobalScope.launch(Dispatchers.Main) {
-                            adapter.addItem(message)
-                            findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
-                        }
-                    }
-                    this.start()
-                }
-            }
+            this.start()
         }
         return super.onOptionsItemSelected(item)
     }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
  * @date 2021/11/21
  * @des 开启adb调试脚本
  */
-class OpenAdbScript(port: String) : IScript {
+class DumpScript : IScript {
     private val tag = "OpenAdbScript"
 
     private var actuator: IActuator
@@ -30,9 +30,7 @@ class OpenAdbScript(port: String) : IScript {
         }else{
             actuator.addCommand("su")
         }
-        actuator.addCommand("setprop service.adb.tcp.port $port")
-        actuator.addCommand("stop adbd")
-        actuator.addCommand("start adbd")
+        actuator.addCommand("dumpsys activity")
     }
 
     override fun start() {

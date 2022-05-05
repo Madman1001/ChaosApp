@@ -8,6 +8,8 @@
             android:title="IP Address" />
         <item android:id="@+id/adb_show_packages"
             android:title="Packages" />
+        <item android:id="@+id/adb_dump"
+            android:title="Dump"/>
         <item android:id="@+id/adb_test"
             android:title="Test" />
     </group>

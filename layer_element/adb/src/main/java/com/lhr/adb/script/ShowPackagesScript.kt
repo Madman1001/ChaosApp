@@ -17,7 +17,7 @@ class ShowPackagesScript : IScript{
 
     private var actuator: IActuator
 
-    var listener: (String, Boolean, String) -> Unit = { command, result, message ->
+    override var listener: (String, Boolean, String) -> Unit = { command, result, message ->
         Log.d(tag, "$result : $message")
     }
 

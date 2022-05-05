@@ -7,6 +7,8 @@ package com.lhr.adb.script
  */
 interface IScript {
 
+    var listener: (String, Boolean, String) -> Unit
+
     /**
      * 执行脚本
      */
