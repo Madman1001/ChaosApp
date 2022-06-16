@@ -37,7 +37,7 @@ dependencies {
     implementation project(':anim')
     implementation project(':sys')
     implementation project(':utils')
-    implementation project(':view')
+    implementation project(':opengl')
 
     implementation project(':access')
     implementation project(':game')

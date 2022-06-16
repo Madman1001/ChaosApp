@@ -4,14 +4,8 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ImageActivity"
+    android:id="@+id/image_content_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <ImageView
-        android:id="@+id/image_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/imager_demo"/>
-
     <Button
         android:id="@+id/image_blur_btn"
         android:layout_width="wrap_content"
@@ -20,6 +14,16 @@
         android:onClick="imageBlur"
         android:layout_marginBottom="25dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/image_normal_btn"
+        app:layout_constraintBottom_toBottomOf="parent" />
+    <Button
+        android:id="@+id/image_normal_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NORMAL"
+        android:onClick="imageNormal"
+        android:layout_marginBottom="25dp"
+        app:layout_constraintStart_toEndOf="@id/image_blur_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -36,5 +36,6 @@ android {
 
 dependencies {
     implementation project(':centre')
+    implementation project(path: ':utils')
     kapt project(':centre_processor')
 }

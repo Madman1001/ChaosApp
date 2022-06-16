@@ -1,5 +1,6 @@
 package com.lhr.utils
 
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
@@ -13,17 +14,51 @@ import android.util.Log
 object BitmapUtils {
     private val Tag = BitmapUtils::class.java.simpleName
 
+    /**
+     * 获取Bitmap对象
+     * @param resource 资源对象
+     * @param id 资源id
+     * @param reqWidth 期望的图片宽度
+     * @param reqHeight 期望的图片高度
+     */
+    fun getBitmapFromResource(resource: Resources, id: Int, reqWidth: Int = -1, reqHeight: Int = -1): Bitmap?{
+        var bitmap: Bitmap? = null
+        val option = BitmapFactory.Options()
+        option.inJustDecodeBounds = true
+        BitmapFactory.decodeResource(resource,id,option)
+        option.inSampleSize =
+            calculateInSampleSize(
+                option,
+                reqWidth,
+                reqHeight
+            )
+        option.inJustDecodeBounds = false
+        bitmap = BitmapFactory.decodeResource(resource,id,option)
+        return bitmap
+    }
+
+    /**
+     * 获取Bitmap对象
+     * @param path 图片文件路径
+     * @param reqWidth 期望的图片宽度
+     * @param reqHeight 期望的图片高度
+     */
     fun getBitmapFromFile(path: String?, reqWidth: Int = -1, reqHeight: Int = -1): Bitmap?{
         var bitmap: Bitmap? = null
         val option = BitmapFactory.Options()
         option.inJustDecodeBounds = true
         BitmapFactory.decodeFile(path,option)
-        option.inSampleSize = calculateInSampleSize(option, reqWidth, reqHeight)
-        Log.e(Tag,"bitmap sample size ${option.inSampleSize}")
+        option.inSampleSize =
+            calculateInSampleSize(
+                option,
+                reqWidth,
+                reqHeight
+            )
         option.inJustDecodeBounds = false
         bitmap = BitmapFactory.decodeFile(path,option)
         return bitmap
     }
+
 
     fun cropBitmapToRect(bitmap: Bitmap, rect: Rect): Bitmap{
         val oldWidth = bitmap.width

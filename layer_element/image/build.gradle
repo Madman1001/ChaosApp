@@ -13,14 +13,13 @@ android {
         targetSdkVersion rootProject.ext.android['targetSdkVersion']
         versionCode rootProject.ext.android['versionCode']
         versionName rootProject.ext.android['versionName']
-
-        ndk {
-            abiFilters 'x86_64', 'x86', 'arm64-v8a', 'armeabi-v7a'
-        }
     }
 
     buildTypes {
         release {
+            minifyEnabled false
+        }
+        debug {
             minifyEnabled false
         }
     }
@@ -36,20 +35,12 @@ android {
             arg("ELEMENT_MODULE_NAME", project.name)
         }
     }
-
-    //配置NDK编译脚本
-    externalNativeBuild {
-        cmake{
-            path "CMakeLists.txt"
-        }
-    }
-
-    ndkVersion "21.1.6352462"
 }
 
 dependencies {
     implementation project(':utils')
 
     implementation project(':centre')
+    implementation project(path: ':opengl')
     kapt project(':centre_processor')
 }

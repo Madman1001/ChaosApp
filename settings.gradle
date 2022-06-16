@@ -1,10 +1,10 @@
 
 //基础层
-include ':sys',':utils',':anim',':view',':crash'
+include ':sys',':utils',':anim', ':opengl',':crash'
 project(':sys').projectDir = new File("layer_base/sys")
 project(':utils').projectDir = new File("layer_base/utils")
 project(':anim').projectDir = new File("layer_base/anim")
-project(':view').projectDir = new File("layer_base/view")
+project(':opengl').projectDir = new File("layer_base/opengl")
 project(':crash').projectDir = new File("layer_base/crash")
 
 //中间层
