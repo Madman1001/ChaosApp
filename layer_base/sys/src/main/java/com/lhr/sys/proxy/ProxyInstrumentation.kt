@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
+import android.widget.Toast
 
 /**
  * @author lhr
@@ -22,11 +23,10 @@ class ProxyInstrumentation(private val baseIns: Instrumentation) : Instrumentati
         who: Context?, contextThread: IBinder?, token: IBinder?, target: Activity?,
         intent: Intent?, requestCode: Int, options: Bundle?
     ): ActivityResult? {
-        Log.e(
-            PI_TAG,
-            "Context: " + who + " , IBinder: " + contextThread + " , IBinder: " + token + " , Activity: " + target + " " +
-                    "Intent: " + intent + " , Int: " + requestCode + " , Bundle: " + options + ""
-        )
+        val toast = "Context: " + who + " , IBinder: " + contextThread + " , IBinder: " + token + " , Activity: " + target + " " +
+                "Intent: " + intent + " , Int: " + requestCode + " , Bundle: " + options + ""
+        Log.e(PI_TAG, toast)
+        Toast.makeText(who, toast, Toast.LENGTH_SHORT).show()
         return try {
             val realExec =
                 Instrumentation::class.java.getDeclaredMethod(
