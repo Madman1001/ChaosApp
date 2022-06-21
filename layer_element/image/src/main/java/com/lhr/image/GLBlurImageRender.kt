@@ -109,10 +109,10 @@ class GLBlurImageRender(private val context: Context,
         GLESUtils.checkGlError("mVertexBuffer")
 
         /* ---------------------设置模糊配置----------------------- */
-        val uBlurRadius = GLES20.glGetAttribLocation(mProgramHandle, "uBlurRadius")
-        GLES20.glUniform1i(uBlurRadius, 35)
-        val uBlurOffset = GLES20.glGetAttribLocation(mProgramHandle, "uBlurOffset")
-        GLES20.glUniform2f(uBlurOffset, 1f, 0f)
+        val uBlurRadius = GLES20.glGetUniformLocation(mProgramHandle, "uBlurRadius")
+        GLES20.glUniform1i(uBlurRadius, 5)
+        val uBlurOffset = GLES20.glGetUniformLocation(mProgramHandle, "uBlurOffset")
+        GLES20.glUniform2f(uBlurOffset, 1.0f/300.0f,1.0f/300.0f)
 
         /* ---------------------加载纹理----------------------- */
         val uSampler =  GLES20.glGetUniformLocation(mProgramHandle,"uSampler")
