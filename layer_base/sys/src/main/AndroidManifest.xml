@@ -4,6 +4,10 @@
 
     <application>
         <activity android:name="com.lhr.sys.SysActivity"/>
-        <activity android:name="com.lhr.sys.PlaceholderActivity"/>
+        <provider
+            android:name=".ServiceHookContentProvider"
+            android:authorities="com.lhr.sys.ServiceHookContentProvider"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 </manifest>

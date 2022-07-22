@@ -6,6 +6,7 @@
     tools:context=".ImageActivity"
     android:id="@+id/image_content_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <Button
         android:id="@+id/image_blur_btn"
         android:layout_width="wrap_content"
@@ -24,6 +25,25 @@
         android:onClick="imageNormal"
         android:layout_marginBottom="25dp"
         app:layout_constraintStart_toEndOf="@id/image_blur_btn"
+        app:layout_constraintEnd_toStartOf="@id/digital_rain_btn"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <Button
+        android:id="@+id/digital_rain_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DIGITAL RAIN"
+        android:onClick="digitalRain"
+        android:layout_marginBottom="25dp"
+        app:layout_constraintStart_toEndOf="@id/image_normal_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ic_wallpaper"
+        android:onClick="gotoWallpaper"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

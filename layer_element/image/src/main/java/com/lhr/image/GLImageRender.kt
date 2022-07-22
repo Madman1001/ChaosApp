@@ -3,10 +3,8 @@ package com.lhr.image
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.opengl.EGL14
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
-import android.renderscript.Matrix4f
 import com.lhr.opengl.utils.GLESUtils
 import com.lhr.opengl.utils.ShaderUtils
 import com.lhr.opengl.utils.TextureUtils
@@ -49,7 +47,7 @@ class GLImageRender(private val context: Context,
         1f, 1f
     )
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        gl?.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
+        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 0.0f)
         //创建着色器程序
         if (mProgramHandle == 0) {
             val vertexString= ShaderUtils.readShader(context, R.raw.image_v)
@@ -73,7 +71,7 @@ class GLImageRender(private val context: Context,
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        gl?.glViewport(0, 0, width, height)
+        GLES20.glViewport(0, 0, width, height)
         mRect.set(0, 0, width, height)
     }
 

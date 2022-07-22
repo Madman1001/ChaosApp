@@ -2,15 +2,16 @@ package com.lhr.sys
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Intent
+import android.app.ActivityManager
+import android.app.AlarmManager
+import android.app.AppOpsManager
+import android.content.Context
 import android.os.Bundle
+import android.os.Process
+import android.provider.Settings
+import android.util.Log
 import android.view.View
-import com.lhr.sys.utils.HookUtil
 import com.lhr.centre.annotation.CElement
-import com.lhr.sys.proxy.ProxyInstrumentation
-import com.lhr.sys.reflection.SysProxyField
-import com.lhr.sys.reflection.SysProxyMethod
-
 
 /**
  * @author lhr
@@ -22,20 +23,32 @@ class SysActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sys_activity)
+
+        HookFailList.forEach {
+            ServiceHookHelper.hookService(it)
+        }
     }
 
-    fun onHook(v: View){
-        hookInstrumentation()
+    fun getHookAlarmManager(v: View){
+        (this.getSystemService(ALARM_SERVICE) as AlarmManager).nextAlarmClock
     }
 
-    fun onStartActivity(v: View){
-        startActivity(Intent(this,PlaceholderActivity::class.java))
+    fun getHookPackageManager(v: View){
+        this.packageManager.isSafeMode
     }
 
-    @SuppressLint("PrivateApi")
-    private fun hookInstrumentation() {
-        val hookClass = HookUtil::class.java
-        val proxyMethod = SysProxyMethod(hookClass,"hookInstrumentation",Activity::class.java, Class::class.java)
-        proxyMethod.invoke(HookUtil,this, ProxyInstrumentation::class.java)
+    fun getHookActivityManager(v: View){
+        (this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).appTasks
+    }
+
+    fun getHookAppOpsService(v: View){
+        (this.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager)
+            .checkPackage(Process.myUid(), this.packageName)
+    }
+
+    @SuppressLint("HardwareIds")
+    fun getAndroidId(v: View){
+        val mAndroidId = Settings.Secure.getString(contentResolver, "android_id")
+        Log.e(HOOK_TAG,"android id $mAndroidId")
     }
 }

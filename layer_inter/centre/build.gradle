@@ -33,17 +33,7 @@ android {
 dependencies {
     api project(':centre_annotation')
 
-    api rootProject.ext.dependencies['androidx-core']
-    api rootProject.ext.dependencies['androidx-appcompat']
-    api rootProject.ext.dependencies['androidx-material']
-    api rootProject.ext.dependencies['androidx-fragment']
-    api rootProject.ext.dependencies['androidx-fragment-ktx']
-    api rootProject.ext.dependencies['androidx-constraintlayout']
-    api rootProject.ext.dependencies['kotlin']
-    api rootProject.ext.dependencies['kotlin-reflect']
-    api rootProject.ext.dependencies['kotlin-jdk8']
-    api rootProject.ext.dependencies['kotlinx-coroutines-core']
-    api rootProject.ext.dependencies['kotlinx-coroutines-android']
-    api rootProject.ext.dependencies['junit']
-    api rootProject.ext.dependencies['junit-android']
+    rootProject.ext.dependencies.each {
+        k, v -> api(v)
+    }
 }

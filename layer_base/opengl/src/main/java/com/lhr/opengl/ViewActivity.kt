@@ -52,8 +52,14 @@ class ViewActivity : Activity(), SurfaceHolder.Callback {
             .drawToBitmap()
             .applyCanvas {
                 val paint = Paint()
-                paint.color = Color.parseColor("#AAAAAA")
-                this.drawCircle(this.width / 2f, this.height / 2f, this.width / 4f, paint)
+                this.drawRGB(255,255,255)
+                var radius = this.width / 2f
+                while (radius > 0){
+                    val color = Color.rgb((0..255).random(),(0..255).random(),(0..255).random())
+                    paint.color = color
+                    this.drawCircle(this.width / 2f, this.height / 2f, radius, paint)
+                    radius -= 25f
+                }
             }
         val view = findViewById<SurfaceView>(R.id.surface_view)
         GLESUtils.drawBitmapToSurface(surface, bitmap, view.width, view.height)

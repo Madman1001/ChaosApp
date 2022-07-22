@@ -1,5 +1,8 @@
 package com.lhr.image
 
+import android.app.WallpaperManager
+import android.content.ComponentName
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.opengl.GLSurfaceView
 import android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY
@@ -40,6 +43,14 @@ class ImageActivity : AppCompatActivity() {
         glView?.onPause()
     }
 
+    fun gotoWallpaper(view: View){
+        val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
+            this.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT, ComponentName(this@ImageActivity, GameWallpaperService::class.java))
+        }
+        startActivity(intent)
+
+    }
+
     fun imageNormal(view: View){
         GlobalScope.launch(Dispatchers.Default){
             val option = BitmapFactory.Options()
@@ -47,6 +58,11 @@ class ImageActivity : AppCompatActivity() {
             val normalBitmap =
                 BitmapFactory.decodeResource(this@ImageActivity.resources,R.drawable.imager_demo,option)
             withContext(Dispatchers.Main){
+                if (glView?.parent != null){
+                    glView?.parent?.run {
+                        (this as ViewGroup).removeView(glView)
+                    }
+                }
                 glView = GLSurfaceView(this@ImageActivity)
                 glView?.setEGLContextClientVersion(2)
                 glView?.setRenderer(GLImageRender(this@ImageActivity, normalBitmap))
@@ -62,11 +78,28 @@ class ImageActivity : AppCompatActivity() {
             val normalBitmap =
                 BitmapFactory.decodeResource(this@ImageActivity.resources,R.drawable.imager_demo,option)
             withContext(Dispatchers.Main){
+                if (glView?.parent != null){
+                    glView?.parent?.run {
+                        (this as ViewGroup).removeView(glView)
+                    }
+                }
                 glView = GLSurfaceView(this@ImageActivity)
                 glView?.setEGLContextClientVersion(2)
                 glView?.setRenderer(GLBlurImageRender(this@ImageActivity, normalBitmap))
                 this@ImageActivity.findViewById<ViewGroup>(R.id.image_content_layout).addView(glView)
             }
         }
+    }
+
+    fun digitalRain(view: View){
+        if (glView?.parent != null){
+            glView?.parent?.run {
+                (this as ViewGroup).removeView(glView)
+            }
+        }
+        glView = GLSurfaceView(this@ImageActivity)
+        glView?.setEGLContextClientVersion(2)
+        glView?.setRenderer(GLDigitalRainRender(this@ImageActivity))
+        this@ImageActivity.findViewById<ViewGroup>(R.id.image_content_layout).addView(glView)
     }
 }

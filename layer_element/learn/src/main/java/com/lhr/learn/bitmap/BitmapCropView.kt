@@ -1,4 +1,4 @@
-package com.lhr.learn.view
+package com.lhr.learn.bitmap
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -8,7 +8,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import java.lang.StringBuilder
-import java.util.jar.Attributes
 import kotlin.math.floor
 
 /**

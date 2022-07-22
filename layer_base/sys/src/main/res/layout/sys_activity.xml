@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SysActivity"
+        android:text="System Service"
         android:textStyle="bold"
         android:textSize="36sp"
         android:layout_marginTop="40dp"
@@ -22,19 +22,49 @@
         android:id="@+id/button_a"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="hook activity"
-        android:onClick="onHook"
+        android:text="Alarm Manager"
+        android:onClick="getHookAlarmManager"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <Button
+        android:id="@+id/button_b"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="start PlaceholderActivity"
-        android:onClick="onStartActivity"
+        android:text="Package Manager"
+        android:onClick="getHookPackageManager"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_a"/>
+
+    <Button
+        android:id="@+id/button_c"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Activity Manager"
+        android:onClick="getHookActivityManager"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_b"/>
+
+    <Button
+        android:id="@+id/button_d"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="APP OPS SERVICE"
+        android:onClick="getHookAppOpsService"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_c"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android Id"
+        android:onClick="getAndroidId"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_d"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

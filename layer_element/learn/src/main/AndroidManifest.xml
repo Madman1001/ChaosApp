@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.lhr.learn">
+    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
     <application>
+        <service android:name="com.lhr.learn.applications.StorageUsageService" />
+
         <activity android:name="com.lhr.learn.LearnActivity"
             android:theme="@style/Theme.AppCompat"
             android:label="Learn"/>
+
+
+        <activity android:name="com.lhr.learn.base.ReplaceFragmentActivity"
+            android:theme="@style/Theme.AppCompat"
+            android:exported="false"/>
     </application>
 </manifest>
