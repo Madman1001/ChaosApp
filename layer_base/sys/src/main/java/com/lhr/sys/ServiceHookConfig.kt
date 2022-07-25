@@ -48,11 +48,11 @@ val SERVICE_HOOK_LIST: List<ServiceHookBean> get() {
 
     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P){
         //黑名单api
-//        result.add(
-//            ServiceHookBean("activity_task",
-//                Class.forName("android.app.IActivityTaskManager\$Stub"),
-//                Class.forName("android.app.IActivityTaskManager"))
-//        )
+        result.add(
+            ServiceHookBean("activity_task",
+                Class.forName("android.app.IActivityTaskManager\$Stub"),
+                Class.forName("android.app.IActivityTaskManager"))
+        )
     }
     return result
 }

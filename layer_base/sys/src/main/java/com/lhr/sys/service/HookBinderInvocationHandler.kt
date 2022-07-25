@@ -1,6 +1,8 @@
 package com.lhr.sys.service
 
+import android.os.Build
 import android.os.IBinder
+import com.lhr.sys.reflection.HiddenApiBypass
 import java.lang.reflect.Method
 
 /**
@@ -8,18 +10,26 @@ import java.lang.reflect.Method
  * @Author: mac
  * @Description:
  */
-class HookBinderInvocationHandler(base: IBinder, stubClass: Class<*>) : IUniversalHandler(base) {
-    private val rawService: Any?
+class HookBinderInvocationHandler(private val base: IBinder, private val stubClass: Class<*>) : IUniversalHandler(base) {
+    private val rawService: Any? = createBinderInvocation(base, stubClass)
     init {
-        rawService = createBinderInvocation(base, stubClass)
         concrete = rawService
     }
 
     companion object{
         fun createBinderInvocation(base: IBinder, stubClass: Class<*>): Any? {
-            val asInterfaceMethod =
-                stubClass.getDeclaredMethod("asInterface", IBinder::class.java)
-            return asInterfaceMethod.invoke(null, base)
+            kotlin.runCatching {
+                val asInterfaceMethod =
+                    stubClass.getDeclaredMethod("asInterface", IBinder::class.java)
+                return asInterfaceMethod.invoke(null, base)
+            }.onFailure {
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    HiddenApiBypass.invoke(stubClass, null, "asInterface", base)
+                } else {
+                    null
+                }
+            }
+            return null
         }
     }
 
@@ -27,6 +37,7 @@ class HookBinderInvocationHandler(base: IBinder, stubClass: Class<*>) : IUnivers
         rawService?.run {
             toLog(this::class.java.simpleName, rawService, method, args)
         }
-        return super.invoke(proxy, method, args)
+
+        return super.invoke(rawService, method, args)
     }
 }

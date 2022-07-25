@@ -24,6 +24,6 @@ class HookBinderHandler(
                 HookBinderInvocationHandler(proxyObj, bean.stub)
             )
         }
-        return super.invoke(proxy, method, args)
+        return super.invoke(proxyObj, method, args)
     }
 }
