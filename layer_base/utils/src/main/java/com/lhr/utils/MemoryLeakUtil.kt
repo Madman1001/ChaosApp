@@ -65,8 +65,7 @@ class ProxyCallback(private var concrete: Any?) : InvocationHandler {
     override fun invoke(proxy: Any?, method: Method, args: Array<out Any>?): Any? {
         concrete?.let {
             Log.d("Proxy", this::class.java.simpleName + " >>> " + it::class.java.simpleName + " " + method.name)
-            val runner = it::class.java.getMethod(method.name, *method.parameterTypes)
-            return runner.invoke(concrete, *(args ?: arrayOfNulls<Any>(0)))
+            return method.invoke(concrete, *(args ?: arrayOfNulls<Any>(0)))
         }
         /**
          * 返回默认值

@@ -6,11 +6,15 @@ import android.app.ActivityManager
 import android.app.AlarmManager
 import android.app.AppOpsManager
 import android.content.Context
+import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.View
+import androidx.annotation.RequiresApi
 import com.lhr.centre.annotation.CElement
 
 /**
@@ -23,10 +27,6 @@ class SysActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sys_activity)
-
-        HookFailList.forEach {
-            ServiceHookHelper.hookService(it)
-        }
     }
 
     fun getHookAlarmManager(v: View){
@@ -50,5 +50,17 @@ class SysActivity : Activity() {
     fun getAndroidId(v: View){
         val mAndroidId = Settings.Secure.getString(contentResolver, "android_id")
         Log.e(HOOK_TAG,"android id $mAndroidId")
+    }
+
+    fun getMacId(v: View){
+        val mac = (this.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).connectionInfo?.macAddress
+        Log.e(HOOK_TAG,"mac $mac")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getTelephony(v: View){
+        val telephony = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val imei = telephony.imei
+        Log.e(HOOK_TAG,"imei $imei")
     }
 }

@@ -1,7 +1,7 @@
 package com.lhr.chaos
 
 import android.app.Application
-import android.content.Intent
+import android.util.Log
 
 /**
  * @author lhr
@@ -12,6 +12,7 @@ class MainApplication : Application() {
     private val tag = this::class.java.simpleName
     override fun onCreate() {
         super.onCreate()
-        Intent.ACTION_PACKAGE_CHANGED
+        var s: String
+        Log.e("","")
     }
 }

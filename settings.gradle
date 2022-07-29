@@ -24,5 +24,4 @@ project(':vpn').projectDir = new File("layer_element/vpn")
 
 //应用层
 include ':app'
-include ':lib'
-include ':stub'
+include ':analysis_plugin'

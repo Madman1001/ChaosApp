@@ -1,16 +1,10 @@
 package com.lhr.sys
 
-import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import com.lhr.sys.compat.ActivityManagerHookCompat
-import com.lhr.sys.service.IUniversalHandler
+import com.lhr.sys.compat.PackageManagerHookCompat
 import com.lhr.sys.service.ServiceHookBean
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import java.lang.reflect.Proxy
 
 
 /**
@@ -43,7 +37,23 @@ val SERVICE_HOOK_LIST: List<ServiceHookBean> get() {
     result.add(
         ServiceHookBean("package",
             Class.forName("android.content.pm.IPackageManager\$Stub"),
-            Class.forName("android.content.pm.IPackageManager"))
+            Class.forName("android.content.pm.IPackageManager")
+        ){binder ->
+            PackageManagerHookCompat().hookCompat(binder)
+        }
+    )
+
+    result.add(
+         ServiceHookBean(Context.WIFI_SERVICE,
+            Class.forName("android.net.wifi.IWifiManager\$Stub"),
+            Class.forName("android.net.wifi.IWifiManager"))
+    )
+
+    result.add(
+         ServiceHookBean(Context.TELEPHONY_SERVICE,
+            Class.forName("com.android.internal.telephony.ITelephony\$Stub"),
+            Class.forName("com.android.internal.telephony.ITelephony")
+        )
     )
 
     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P){

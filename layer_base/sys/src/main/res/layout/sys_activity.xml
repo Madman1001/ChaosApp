@@ -60,6 +60,7 @@
         app:layout_constraintTop_toBottomOf="@id/button_c"/>
 
     <Button
+        android:id="@+id/button_e"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Android Id"
@@ -67,4 +68,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/button_d"/>
+
+    <Button
+        android:id="@+id/button_f"
+        android:text="Mac Id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getMacId"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_e"/>
+
+    <Button
+        android:text="imei Id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getTelephony"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_f"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
