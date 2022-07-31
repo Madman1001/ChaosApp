@@ -3,11 +3,12 @@ Just coding
 
 
 ## 基本结构 
+* analysis_plugin asm字节码增强插件
 * layer_base
   * anim 动画库---未实现
-  * sys 系统api反射库---未完成
+  * crash 崩溃拦截库---实现基本崩溃拦截
+  * sys 系统api反射库---实现系统服务代理
   * utils 通用工具库---未完成
-  * view 视图库---未完成
 * layer_inter
   * centre 核心库---实现1.0版本
   * centre_annotation 注解库--实现1.0版本
