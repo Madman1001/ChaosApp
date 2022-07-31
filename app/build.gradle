@@ -46,6 +46,5 @@ dependencies {
     implementation project(':learn')
     implementation project(':image')
     implementation project(':adb')
-    implementation project(':vpn')
     implementation project(':crash')
 }

@@ -12,7 +12,5 @@ class MainApplication : Application() {
     private val tag = this::class.java.simpleName
     override fun onCreate() {
         super.onCreate()
-        var s: String
-        Log.e("","")
     }
 }

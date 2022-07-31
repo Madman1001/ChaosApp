@@ -124,7 +124,7 @@ class AnalyticsPluginTransform extends Transform {
                     modified = AnalyticsClassModifier.modifyClassFile(dir, classFile, context.getTemporaryDir())
                 }
                 if (modified != null) {
-                    // 包名 + 类名  /com/yxhuang/autotrack/android/app/MainActivity.class*/
+                    // 包名 + 类名  /com/xx/xxx/android/app/MainActivity.class*/
                     String key = classFile.absolutePath.replace(dir.absolutePath, "")
                     modifyMap.put(key, modified)
                 }

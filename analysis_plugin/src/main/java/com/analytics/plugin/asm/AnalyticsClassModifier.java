@@ -55,11 +55,11 @@ public class AnalyticsClassModifier{
 
                 byte[] modifiedClassBytes = null;
                 byte[] sourceClassBytes = IOUtils.toByteArray(inputStream);
-                System.out.println(" --- modifyJar entryName " + entryName);
-                if (entryName.endsWith(".class") && isShouldModify(entryName)) {
+                if (entryName.endsWith(".class")) {
                     className = entryName.replace(Matcher.quoteReplacement(File.separator), ".").replace(".class", "");
-                    System.out.println(" --- modifyJar className " + className);
-                    modifiedClassBytes = modifyClass(sourceClassBytes);
+                    if (isShouldModify(className)){
+                        modifiedClassBytes = modifyClass(sourceClassBytes);
+                    }
                 }
                 if (modifiedClassBytes == null) {
                     modifiedClassBytes = sourceClassBytes;
@@ -81,20 +81,19 @@ public class AnalyticsClassModifier{
      * @return -
      */
     public static File modifyClassFile(File dir, File classFile, File tempDir){
-        if (!isShouldModify(classFile.getAbsolutePath())) {
+        String className = classFile.getAbsolutePath().replace(File.separator,"/");
+        if (!isShouldModify(className)) {
             return classFile;
         }
-        System.out.println("-----AnalyticsTransform modifyClassFile dir =" + dir.getAbsolutePath()
-                + "\nclassFile= " + classFile.getName() + "\ngetTemporaryDir " + tempDir);
 
         File modified = null;
 
         try {
-            String className = path2ClassName(classFile.getAbsolutePath().replace(dir.getAbsolutePath() + File.separator, ""));
+            String classFileName = path2ClassName(classFile.getAbsolutePath().replace(dir.getAbsolutePath() + File.separator, ""));
             byte[] sourceClassBytes = IOUtils.toByteArray(new FileInputStream(classFile));
             byte[] modifyClassBytes = modifyClass(sourceClassBytes);
             if (modifyClassBytes != null && modifyClassBytes.length > 0){
-                modified = new File(tempDir, className.replace(".", "") + ".class");
+                modified = new File(tempDir, classFileName.replace(".", "") + ".class");
                 if (modified.exists()){
                     modified.delete();
                 }
@@ -126,13 +125,15 @@ public class AnalyticsClassModifier{
      * @return -
      */
     public static boolean isShouldModify(String className) {
+        boolean result = true;
         if (className.contains(AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS) ||
                 className.contains("R$") ||
                 className.contains("R2$") ||
                 className.contains("R2.class") ||
                 className.contains("BuildConfig.class")) {
-            return false;
+            result = false;
         }
-        return true;
+        System.out.println("-----AnalyticsTransform modifyClassFile = " + className + " is should " + result);
+        return result;
     }
 }
