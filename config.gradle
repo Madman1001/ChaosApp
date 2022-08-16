@@ -3,7 +3,7 @@ ext {
             applicationId    : 'com.lhr.chaos',
             versionCode      : 1,
             versionName      : '1.0',
-            minSdkVersion    : 21,
+            minSdkVersion    : 26,
             targetSdkVersion : 30,
             buildToolsVersion: '30.0.3'
     ]

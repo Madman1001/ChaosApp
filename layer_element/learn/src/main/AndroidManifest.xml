@@ -20,5 +20,10 @@
         <activity android:name="com.lhr.learn.base.ReplaceFragmentActivity"
             android:theme="@style/Theme.AppCompat"
             android:exported="false"/>
+
+        <activity android:name="com.lhr.learn.applications.UninstallHelper"
+            android:theme="@style/TranslucentStyle"
+            android:launchMode="singleTask"
+            android:screenOrientation="behind"/>
     </application>
 </manifest>

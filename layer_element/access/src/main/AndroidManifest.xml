@@ -2,13 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lhr.access">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <application>
         <activity android:name="com.lhr.access.AccessActivity"
             android:screenOrientation="portrait"/>
-
         <service
             android:name="com.lhr.access.ChaosAccessibilityService"
             android:exported="true"
+            android:stopWithTask="false"
             android:label="@string/accessibility_name"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

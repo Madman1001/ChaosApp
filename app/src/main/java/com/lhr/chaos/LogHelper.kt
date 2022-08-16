@@ -18,14 +18,17 @@ object LogHelper {
             sStartTime = HashMap<String, Long>()
             sThreadLocal.set(sStartTime)
         }
-        sStartTime[className + "_" + methodName] = System.nanoTime()
+        sStartTime[className + "_" + methodName] = System.currentTimeMillis()
     }
 
     @JvmStatic
     public fun onMethodExit(className: String?, methodName: String?){
         val sStartTime = sThreadLocal.get() ?: return
-        val endTime = System.nanoTime()
-        val startTime = sStartTime[className + "_" + methodName] ?: System.nanoTime()
-        Log.d("LogHelper", "method: ${className}_$methodName cost ${endTime - startTime} ns")
+        val endTime = System.currentTimeMillis()
+        val startTime = sStartTime[className + "_" + methodName] ?: System.currentTimeMillis()
+        val costTime = endTime - startTime
+        if (costTime > 0){
+            Log.d("LogHelper", "method: ${className}_$methodName cost ${costTime} ms")
+        }
     }
 }

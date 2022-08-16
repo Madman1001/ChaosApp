@@ -20,7 +20,7 @@ project(':image').projectDir = new File("layer_element/image")
 project(':game').projectDir = new File("layer_element/game")
 project(':adb').projectDir = new File("layer_element/adb")
 project(':learn').projectDir = new File("layer_element/learn")
-project(':vpn').projectDir = new File("layer_element/vpn")
+//project(':vpn').projectDir = new File("layer_element/vpn")
 
 //应用层
 include ':app'
