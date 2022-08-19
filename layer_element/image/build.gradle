@@ -38,9 +38,9 @@ android {
 }
 
 dependencies {
-    implementation project(':utils')
 
-    implementation project(':centre')
+
+    implementation project(':common')
     implementation project(path: ':opengl')
     kapt project(':centre_processor')
 }

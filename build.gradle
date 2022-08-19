@@ -1,18 +1,17 @@
 buildscript {
     apply from: "config.gradle"
     ext {
-        kotlin_version = '1.4.32'
-        rootProject.ext.versions['kotlin'] = '1.4.32'
+        kotlin_version = rootProject.ext.versions['kotlin']
     }
     repositories {
         maven { url uri('./repo') }
 
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${rootProject.ext.versions['gradle']}"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProject.ext.versions['kotlin']}"
         classpath "com.analytics:analyticsplugin:1.0.0"
     }
 }
@@ -20,7 +19,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
         mavenCentral()
     }
 }

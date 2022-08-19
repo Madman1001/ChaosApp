@@ -7,6 +7,7 @@ import android.util.Log
  * @Author: mac
  * @Description:
  */
+@Deprecated("该类用于字节码插桩")
 object LogHelper {
     @JvmStatic
     private val sThreadLocal: ThreadLocal<HashMap<String, Long>> = ThreadLocal()

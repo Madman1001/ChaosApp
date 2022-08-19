@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -16,9 +15,9 @@ import android.widget.TextView
 import com.lhr.access.R
 import com.lhr.access.model.IHandleModule
 import com.lhr.access.utils.AccessibilityUtils
-import com.lhr.utils.DipToPx
-import com.lhr.utils.DragWindowTouchListener
-import com.lhr.utils.visible
+import com.lhr.common.utils.DipToPx
+import com.lhr.common.utils.DragWindowTouchListener
+import com.lhr.common.ext.visible
 import kotlinx.coroutines.*
 
 /**

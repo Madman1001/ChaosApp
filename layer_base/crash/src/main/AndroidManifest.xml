@@ -11,7 +11,7 @@
 
         <provider
             android:name=".InitCrashProvider"
-            android:authorities="chaos-crash"
+            android:authorities="${applicationId}.InitCrashProvider"
             android:enabled="true"
             android:exported="false" />
     </application>

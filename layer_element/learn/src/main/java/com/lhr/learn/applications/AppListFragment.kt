@@ -11,11 +11,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
-import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.lhr.learn.R
-import com.lhr.learn.base.BaseFragment
+import com.lhr.common.ui.BaseFragment
+import com.lhr.learn.databinding.FragmentAppListBinding
 import java.io.File
 
 
@@ -24,24 +22,22 @@ import java.io.File
  * @Author: mac
  * @Description:
  */
-class AppListFragment: BaseFragment(), AppInfoAdapter.ItemClickListener {
-
-    override fun getLayout(): Int = R.layout.fragment_app_list
+class AppListFragment: BaseFragment<FragmentAppListBinding>(), AppInfoAdapter.ItemClickListener {
 
     private val packageManager: PackageManager by lazy { requireContext().packageManager }
     private var appList: ArrayList<AppInfo> = arrayListOf()
-    private var appInfoAdapter: AppInfoAdapter? = null
+    private var appInfoAdapter: AppInfoAdapter = AppInfoAdapter(this)
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val rv = view.findViewById<RecyclerView>(R.id.app_list_rv)
-        rv.layoutManager = LinearLayoutManager(this.context).apply {
-            this.orientation = LinearLayoutManager.VERTICAL
+    override fun initView(savedInstanceState: Bundle?) {
+        mBinding.appListRv.run {
+            layoutManager = LinearLayoutManager(this.context).apply {
+                this.orientation = LinearLayoutManager.VERTICAL
+            }
+            appList.clear()
+            appList.addAll(allApplications())
+            appInfoAdapter.replaceData(appList)
+            adapter = appInfoAdapter
         }
-        appList.clear()
-        appList.addAll(this.allApplications())
-        appInfoAdapter = AppInfoAdapter(appList, this)
-        rv.adapter = appInfoAdapter
     }
 
     override fun appOpenClicked(position: Int) {

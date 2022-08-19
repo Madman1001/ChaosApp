@@ -5,6 +5,10 @@ plugins {
 }
 
 apply from: 'analysis.gradle'
+AnalysisExtension{
+    isInjectCode = false
+}
+
 
 android {
     compileSdkVersion rootProject.ext.android['targetSdkVersion']
@@ -16,6 +20,11 @@ android {
         targetSdkVersion rootProject.ext.android['targetSdkVersion']
         versionCode rootProject.ext.android['versionCode']
         versionName rootProject.ext.android['versionName']
+
+        //开启DataBinding
+        buildFeatures {
+            dataBinding = true
+        }
     }
 
     buildTypes {
@@ -34,11 +43,10 @@ android {
 }
 
 dependencies {
-    implementation project(':centre')
+    implementation project(':common')
 
     implementation project(':anim')
     implementation project(':sys')
-    implementation project(':utils')
     implementation project(':opengl')
 
     implementation project(':access')

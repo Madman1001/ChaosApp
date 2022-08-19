@@ -1,10 +1,10 @@
 package com.example.crash
 
-import androidx.appcompat.app.AppCompatActivity
+import android.app.Activity
 import android.os.Bundle
 import android.widget.TextView
 
-class CrashActivity : AppCompatActivity() {
+class CrashActivity : Activity() {
     companion object{
         const val CRASH_DETAIL_KEY = "CRASH_DETAIL_KEY"
     }

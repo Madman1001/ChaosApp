@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lhr.centre.Centre
 import com.lhr.chaos.adapter.ButtonAdapter
-import com.lhr.utils.live
+import com.lhr.common.ext.live
 
 /**
  * @author lhr
@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
                 bt.text = entry.key
                 bt.setOnClickListener {
                     val intent = Intent(this, Class.forName(entry.value) as Class<*>)
-//                    ActivityLaunchUtils.launchActivity(this, intent)
                     this.startActivity(intent)
                 }
                 buttonAdapter.addButton(bt)

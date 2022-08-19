@@ -10,20 +10,17 @@
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <application>
-        <service android:name="com.lhr.learn.applications.StorageUsageService" />
 
         <activity android:name="com.lhr.learn.LearnActivity"
-            android:theme="@style/Theme.AppCompat"
+            android:theme="@style/BaseStyle"
             android:label="Learn"/>
-
-
-        <activity android:name="com.lhr.learn.base.ReplaceFragmentActivity"
-            android:theme="@style/Theme.AppCompat"
-            android:exported="false"/>
 
         <activity android:name="com.lhr.learn.applications.UninstallHelper"
             android:theme="@style/TranslucentStyle"
             android:launchMode="singleTask"
             android:screenOrientation="behind"/>
+        <activity android:name=".ReplaceFragmentActivity"
+            android:theme="@style/BaseStyle"
+            android:exported="false"/>
     </application>
 </manifest>

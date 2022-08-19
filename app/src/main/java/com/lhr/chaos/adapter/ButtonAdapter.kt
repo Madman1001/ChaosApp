@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
-import com.lhr.utils.DipToPx
+import com.lhr.common.utils.DipToPx
 
 /**
  * @author lhr
