@@ -15,6 +15,9 @@ import java.lang.reflect.InvocationTargetException
 class ServiceHookContentProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            HiddenApiBypass.addHiddenApiExemptions("")
+        }
         val application = context?.applicationContext ?: getApplicationByReflect()
         SERVICE_HOOK_LIST.forEach {
             if (!ServiceHookHelper.hookService(it)) {

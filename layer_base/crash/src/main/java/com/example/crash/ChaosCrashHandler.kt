@@ -2,6 +2,7 @@ package com.example.crash
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
 
 /**
@@ -17,7 +18,8 @@ class ChaosCrashHandler(private val app: Context) : Thread.UncaughtExceptionHand
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        Toast.makeText(app, "${e.stackTraceToString()}", Toast.LENGTH_LONG).show()
+        e.printStackTrace()
+        Log.e("ChaosCrashHandler", e.stackTraceToString())
         gotoCrashActivity(e.stackTraceToString())
     }
 

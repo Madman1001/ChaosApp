@@ -5,6 +5,7 @@ import android.util.Log
 import dalvik.system.BaseDexClassLoader
 import dalvik.system.DexFile
 import java.lang.reflect.Field
+import java.util.jar.JarFile
 
 /**
  * @CreateDate: 2022/8/19
@@ -16,8 +17,14 @@ object ClassScanUtil {
 
     fun getAllClass(context: Context): List<String>{
         val result = mutableListOf<String>()
-        for (dexFile in getDexFiles(context)) {
+        for (dexFile in getDexFilesByContext(context)) {
+            Log.e("TAG", "Dex File By Context ${dexFile.name}")
             result.addAll(getDexAllClassName(dexFile))
+        }
+        for (dexFile in getDexFilesBySystem()) {
+            Log.e("TAG", "Dex File By System ${dexFile.name}")
+            result.addAll(getDexAllClassName(dexFile))
+            dexFile.close()
         }
         return result
     }
@@ -36,13 +43,26 @@ object ClassScanUtil {
     }
 
     /**
-     * 获取所以dex文件
+     * 获取虚拟机内部jar文件
+     * VMClassLoader为隐藏对象，需要绕过安全检查
      */
-    internal fun getDexFiles(context: Context): Sequence<DexFile> {
-        // Here we do some reflection to access the dex files from the class loader. These implementation details vary by platform version,
-        // so we have to be a little careful, but not a huge deal since this is just for testing. It should work on 21+.
-        // The source for reference is at:
-        // https://android.googlesource.com/platform/libcore/+/oreo-release/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java
+    internal fun getDexFilesBySystem(): Sequence<DexFile>{
+        val bootClassPathUrlHandlersField = field("java.lang.VMClassLoader", "bootClassPathUrlHandlers")
+        val bootClassPathUrlHandlers = bootClassPathUrlHandlersField.get(null)
+        val jarFileField = field("libcore.io.ClassPathURLStreamHandler", "jarFile")
+        val jarFiles = (bootClassPathUrlHandlers as Array<*>).map {
+            jarFileField.get(it) as JarFile
+        }
+        jarFiles.forEach { jarFile ->
+            DexFile(jarFile.name)
+        }
+        return jarFiles.map { DexFile(it.name) }.asSequence()
+    }
+
+    /**
+     * 获取安装包的dex文件
+     */
+    internal fun getDexFilesByContext(context: Context): Sequence<DexFile> {
         val classLoader = context.classLoader as BaseDexClassLoader
 
         val pathListField = field("dalvik.system.BaseDexClassLoader", "pathList")
