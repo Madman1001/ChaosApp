@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.lhr.common.ext.createViewBinding
 import com.lhr.common.ext.obtainBindingClassByParadigm
 
@@ -18,6 +19,8 @@ abstract class BaseFragment<out DB: ViewDataBinding>: Fragment() {
     private var _bind: DB? = null
 
     val mBinding: DB get() = _bind!!
+
+    val attachActivity: FragmentActivity get() = requireActivity()
 
     override fun onCreateView(
         inflater: LayoutInflater,

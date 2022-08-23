@@ -9,6 +9,7 @@ import com.lhr.learn.applications.AppListFragment
 import com.lhr.learn.bitmap.BitmapCropFragment
 import com.lhr.learn.classcheck.ClassCheckFragment
 import com.lhr.learn.databinding.ActivityLearnBinding
+import com.lhr.learn.procfile.ProcFilesystemsFragment
 
 /**
  * @author lhr
@@ -22,6 +23,7 @@ class LearnActivity : BaseActivity<ActivityLearnBinding>() {
         ListData("App List", this::gotoAppList),
         ListData("Bitmap Crop", this::gotoImageCrop),
         ListData("Class Check", this::gotoClassCheck),
+        ListData("Proc Files", this::gotoProcFilesystems),
     )
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -53,6 +55,10 @@ class LearnActivity : BaseActivity<ActivityLearnBinding>() {
 
     private fun gotoAppList() {
         this.startFragment<AppListFragment>()
+    }
+
+    private fun gotoProcFilesystems(){
+        this.startFragment<ProcFilesystemsFragment>()
     }
 
     data class ListData(val name: String, val action: () -> Unit = {})
