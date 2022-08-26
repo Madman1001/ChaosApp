@@ -14,5 +14,4 @@ java {
 
 dependencies {
     implementation project(':centre_annotation')
-    implementation rootProject.ext.dependencies['kotlin']
 }

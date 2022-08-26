@@ -45,14 +45,10 @@ android {
 dependencies {
     implementation project(':common')
 
-    implementation project(':anim')
     implementation project(':sys')
-    implementation project(':opengl')
 
     implementation project(':access')
-    implementation project(':game')
     implementation project(':learn')
-    implementation project(':image')
     implementation project(':adb')
     implementation project(':crash')
 }

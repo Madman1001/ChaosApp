@@ -34,6 +34,6 @@ dependencies {
     api project(':centre_annotation')
 
     rootProject.ext.dependencies.each {
-        k, v -> api(v)
+        v -> api(v)
     }
 }

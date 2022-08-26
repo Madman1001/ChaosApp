@@ -13,12 +13,12 @@ project(':centre_annotation').projectDir = new File("layer_inter/centre_annotati
 //组件层
 include ':access', ':image',':game',':adb',':vpn','learn',':anim', ':opengl',':sys'
 project(':access').projectDir = new File("layer_element/access")
-project(':image').projectDir = new File("layer_element/image")
-project(':game').projectDir = new File("layer_element/game")
+//project(':image').projectDir = new File("layer_element/image")
+//project(':game').projectDir = new File("layer_element/game")
 project(':adb').projectDir = new File("layer_element/adb")
 project(':learn').projectDir = new File("layer_element/learn")
-project(':anim').projectDir = new File("layer_element/anim")
-project(':opengl').projectDir = new File("layer_element/opengl")
+//project(':anim').projectDir = new File("layer_element/anim")
+//project(':opengl').projectDir = new File("layer_element/opengl")
 project(':sys').projectDir = new File("layer_element/sys")
 //project(':vpn').projectDir = new File("layer_element/vpn")
 
