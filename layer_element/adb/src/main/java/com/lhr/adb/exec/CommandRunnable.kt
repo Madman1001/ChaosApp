@@ -1,6 +1,6 @@
 package com.lhr.adb.exec
 
-import com.lhr.common.utils.IOUtils
+import com.lhr.common.ext.readText
 import java.io.DataOutputStream
 
 /**
@@ -23,14 +23,14 @@ class CommandExecute(
             output.flush()
             val success =
                 try {
-                    IOUtils.readStream(process.inputStream)
+                    process.inputStream.readText()
                 }catch (e: Exception){
                     ""
                 }
 
             val fail =
                 try {
-                    IOUtils.readStream(process.errorStream)
+                    process.errorStream.readText()
                 }catch (e: Exception){
                     ""
                 }

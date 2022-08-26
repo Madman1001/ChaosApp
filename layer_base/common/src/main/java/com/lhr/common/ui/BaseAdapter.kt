@@ -1,5 +1,6 @@
 package com.lhr.common.ui
 
+import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -51,6 +52,7 @@ abstract class BaseAdapter<T>: RecyclerView.Adapter<BaseAdapter.ViewHolder>() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun replaceData(list: Collection<T>){
         data.clear()
         data.addAll(list)

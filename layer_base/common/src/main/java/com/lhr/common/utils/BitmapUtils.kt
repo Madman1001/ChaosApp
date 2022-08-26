@@ -4,7 +4,6 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Rect
-import android.util.Log
 
 /**
  * @author lhr
@@ -60,11 +59,10 @@ object BitmapUtils {
     }
 
 
+    /**
+     * 调整bitmap比例
+     */
     fun cropBitmapToRect(bitmap: Bitmap, rect: Rect): Bitmap{
-        val oldWidth = bitmap.width
-        val oldHeight = bitmap.height
-
-        Log.e(Tag,"bitmap ${oldWidth}x${oldHeight}  ${rect.width()}x${rect.height()}")
         return Bitmap.createBitmap(bitmap,rect.left, rect.top, rect.width(), rect.height())
     }
 

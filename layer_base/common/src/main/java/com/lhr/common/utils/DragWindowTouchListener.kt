@@ -5,9 +5,13 @@ import android.view.View
 import android.view.WindowManager
 import kotlin.math.abs
 
+/**
+ * 可拖拽窗体
+ */
 class DragWindowTouchListener(
     private val wm: WindowManager,
-    private val param: WindowManager.LayoutParams): View.OnTouchListener{
+    private val param: WindowManager.LayoutParams
+) : View.OnTouchListener {
     private val MAX_DISTANCE = 10
     private var distanceX = 0f
     private var distanceY = 0f
@@ -20,7 +24,7 @@ class DragWindowTouchListener(
     private var preY: Float = 0f
 
     override fun onTouch(v: View, event: MotionEvent): Boolean {
-        when(event.action){
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 /*按下*/
                 isIntercept = false
@@ -44,10 +48,10 @@ class DragWindowTouchListener(
                 distanceX = 0f
                 distanceY = 0f
                 /*松开*/
-                return if (isIntercept){
+                return if (isIntercept) {
                     isIntercept = false
                     true
-                }else{
+                } else {
                     false
                 }
             }

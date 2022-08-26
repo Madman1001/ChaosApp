@@ -1,5 +1,6 @@
 package com.lhr.common.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -20,6 +21,7 @@ object NetworkUtils {
     /**
      * 获取网络ip地址
      */
+    @SuppressLint("MissingPermission")
     fun getIpAddress(context: Context): String {
         val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 

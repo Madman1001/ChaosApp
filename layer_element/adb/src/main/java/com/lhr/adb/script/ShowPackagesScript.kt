@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 /**
  * @author lhr
  * @date 2021/11/22
- * @des 查看ip地址
+ * @des 查看进程
  */
 class ShowPackagesScript : IScript{
     private val tag = "ShowIpScript"

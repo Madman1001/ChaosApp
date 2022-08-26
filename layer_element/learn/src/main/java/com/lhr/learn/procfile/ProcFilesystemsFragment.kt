@@ -7,6 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.lhr.common.ui.BaseAdapter
@@ -26,24 +27,12 @@ class ProcFilesystemsFragment: BaseFragment<FragmentProcFilesystemsBinding>() {
     private val basePath = File("/proc")
 
     private var currentPath = basePath
+        set(value) {
+            field = value
+            liveTitle.value = field.absolutePath
+        }
 
-    override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
-        requireActivity().onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true){
-            override fun handleOnBackPressed() {
-                if (currentPath.path != basePath.path){
-                    val file = currentPath.parentFile
-                     if (file != null){
-                         openFile(file)
-                     } else {
-                         attachActivity.finish()
-                     }
-                } else {
-                    attachActivity.finish()
-                }
-            }
-        })
-    }
+    val liveTitle = MutableLiveData<String>(basePath.absolutePath)
 
     private val filesDataAdapter = object : BaseAdapter<File>() {
         override fun bind(holder: ViewHolder, position: Int, data: File) {
@@ -63,7 +52,26 @@ class ProcFilesystemsFragment: BaseFragment<FragmentProcFilesystemsBinding>() {
         override var layout: Int = R.layout.item_proc_files_list
     }
 
+    override fun onAttach(activity: Activity) {
+        super.onAttach(activity)
+        requireActivity().onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                if (currentPath.path != basePath.path){
+                    val file = currentPath.parentFile
+                    if (file != null){
+                        openFile(file)
+                    } else {
+                        attachActivity.finish()
+                    }
+                } else {
+                    attachActivity.finish()
+                }
+            }
+        })
+    }
+
     override fun initView(savedInstanceState: Bundle?) {
+        mBinding.fragment = this
         mBinding.filesRv.run {
             adapter = filesDataAdapter
             layoutManager = LinearLayoutManager(context).apply {

@@ -15,7 +15,7 @@ import android.widget.TextView
 import com.lhr.access.R
 import com.lhr.access.model.IHandleModule
 import com.lhr.access.utils.AccessibilityUtils
-import com.lhr.common.utils.DipToPx
+import com.lhr.common.ext.DipToPx
 import com.lhr.common.utils.DragWindowTouchListener
 import com.lhr.common.ext.visible
 import kotlinx.coroutines.*

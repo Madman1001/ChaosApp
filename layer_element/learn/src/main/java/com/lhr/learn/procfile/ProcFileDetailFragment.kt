@@ -23,21 +23,24 @@ class ProcFileDetailFragment: BaseFragment<FragmentProcFileDetailBinding>() {
     override fun initData(savedInstanceState: Bundle?) {
         super.initData(savedInstanceState)
         filePath = arguments?.getString(KEY_FILE_PATH) ?: ""
-        val file = File(filePath)
-        if (file.exists() && file.isFile){
-            lifecycleScope.launch(Dispatchers.IO){
-                kotlin.runCatching {
-                    val text = file.inputStream().bufferedReader().readText()
-                    withContext(Dispatchers.Main){
-                        mBinding.fileDetailTv.text = text
+
+        kotlin.runCatching {
+            val file = File(filePath)
+            if (file.exists() && file.isFile){
+                lifecycleScope.launch(Dispatchers.IO){
+                    kotlin.runCatching {
+                        val text = file.inputStream().bufferedReader().readText()
+                        withContext(Dispatchers.Main){
+                            mBinding.fileDetailTv.text = text
+                        }
+                    }.onFailure {
+                        attachActivity.finish()
                     }
-                }.onFailure {
-                    Toast.makeText(requireContext(), "缺少相关权限", Toast.LENGTH_SHORT).show()
-                    attachActivity.finish()
                 }
+            } else {
+                attachActivity.finish()
             }
-        } else {
-            Toast.makeText(requireContext(), "无法打开文件", Toast.LENGTH_SHORT).show()
+        }.onFailure {
             attachActivity.finish()
         }
     }

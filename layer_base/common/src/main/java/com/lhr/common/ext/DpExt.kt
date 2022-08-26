@@ -1,4 +1,4 @@
-package com.lhr.common.utils
+package com.lhr.common.ext
 
 import android.content.res.Resources
 import android.util.TypedValue

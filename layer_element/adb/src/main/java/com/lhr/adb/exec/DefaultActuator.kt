@@ -1,6 +1,6 @@
 package com.lhr.adb.exec
 
-import com.lhr.common.utils.IOUtils
+import com.lhr.common.ext.readText
 import java.io.DataOutputStream
 import java.util.*
 
@@ -43,7 +43,7 @@ class DefaultActuator(
             dos?.close()
             val success = process?.let {
                 try {
-                    IOUtils.readStream(it.inputStream)
+                    it.inputStream.readText()
                 }catch (e: Exception){
                     ""
                 }
@@ -52,7 +52,7 @@ class DefaultActuator(
 
             val fail = process?.let {
                 try {
-                    IOUtils.readStream(it.errorStream)
+                    it.errorStream.readText()
                 }catch (e: Exception){
                     ""
                 }
