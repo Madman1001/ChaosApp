@@ -1,4 +1,4 @@
-package com.lhr.learn.classcheck
+package com.lhr.learn.nativelib
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -15,28 +15,30 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.lhr.common.ui.BaseAdapter
 import com.lhr.common.ui.BaseFragment
 import com.lhr.learn.R
-import com.lhr.learn.databinding.FragmentClassCheckBinding
-import com.lhr.learn.utils.ClassScanUtil
+import com.lhr.learn.databinding.FragmentNativeLibCheckBinding
+import com.lhr.learn.procfile.FilesystemsFragment
+import com.lhr.learn.utils.NativeLibScanUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
  * @CreateDate: 2022/8/16
  * @Author: mac
- * @Description: 类查看工具
+ * @Description: native库查看工具
  */
-class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
+class NativeLibFragment : BaseFragment<FragmentNativeLibCheckBinding>() {
     private var inputManager: InputMethodManager? = null
 
-    private var allClassList = listOf<String>()
+    private var allNativeLibList = listOf<File>()
 
-    private var selectClassList = listOf<String>()
+    private var selectClassList = listOf<File>()
 
-    private val classDataAdapter = object : BaseAdapter<String>() {
-        override fun bind(holder: ViewHolder, position: Int, data: String) {
-            holder.itemView.findViewById<TextView>(R.id.itemTv).text = data
+    private val classDataAdapter = object : BaseAdapter<File>() {
+        override fun bind(holder: ViewHolder, position: Int, data: File) {
+            holder.itemView.findViewById<TextView>(R.id.itemTv).text = data.absolutePath
             holder.itemView.setOnClickListener {
-                gotoClassDetail(data)
+                gotoNativeLibDetail(data.absolutePath)
             }
         }
 
@@ -58,8 +60,8 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
             }
         }
         lifecycleScope.launch(Dispatchers.IO) {
-            allClassList = ClassScanUtil.getAllClass(requireContext())
-            classDataAdapter.replaceData(allClassList)
+            allNativeLibList = NativeLibScanUtil.getAllNativeLibraryFile(requireContext())
+            classDataAdapter.replaceData(allNativeLibList)
         }
     }
 
@@ -69,10 +71,10 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
             doOnTextChanged { text, start, before, count ->
                 Log.e("TAG", "onTextChanged $text $start $before $count")
                 if (TextUtils.isEmpty(text)) {
-                    classDataAdapter.replaceData(allClassList)
+                    classDataAdapter.replaceData(allNativeLibList)
                 } else {
-                    selectClassList = allClassList.filter {
-                        it.contains(text ?: ".*", true)
+                    selectClassList = allNativeLibList.filter {
+                        it.absolutePath.contains(text ?: ".*", true)
                     }
                     classDataAdapter.replaceData(selectClassList)
                 }
@@ -123,14 +125,14 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
             return
         }
 
-        gotoClassDetail(text)
+        gotoNativeLibDetail(text)
     }
 
     fun clearText() {
         mBinding.adbInCode.setText("")
     }
 
-    fun gotoClassDetail(className: String) {
-        ClassDetailFragment.start(requireActivity(), className)
+    fun gotoNativeLibDetail(path: String) {
+        FilesystemsFragment.start(attachActivity, path)
     }
 }

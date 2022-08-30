@@ -2,10 +2,9 @@ package com.lhr.learn.procfile
 
 import android.app.Activity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.lhr.common.ui.BaseFragment
-import com.lhr.learn.databinding.FragmentProcFileDetailBinding
+import com.lhr.learn.databinding.FragmentTextFileDetailBinding
 import com.lhr.learn.startFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,7 +16,7 @@ import java.io.File
  * @Author: mac
  * @Description:
  */
-class ProcFileDetailFragment: BaseFragment<FragmentProcFileDetailBinding>() {
+class TxtFileDetailFragment : BaseFragment<FragmentTextFileDetailBinding>() {
     private var filePath = ""
 
     override fun initData(savedInstanceState: Bundle?) {
@@ -26,11 +25,11 @@ class ProcFileDetailFragment: BaseFragment<FragmentProcFileDetailBinding>() {
 
         kotlin.runCatching {
             val file = File(filePath)
-            if (file.exists() && file.isFile){
-                lifecycleScope.launch(Dispatchers.IO){
+            if (file.exists() && file.isFile) {
+                lifecycleScope.launch(Dispatchers.IO) {
                     kotlin.runCatching {
                         val text = file.inputStream().bufferedReader().readText()
-                        withContext(Dispatchers.Main){
+                        withContext(Dispatchers.Main) {
                             mBinding.fileDetailTv.text = text
                         }
                     }.onFailure {
@@ -45,11 +44,16 @@ class ProcFileDetailFragment: BaseFragment<FragmentProcFileDetailBinding>() {
         }
     }
 
-    companion object{
+    companion object {
         private const val KEY_FILE_PATH = "KEY_FILE_PATH"
 
-        fun start(activity: Activity, path: String){
-            activity.startFragment<ProcFileDetailFragment>(Bundle().apply { putString(KEY_FILE_PATH, path)})
+        fun start(activity: Activity, path: String) {
+            activity.startFragment<TxtFileDetailFragment>(Bundle().apply {
+                putString(
+                    KEY_FILE_PATH,
+                    path
+                )
+            })
         }
     }
 }

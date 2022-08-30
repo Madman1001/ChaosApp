@@ -1,5 +1,6 @@
 package com.lhr.chaos
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -31,10 +32,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun initListButton() {
         for (element in Centre.getElementList()) {
             for (entry in element.extraMap) {
                 val bt = Button(this)
+                bt.isAllCaps = false
                 bt.text = entry.key
                 bt.setOnClickListener {
                     val intent = Intent(this, Class.forName(entry.value) as Class<*>)

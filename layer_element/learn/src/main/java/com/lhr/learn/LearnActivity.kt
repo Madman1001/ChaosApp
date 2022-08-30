@@ -9,7 +9,8 @@ import com.lhr.learn.applications.AppListFragment
 import com.lhr.learn.bitmap.BitmapCropFragment
 import com.lhr.learn.classcheck.ClassCheckFragment
 import com.lhr.learn.databinding.ActivityLearnBinding
-import com.lhr.learn.procfile.ProcFilesystemsFragment
+import com.lhr.learn.nativelib.NativeLibFragment
+import com.lhr.learn.procfile.FilesystemsFragment
 
 /**
  * @author lhr
@@ -23,6 +24,7 @@ class LearnActivity : BaseActivity<ActivityLearnBinding>() {
         ListData("App List", this::gotoAppList),
         ListData("Bitmap Crop", this::gotoImageCrop),
         ListData("Class Check", this::gotoClassCheck),
+        ListData("Native Files", this::gotoNativeFileCheck),
         ListData("Proc Files", this::gotoProcFilesystems),
     )
 
@@ -58,7 +60,11 @@ class LearnActivity : BaseActivity<ActivityLearnBinding>() {
     }
 
     private fun gotoProcFilesystems(){
-        this.startFragment<ProcFilesystemsFragment>()
+        FilesystemsFragment.start(this, "/proc")
+    }
+
+    private fun gotoNativeFileCheck(){
+        this.startFragment<NativeLibFragment>()
     }
 
     data class ListData(val name: String, val action: () -> Unit = {})

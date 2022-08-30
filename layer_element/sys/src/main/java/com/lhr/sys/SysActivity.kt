@@ -22,7 +22,7 @@ import com.lhr.centre.annotation.CElement
  * @date 2021/5/7
  * @des
  */
-@CElement(name = "系统反射")
+@CElement(name = "系统代理")
 class SysActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

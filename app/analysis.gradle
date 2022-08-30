@@ -3,7 +3,7 @@ AnalysisExtension{
     isInjectCode = true
     proxyClass = "com.lhr.chaos.LogHelper"
     rulesIn = [
-            "com.lhr.chaos.*"
+            "com.lhr.*"
     ]
     rulesOut = [
             ".*R\\..*",

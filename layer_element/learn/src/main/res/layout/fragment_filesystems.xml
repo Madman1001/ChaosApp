@@ -5,7 +5,7 @@
     <data>
         <variable
             name="fragment"
-            type="com.lhr.learn.procfile.ProcFilesystemsFragment" />
+            type="com.lhr.learn.procfile.FilesystemsFragment" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -23,12 +23,15 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             app:layout_constraintTop_toTopOf="parent">
-            <TextView
+            <com.lhr.common.ui.widget.ScrollingTextView
                 android:id="@+id/titleTv"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="@{fragment.liveTitle}"
                 android:textStyle="bold"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
                 android:textColor="@color/main_text_color"
                 android:textSize="18sp"/>
         </LinearLayout>
@@ -38,6 +41,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/titleLay"
-            tools:listitem="@layout/item_proc_files_list"/>
+            tools:listitem="@layout/item_files_list"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

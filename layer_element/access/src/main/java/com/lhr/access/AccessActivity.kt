@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.lhr.access.utils.PermissionUtils
 import com.lhr.centre.annotation.CElement
 
-@CElement(name = "无障碍功能")
+@CElement(name = "自动化服务")
 class AccessActivity : AppCompatActivity() {
     private val tag = "AS_${this::class.java.simpleName}"
 
