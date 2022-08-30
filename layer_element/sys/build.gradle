@@ -7,7 +7,6 @@ plugins {
 
 android {
     compileSdkVersion rootProject.ext.android['targetSdkVersion']
-    buildToolsVersion rootProject.ext.android['buildToolsVersion']
 
     defaultConfig {
         minSdkVersion rootProject.ext.android['minSdkVersion']
@@ -34,6 +33,7 @@ android {
             arg("ELEMENT_MODULE_NAME", project.name)
         }
     }
+    kapt.includeCompileClasspath = false
 }
 
 dependencies {

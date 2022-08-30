@@ -5,6 +5,7 @@ import org.objectweb.asm.Opcodes;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class AnalyticsConfig {
     public static int ASM_API = Opcodes.ASM9;
@@ -15,14 +16,7 @@ public class AnalyticsConfig {
     public static String ANALYTICS_ENTER_METHOD_DESCRIPTOR = "(Ljava/lang/String;Ljava/lang/String;)V";
     public static String ANALYTICS_EXIT_METHOD_DESCRIPTOR = "(Ljava/lang/String;Ljava/lang/String;)V";
 
-    public static Set<String> methodSet = new HashSet<>();
-    public static Set<String> fieldSet = new HashSet<>();
+    public static Set<Pattern> rulesIn = new HashSet<>();
 
-    static {
-
-        Collections.addAll(methodSet);
-
-        Collections.addAll(fieldSet);
-
-    }
+    public static Set<Pattern> rulesOut = new HashSet<>();
 }

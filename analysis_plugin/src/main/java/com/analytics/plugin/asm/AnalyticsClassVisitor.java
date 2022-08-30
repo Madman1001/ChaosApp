@@ -34,7 +34,10 @@ public class AnalyticsClassVisitor extends ClassVisitor {
         final MethodVisitor  methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
         String nameDesc = name + descriptor;
 
-        System.out.println("------------AnalyticsClassVisitor name=" + name + " descriptor=" + descriptor + " nameDesc=" + nameDesc);
+        if (!AnalyticsClassModifier.isShouldModify(className, name)){
+            return methodVisitor;
+        }
+        System.out.println("------------AnalyticsClassVisitor inject className=" + className + " name=" + name + " descriptor=" + descriptor + " nameDesc=" + nameDesc);
 
         return new AnalyticsDefaultMethodVisitor(AnalyticsConfig.ASM_API, methodVisitor, access, name, descriptor){
             @Override
@@ -63,7 +66,7 @@ public class AnalyticsClassVisitor extends ClassVisitor {
                         AnalyticsConfig.ANALYTICS_METHOD_EXIT_HOOK,
                         AnalyticsConfig.ANALYTICS_EXIT_METHOD_DESCRIPTOR,
                         false);
-                }
+            }
         };
     }
 }

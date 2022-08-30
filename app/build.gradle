@@ -5,14 +5,9 @@ plugins {
 }
 
 apply from: 'analysis.gradle'
-AnalysisExtension{
-    isInjectCode = false
-}
-
 
 android {
     compileSdkVersion rootProject.ext.android['targetSdkVersion']
-    buildToolsVersion rootProject.ext.android['buildToolsVersion']
 
     defaultConfig {
         applicationId rootProject.ext.android['applicationId']

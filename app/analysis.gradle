@@ -1,1 +1,15 @@
 apply plugin: 'AnalyticsPlugin'
+AnalysisExtension{
+    isInjectCode = true
+    proxyClass = "com.lhr.chaos.LogHelper"
+    rulesIn = [
+            "com.lhr.chaos.*"
+    ]
+    rulesOut = [
+            ".*R\\..*",
+            ".*R\$.*\\..*",
+            ".*R2\$.*\\..*",
+            ".*R2\\..*",
+            ".*\\.BuildConfig\\..*"
+    ]
+}

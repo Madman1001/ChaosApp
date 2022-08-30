@@ -1,8 +1,9 @@
 package com.analytics.plugin
 
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+
+import java.util.regex.Pattern
 
 class AnalyticsPlugin implements Plugin<Project> {
 
@@ -14,27 +15,44 @@ class AnalyticsPlugin implements Plugin<Project> {
             println '配置信息======='
             AnalyticsExtension privacyExtension = project['AnalysisExtension']
 
-            Set<String> privacySet = privacyExtension.methodSet
-            if (privacySet != null && !privacySet.isEmpty()) {
-                for (item in privacySet) {
-                    println '方法名=' + item
-                }
-                AnalyticsConfig.methodSet.clear()
-                AnalyticsConfig.methodSet.addAll(privacySet)
+            String proxyClass = privacyExtension.proxyClass
+            if (proxyClass != null){
+                AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS = proxyClass.replaceAll("\\.", "/")
             }
 
-            Set<String> fieldSet = privacyExtension.fieldSet
-            if (fieldSet != null && !fieldSet.isEmpty()) {
-                for (item in fieldSet) {
-                    println '属性名=' + item
+            Set<String> rulesIn = privacyExtension.rulesIn
+            if (rulesIn != null && !rulesIn.isEmpty()) {
+                AnalyticsConfig.rulesIn.clear()
+                for (item in rulesIn) {
+                    AnalyticsConfig.rulesIn.add(Pattern.compile(item))
                 }
-                AnalyticsConfig.fieldSet.clear()
-                AnalyticsConfig.fieldSet.addAll(privacyExtension.fieldSet)
+            }
+
+            Set<String> rulesOut = privacyExtension.rulesOut
+            if (rulesOut != null && !rulesOut.isEmpty()) {
+                AnalyticsConfig.rulesOut.clear()
+                for (item in rulesOut) {
+                    AnalyticsConfig.rulesOut.add(Pattern.compile(item))
+                }
+            }
+
+            if (AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS != null){
+                String pc = AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS.replaceAll("/", ".")
+                AnalyticsConfig.rulesOut.add(Pattern.compile("^${pc}\\..*"))
+            }
+
+            println '代理类 = ' + AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS
+
+            AnalyticsConfig.rulesIn.each {
+                println '匹配规则 = ' + it.pattern()
+            }
+
+            AnalyticsConfig.rulesOut.each {
+                println '排除规则 = ' + it.pattern()
             }
 
             AnalyticsConfig.ANALYTICS_INJECT = privacyExtension.isInjectCode
             println 'PrivacyConfig.isInject = ' + AnalyticsConfig.ANALYTICS_INJECT
-
         }
         project.android.registerTransform(new AnalyticsPluginTransform(project))
     }
