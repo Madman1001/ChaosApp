@@ -46,6 +46,7 @@ public class AnalyticsClassVisitor extends ClassVisitor {
                 //方法前加入
                 methodVisitor.visitLdcInsn(className);
                 methodVisitor.visitLdcInsn(name);
+                methodVisitor.visitLdcInsn(descriptor);
                 methodVisitor.visitMethodInsn(
                         INVOKESTATIC,
                         AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS,
@@ -60,6 +61,7 @@ public class AnalyticsClassVisitor extends ClassVisitor {
                 //方法后加入
                 methodVisitor.visitLdcInsn(className);
                 methodVisitor.visitLdcInsn(name);
+                methodVisitor.visitLdcInsn(descriptor);
                 methodVisitor.visitMethodInsn(
                         INVOKESTATIC,
                         AnalyticsConfig.ANALYTICS_METHOD_HOOK_CLASS,

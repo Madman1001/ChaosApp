@@ -1,6 +1,7 @@
 package com.lhr.chaos
 
 import android.util.Log
+import java.util.*
 
 /**
  * @CreateDate: 2022/7/28
@@ -10,26 +11,28 @@ import android.util.Log
 @Deprecated("该类用于字节码插桩")
 object LogHelper {
     @JvmStatic
-    private val sThreadLocal: ThreadLocal<HashMap<String, Long>> = ThreadLocal()
+    private val sThreadLocal: ThreadLocal<Stack<Long>> = ThreadLocal()
 
     @JvmStatic
-    public fun onMethodEnter(className: String?, methodName: String?) {
-        var sStartTime = sThreadLocal.get()
-        if (sStartTime == null) {
-            sStartTime = HashMap<String, Long>()
-            sThreadLocal.set(sStartTime)
+    public fun onMethodEnter(className: String?, methodName: String?, descriptor: String?) {
+        var sStartTimeStack = sThreadLocal.get()
+        if (sStartTimeStack == null) {
+            sStartTimeStack = Stack()
+            sThreadLocal.set(sStartTimeStack)
         }
-        sStartTime[className + "_" + methodName] = System.currentTimeMillis()
+        sStartTimeStack.push(System.currentTimeMillis())
     }
 
     @JvmStatic
-    public fun onMethodExit(className: String?, methodName: String?){
-        val sStartTime = sThreadLocal.get() ?: return
+    public fun onMethodExit(className: String?, methodName: String?, descriptor: String?){
+        val sStartTimeStack = sThreadLocal.get() ?: return
+        if (sStartTimeStack.isEmpty()) return
+
         val endTime = System.currentTimeMillis()
-        val startTime = sStartTime[className + "_" + methodName] ?: System.currentTimeMillis()
+        val startTime = sStartTimeStack.pop()
         val costTime = endTime - startTime
         if (costTime > 0){
-            Log.d("LogHelper", "method: ${className}_$methodName cost ${costTime} ms")
+            Log.d("LogHelper", "method: ${className}_${methodName}${descriptor} cost $costTime ms")
         }
     }
 }

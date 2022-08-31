@@ -13,8 +13,8 @@ public class AnalyticsConfig {
     public static String ANALYTICS_METHOD_HOOK_CLASS = "com/lhr/chaos/LogHelper";
     public static String ANALYTICS_METHOD_ENTER_HOOK = "onMethodEnter";
     public static String ANALYTICS_METHOD_EXIT_HOOK = "onMethodExit";
-    public static String ANALYTICS_ENTER_METHOD_DESCRIPTOR = "(Ljava/lang/String;Ljava/lang/String;)V";
-    public static String ANALYTICS_EXIT_METHOD_DESCRIPTOR = "(Ljava/lang/String;Ljava/lang/String;)V";
+    public static String ANALYTICS_ENTER_METHOD_DESCRIPTOR = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V";
+    public static String ANALYTICS_EXIT_METHOD_DESCRIPTOR = "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V";
 
     public static Set<Pattern> rulesIn = new HashSet<>();
 
