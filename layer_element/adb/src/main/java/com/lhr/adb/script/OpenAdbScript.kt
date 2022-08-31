@@ -2,8 +2,9 @@ package com.lhr.adb.script
 
 import android.os.Build
 import android.util.Log
+import com.lhr.adb.IScript
 import com.lhr.adb.exec.DefaultActuator
-import com.lhr.adb.exec.IActuator
+import com.lhr.adb.IActuator
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 

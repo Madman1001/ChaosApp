@@ -1,43 +1,33 @@
 package com.lhr.adb.adapter
 
 import android.graphics.Color
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import java.util.ArrayList
+import com.lhr.common.ui.BaseAdapter
 
 /**
  * @author lhr
  * @date 2021/4/27
  * @des
  */
-class ResultAdapter(private val list:ArrayList<String>) : RecyclerView.Adapter<ResultAdapter.ResultHolder>(){
-    class ResultHolder(var view: TextView) : RecyclerView.ViewHolder(view)
+class ResultAdapter : BaseAdapter<String>() {
+    override fun bind(holder: ViewHolder, position: Int, data: String) {
+        (holder.itemView as TextView).text = "Result: $data"
+    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultHolder {
-        return ResultHolder(TextView(parent.context).apply {
+    override fun createView(parent: ViewGroup, viewType: Int): View {
+        return TextView(parent.context).apply {
             isAllCaps = false
             isActivated = false
-        })
+            textSize = 15f
+            setTextColor(Color.parseColor("#FFFFFF"))
+        }
     }
 
-    override fun getItemCount(): Int {
-        return list.size
+    fun addMessage(vararg item: String){
+        addData(item.toList())
     }
 
-    override fun onBindViewHolder(holder: ResultHolder, position: Int) {
-        holder.view.textSize = 15f
-        holder.view.setTextColor(Color.parseColor("#000000"))
-        holder.view.text = "Result: ${list[position]}"
-    }
-
-    fun addItem(itemString: String){
-        list.add(itemString)
-        notifyDataSetChanged()
-    }
-
-    fun clearItem(){
-        list.clear()
-        notifyDataSetChanged()
-    }
+    override var layout: Int = 0
 }

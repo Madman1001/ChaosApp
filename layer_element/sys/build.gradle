@@ -13,6 +13,11 @@ android {
         targetSdkVersion rootProject.ext.android['targetSdkVersion']
         versionCode rootProject.ext.android['versionCode']
         versionName rootProject.ext.android['versionName']
+
+        //开启DataBinding
+        buildFeatures {
+            dataBinding = true
+        }
     }
 
     buildTypes {

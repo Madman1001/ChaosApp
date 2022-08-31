@@ -5,6 +5,7 @@ import android.widget.Button
 import com.lhr.centre.annotation.CElement
 import com.lhr.common.ui.BaseActivity
 import com.lhr.common.ui.BaseAdapter
+import com.lhr.common.ui.startFragment
 import com.lhr.learn.applications.AppListFragment
 import com.lhr.learn.bitmap.BitmapCropFragment
 import com.lhr.learn.classcheck.ClassCheckFragment
@@ -17,7 +18,7 @@ import com.lhr.learn.procfile.FilesystemsFragment
  * @date 2021/4/27
  * @des
  */
-@CElement(name = "Android基础")
+@CElement(name = "Android环境")
 class LearnActivity : BaseActivity<ActivityLearnBinding>() {
     private val tag = "AS_${this::class.java.simpleName}"
     private val dataList = listOf(

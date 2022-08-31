@@ -1,4 +1,4 @@
-package com.lhr.adb.script
+package com.lhr.adb
 
 /**
  * @author lhr

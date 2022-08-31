@@ -3,7 +3,6 @@ package com.lhr.chaos
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,14 +16,14 @@ import com.lhr.common.ext.live
  * @des 应用主Activity
  */
 class MainActivity : AppCompatActivity() {
-    private val buttonAdapter = ButtonAdapter(ArrayList<Button>())
+    private val buttonAdapter by lazy { ButtonAdapter() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val recyclerView = this.findViewById<RecyclerView>(R.id.main_recycler_view)
-        val layoutManager = GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false)
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = buttonAdapter
+        this.findViewById<RecyclerView>(R.id.main_recycler_view).run {
+            layoutManager = GridLayoutManager(this.context, 2, GridLayoutManager.VERTICAL, false)
+            adapter = buttonAdapter
+        }
         if (Centre.isInit) {
             initListButton()
         } else {
@@ -34,18 +33,19 @@ class MainActivity : AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun initListButton() {
+        val resultList = mutableListOf<ButtonAdapter.ListData>()
         for (element in Centre.getElementList()) {
             for (entry in element.extraMap) {
-                val bt = Button(this)
-                bt.isAllCaps = false
-                bt.text = entry.key
-                bt.setOnClickListener {
-                    val intent = Intent(this, Class.forName(entry.value) as Class<*>)
-                    this.startActivity(intent)
-                }
-                buttonAdapter.addButton(bt)
+                resultList.add(
+                    ButtonAdapter.ListData(
+                        entry.key
+                    ) {
+                        val intent = Intent(this, Class.forName(entry.value) as Class<*>)
+                        this.startActivity(intent)
+                    }
+                )
             }
         }
-        buttonAdapter.notifyDataSetChanged()
+        buttonAdapter.replaceData(resultList)
     }
 }

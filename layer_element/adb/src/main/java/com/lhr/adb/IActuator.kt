@@ -1,4 +1,4 @@
-package com.lhr.adb.exec
+package com.lhr.adb
 
 /**
  * @author lhr

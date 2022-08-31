@@ -1,35 +1,39 @@
 package com.lhr.adb
 
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lhr.adb.adapter.ResultAdapter
+import com.lhr.adb.databinding.ActivityAdbBinding
 import com.lhr.adb.exec.DefaultActuator
 import com.lhr.adb.script.*
 import com.lhr.centre.annotation.CElement
+import com.lhr.common.ui.BaseActivity
 import kotlinx.coroutines.*
-import java.util.*
 
 /**
  * @author lhr
  * @date 2021/4/27
  * @des
  */
-@CElement(name = "ADB功能")
-class AdbActivity : AppCompatActivity(){
+@CElement(name = "命令行模块")
+class AdbActivity : BaseActivity<ActivityAdbBinding>(){
     private val tag = "AS_${this::class.java.simpleName}"
-    private val adapter = ResultAdapter(ArrayList<String>())
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_adb)
-        val ab = this.actionBar
-        ab?.show()
+    private val adapter = ResultAdapter()
+
+    private var codeEditText: String
+        get() = mBinding.adbInCode.text.toString()
+        set(value) = mBinding.adbInCode.setText(value)
+
+    override fun initView(savedInstanceState: Bundle?) {
+        super.initView(savedInstanceState)
+        this.actionBar?.show()
         init()
     }
 
@@ -51,8 +55,8 @@ class AdbActivity : AppCompatActivity(){
             this.listener = { command, result, message ->
                 Log.d(tag, "$command: $result : $message")
                 GlobalScope.launch(Dispatchers.Main) {
-                    adapter.addItem(message)
-                    findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
+                    adapter.addMessage(message)
+                    mBinding.adbOutResult.scrollToPosition(adapter.itemCount - 1)
                 }
             }
             this.start()
@@ -61,32 +65,31 @@ class AdbActivity : AppCompatActivity(){
     }
 
     private fun init(){
-        val recyclerView = findViewById<RecyclerView>(R.id.adb_out_result)
-        val linearLayoutManager = LinearLayoutManager(this)
-        linearLayoutManager.stackFromEnd = true
-        recyclerView.layoutManager = linearLayoutManager
-        recyclerView.adapter = adapter
-        findViewById<View>(R.id.adb_in_run).setOnClickListener {
+        mBinding.adbOutResult.run {
+            layoutManager = LinearLayoutManager(context).apply { stackFromEnd = true }
+            adapter = this@AdbActivity.adapter
+        }
+
+        mBinding.adbInRun.setOnClickListener {
             runCode()
         }
 
-        findViewById<View>(R.id.adb_out_clean).setOnClickListener {
-            adapter.clearItem()
+        mBinding.adbOutClean.setOnClickListener {
+            adapter.replaceData(emptyList())
         }
     }
 
     private fun runCode(){
-        val codeET = findViewById<EditText>(R.id.adb_in_code)
-        val codeCommand = codeET.text.toString()
-        codeET.setText("")
+        val codeCommand = codeEditText
+        codeEditText = ""
         if (codeCommand.isEmpty()){
             return
         }
         val actuator = DefaultActuator { command, result, message ->
             Log.e(tag, message)
             GlobalScope.launch(Dispatchers.Main) {
-                adapter.addItem(message)
-                findViewById<RecyclerView>(R.id.adb_out_result).scrollToPosition(adapter.itemCount - 1)
+                adapter.addMessage(message)
+                mBinding.adbOutResult.scrollToPosition(adapter.itemCount - 1)
             }
         }
         actuator.addCommand(codeCommand)

@@ -19,8 +19,5 @@
             android:theme="@style/TranslucentStyle"
             android:launchMode="singleTask"
             android:screenOrientation="behind"/>
-        <activity android:name=".ReplaceFragmentActivity"
-            android:theme="@style/BaseStyle"
-            android:exported="false"/>
     </application>
 </manifest>

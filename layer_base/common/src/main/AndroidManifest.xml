@@ -3,6 +3,10 @@
     package="com.lhr.common">
 
     <application>
+        <activity android:name=".ui.ReplaceFragmentActivity"
+            android:theme="@style/BaseStyle"
+            android:screenOrientation="behind"
+            android:exported="false"/>
     </application>
 
 </manifest>

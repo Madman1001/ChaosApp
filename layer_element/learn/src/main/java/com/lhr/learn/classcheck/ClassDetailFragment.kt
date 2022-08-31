@@ -4,8 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import android.text.TextUtils
 import com.lhr.common.ui.BaseFragment
+import com.lhr.common.ui.startFragment
 import com.lhr.learn.databinding.FragmentClassDetailBinding
-import com.lhr.learn.startFragment
 
 /**
  * @CreateDate: 2022/6/27

@@ -4,8 +4,8 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.lifecycle.lifecycleScope
 import com.lhr.common.ui.BaseFragment
+import com.lhr.common.ui.startFragment
 import com.lhr.learn.databinding.FragmentTextFileDetailBinding
-import com.lhr.learn.startFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

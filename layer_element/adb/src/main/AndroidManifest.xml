@@ -7,8 +7,8 @@
     <uses-permission android:name="android.permission.READ_LOGS"/>
     <application>
         <activity android:name="com.lhr.adb.AdbActivity"
-            android:theme="@style/Theme.AppCompat"
             android:windowSoftInputMode="adjustPan"
+            android:theme="@style/BaseActionStyle"
             android:label="Adb"/>
     </application>
 </manifest>

@@ -2,7 +2,6 @@ package com.lhr.centre.processor
 
 import com.lhr.centre.element.TableConstant
 import javax.annotation.processing.ProcessingEnvironment
-import javax.tools.Diagnostic
 
 /**
  * @author lhr

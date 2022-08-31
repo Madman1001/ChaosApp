@@ -1,53 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
 
-    <ImageView
-        android:id="@+id/adb_out_clean"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="10dp"
-        android:src="@drawable/ic_clean"
-        app:layout_constraintBottom_toBottomOf="@id/adb_in_code"
-        app:layout_constraintEnd_toStartOf="@id/adb_in_code"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/adb_in_code" />
-
-    <EditText
-        android:id="@+id/adb_in_code"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="10dp"
-        android:fitsSystemWindows="true"
-        android:imeOptions="actionNone"
-        android:singleLine="true"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/adb_in_run"
-        app:layout_constraintStart_toEndOf="@id/adb_out_clean" />
-
-    <ImageView
-        android:id="@+id/adb_in_run"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="10dp"
-        android:src="@drawable/ic_run"
-        app:layout_constraintBottom_toBottomOf="@id/adb_in_code"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/adb_in_code"
-        app:layout_constraintTop_toTopOf="@id/adb_in_code" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/adb_out_result"
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@color/main_bg_color"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="#FFFFFF"
-        android:clipToPadding="false"
-        app:layout_constraintBottom_toTopOf="@id/adb_in_code"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/adb_out_clean"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_clean"
+            app:layout_constraintBottom_toBottomOf="@id/adb_in_code"
+            app:layout_constraintEnd_toStartOf="@id/adb_in_code"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/adb_in_code" />
+
+        <EditText
+            android:id="@+id/adb_in_code"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:fitsSystemWindows="true"
+            android:imeOptions="actionNone"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/adb_in_run"
+            app:layout_constraintStart_toEndOf="@id/adb_out_clean" />
+
+        <ImageView
+            android:id="@+id/adb_in_run"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_run"
+            app:layout_constraintBottom_toBottomOf="@id/adb_in_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/adb_in_code"
+            app:layout_constraintTop_toTopOf="@id/adb_in_code" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/adb_out_result"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:background="@color/main_text_bg_color"
+            app:layout_constraintBottom_toTopOf="@id/adb_in_code"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

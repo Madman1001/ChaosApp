@@ -1,12 +1,12 @@
-package com.lhr.learn
+package com.lhr.common.ui
 
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.text.TextUtils
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 
 /**
  * @CreateDate: 2022/6/27
@@ -22,7 +22,7 @@ inline fun <reified F: Fragment> Activity.startFragment(bundle: Bundle? = null){
     this.startActivity(intent)
 }
 
-class ReplaceFragmentActivity: FragmentActivity() {
+class ReplaceFragmentActivity: BaseNoDbActivity() {
     companion object{
         const val TARGET_FRAGMENT = "TARGET_FRAGMENT"
     }
@@ -35,13 +35,18 @@ class ReplaceFragmentActivity: FragmentActivity() {
 
         val targetString = intent?.getStringExtra(TARGET_FRAGMENT) ?: ""
         if (TextUtils.isEmpty(targetString)){
-            this.finish()
+            this@ReplaceFragmentActivity.finish()
             return
         }
-        val targetClass = Class.forName(targetString)
-        targetFragment = targetClass.newInstance() as Fragment
-        targetFragment?.arguments = intent.extras
-        replaceFragment(targetFragment!!, android.R.id.content)
+        kotlin.runCatching {
+            val targetClass = Class.forName(targetString)
+            targetFragment = targetClass.newInstance() as Fragment
+            targetFragment?.arguments = intent.extras
+            replaceFragment(targetFragment!!, android.R.id.content)
+        }.onFailure {
+            this@ReplaceFragmentActivity.finish()
+            Toast.makeText(this.applicationContext, "launch fragment ${targetFragment} fail", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun replaceFragment(fragment: Fragment, id: Int){

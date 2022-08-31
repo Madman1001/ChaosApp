@@ -29,9 +29,7 @@ abstract class BaseAdapter<T>: RecyclerView.Adapter<BaseAdapter.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(layout, parent, false)
-        return ViewHolder(view)
+        return ViewHolder(createView(parent, viewType))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -63,6 +61,11 @@ abstract class BaseAdapter<T>: RecyclerView.Adapter<BaseAdapter.ViewHolder>() {
                 notifyDataSetChanged()
             }
         }
+    }
+
+    protected open fun createView(parent: ViewGroup, viewType: Int): View {
+        return LayoutInflater.from(parent.context)
+            .inflate(layout, parent, false)
     }
 
     abstract fun bind(holder: ViewHolder, position: Int, data: T)

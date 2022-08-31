@@ -1,5 +1,6 @@
 package com.lhr.adb.exec
 
+import com.lhr.adb.IActuator
 import com.lhr.common.utils.MachineUtils
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors

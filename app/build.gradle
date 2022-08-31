@@ -38,12 +38,11 @@ android {
 }
 
 dependencies {
+    implementation project(':crash')
     implementation project(':common')
 
     implementation project(':sys')
-
     implementation project(':access')
     implementation project(':learn')
     implementation project(':adb')
-    implementation project(':crash')
 }

@@ -2,8 +2,9 @@ package com.lhr.adb.script
 
 import android.os.Build
 import android.util.Log
+import com.lhr.adb.IScript
 import com.lhr.adb.exec.DefaultActuator
-import com.lhr.adb.exec.IActuator
+import com.lhr.adb.IActuator
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -12,7 +13,7 @@ import kotlinx.coroutines.launch
  * @date 2021/11/22
  * @des 查看ip地址
  */
-class ShowIpScript : IScript{
+class ShowIpScript : IScript {
     private val tag = "ShowIpScript"
 
     private var actuator: IActuator

@@ -1,91 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".SysActivity">
+<layout>
+    <data>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="System Service"
-        android:textStyle="bold"
-        android:textSize="36sp"
-        android:layout_marginTop="40dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:context=".SysActivity">
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/titleTv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Service Hook"
+                    android:textStyle="bold"
+                    android:textSize="36sp"
+                    android:layout_marginTop="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
 
-    <Button
-        android:id="@+id/button_a"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Alarm Manager"
-        android:onClick="getHookAlarmManager"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/listRv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/titleTv"/>
 
-    <Button
-        android:id="@+id/button_b"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Package Manager"
-        android:onClick="getHookPackageManager"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_a"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/button_c"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Activity Manager"
-        android:onClick="getHookActivityManager"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_b"/>
-
-    <Button
-        android:id="@+id/button_d"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="APP OPS SERVICE"
-        android:onClick="getHookAppOpsService"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_c"/>
-
-    <Button
-        android:id="@+id/button_e"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Android Id"
-        android:onClick="getAndroidId"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_d"/>
-
-    <Button
-        android:id="@+id/button_f"
-        android:text="Mac Id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="getMacId"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_e"/>
-
-    <Button
-        android:text="imei Id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="getTelephony"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_f"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

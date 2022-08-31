@@ -1,7 +1,6 @@
 package com.lhr.common.ui
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ViewDataBinding
 import com.lhr.common.ext.createViewBinding
 import com.lhr.common.ext.obtainBindingClassByParadigm
@@ -11,7 +10,7 @@ import com.lhr.common.ext.obtainBindingClassByParadigm
  * @Author: mac
  * @Description:
  */
-abstract class BaseActivity<out DB: ViewDataBinding>: AppCompatActivity() {
+abstract class BaseActivity<out DB: ViewDataBinding>: BaseNoDbActivity() {
     private var _bind: DB? = null
 
     val mBinding: DB get() = _bind!!

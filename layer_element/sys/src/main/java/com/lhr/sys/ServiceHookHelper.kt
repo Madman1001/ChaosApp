@@ -1,5 +1,6 @@
 package com.lhr.sys
 
+import android.annotation.SuppressLint
 import android.os.IBinder
 import com.lhr.sys.service.HookBinderHandler
 import com.lhr.sys.service.ServiceHookBean
@@ -12,6 +13,7 @@ import java.lang.reflect.Proxy
  * @Description: 系统服务hook工具
  */
 internal object ServiceHookHelper {
+    @SuppressLint("DiscouragedPrivateApi", "PrivateApi")
     internal fun hookService(bean: ServiceHookBean): Boolean{
         val serviceManagerClass = Class.forName("android.os.ServiceManager")
         val getServiceMethod = serviceManagerClass.getDeclaredMethod("getService", String::class.java)
