@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.lhr.adb">
-
-    <uses-permission android:name="android.permission.DUMP"/>
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
-    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application>
         <activity android:name="com.lhr.adb.AdbActivity"
             android:windowSoftInputMode="adjustPan"
-            android:theme="@style/BaseActionStyle"
+            android:theme="@style/BaseStyle"
             android:label="Adb"/>
     </application>
 </manifest>

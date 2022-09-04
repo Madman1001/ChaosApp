@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+
+        <variable
+            name="pager"
+            type="com.lhr.adb.AdbConnectFragment" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@color/main_bg_color"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="30dp">
+        <EditText
+            android:id="@+id/ipEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e: 127.0.0.1"
+            android:text="127.0.0.1"
+            android:digits="0123456789."
+            android:layout_marginTop="20dp"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <EditText
+            android:id="@+id/portEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e: 5555"
+            android:text="5555"
+            android:inputType="number"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ipEditText"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="connect"
+            android:background="@color/main_text_color"
+            android:onClick="@{()->pager.connectADBD()}"
+            app:layout_constraintTop_toBottomOf="@id/portEditText"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

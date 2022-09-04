@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable
+            name="pager"
+            type="com.lhr.adb.AdbClientFragment" />
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@color/main_bg_color"
+        android:fitsSystemWindows="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/cleanIv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:src="@drawable/ic_clean"
+            android:onClick="@{()->pager.cleanResult()}"
+            app:layout_constraintBottom_toBottomOf="@id/inputEditText"
+            app:layout_constraintEnd_toStartOf="@id/inputEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/inputEditText" />
+
+        <EditText
+            android:id="@+id/inputEditText"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="10dp"
+            android:fitsSystemWindows="true"
+            android:imeOptions="actionNone"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/runIv"
+            app:layout_constraintStart_toEndOf="@id/cleanIv" />
+
+        <ImageView
+            android:id="@+id/runIv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_run"
+            android:onClick="@{()->pager.runCode()}"
+            app:layout_constraintBottom_toBottomOf="@id/inputEditText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/inputEditText"
+            app:layout_constraintTop_toTopOf="@id/inputEditText" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/resultRv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:background="@color/main_text_bg_color"
+            app:layout_constraintBottom_toTopOf="@id/runIv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

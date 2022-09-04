@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation files('src/libs/AdbLib.jar')
 
     implementation project(':common')
     kapt project(':centre_processor')

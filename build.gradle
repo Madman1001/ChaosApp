@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         classpath "com.android.tools.build:gradle:${rootProject.ext.versions['gradle']}"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProject.ext.versions['kotlin']}"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10"
         classpath "com.analytics:analyticsplugin:1.0.0"
     }
 }

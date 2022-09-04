@@ -12,6 +12,7 @@ import androidx.core.content.getSystemService
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.lhr.common.ext.initInputBar
 import com.lhr.common.ui.BaseAdapter
 import com.lhr.common.ui.BaseFragment
 import com.lhr.learn.R
@@ -26,8 +27,6 @@ import kotlinx.coroutines.launch
  * @Description: 类查看工具
  */
 class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
-    private var inputManager: InputMethodManager? = null
-
     private var allClassList = listOf<String>()
 
     private var selectClassList = listOf<String>()
@@ -76,44 +75,8 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
                     }
                     classDataAdapter.replaceData(selectClassList)
                 }
-
             }
-            val root = mBinding.root
-            if (root is ViewGroup) {
-                root.run {
-                    val focusView = View(context)
-                    val param = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    addView(focusView, param)
-                    focusView.setOnTouchListener(View.OnTouchListener { v, event ->
-                        if (mBinding.adbInCode.isFocused) {
-                            val position = IntArray(2) { 0 }
-                            mBinding.adbInCode.getLocationInWindow(position)
-                            if (event.rawY.toInt() !in position[1]..position[1] + mBinding.adbInCode.height) {
-                                hideSoftInput(focusView)
-                                return@OnTouchListener true
-                            }
-                        }
-                        return@OnTouchListener false
-                    })
-                }
-            }
-
-        }
-    }
-
-    private fun hideSoftInput(view: View) {
-        view.run {
-            val manager = inputManager ?: context.getSystemService()
-            if (inputManager == null) {
-                inputManager = manager
-            }
-            isFocusable = true
-            isFocusableInTouchMode = true
-            requestFocus()
-            inputManager?.hideSoftInputFromWindow(windowToken, 0)
+            initInputBar(mBinding.root as ViewGroup)
         }
     }
 

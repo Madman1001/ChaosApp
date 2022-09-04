@@ -1,21 +1,13 @@
 package com.lhr.adb
 
-import android.graphics.drawable.ColorDrawable
+import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.EditText
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.lhr.adb.adapter.ResultAdapter
+import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.tabs.TabLayoutMediator
 import com.lhr.adb.databinding.ActivityAdbBinding
-import com.lhr.adb.exec.DefaultActuator
-import com.lhr.adb.script.*
 import com.lhr.centre.annotation.CElement
 import com.lhr.common.ui.BaseActivity
-import kotlinx.coroutines.*
+import com.lhr.common.ui.BaseFragmentAdapter
 
 /**
  * @author lhr
@@ -23,78 +15,35 @@ import kotlinx.coroutines.*
  * @des
  */
 @CElement(name = "命令行模块")
-class AdbActivity : BaseActivity<ActivityAdbBinding>(){
+class AdbActivity : BaseActivity<ActivityAdbBinding>() {
     private val tag = "AS_${this::class.java.simpleName}"
-    private val adapter = ResultAdapter()
+    private var adapter: BaseFragmentAdapter<ConnectConfig>? = null
 
-    private var codeEditText: String
-        get() = mBinding.adbInCode.text.toString()
-        set(value) = mBinding.adbInCode.setText(value)
-
+    @SuppressLint("NotifyDataSetChanged")
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
-        this.actionBar?.show()
-        init()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val menuInflater = this.menuInflater
-        menuInflater.inflate(R.menu.adb_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.adb_open_connect -> OpenAdbScript("5555")
-            R.id.adb_show_ip -> ShowIpScript()
-            R.id.adb_show_packages -> ShowPackagesScript()
-            R.id.adb_dump -> DumpScript()
-            R.id.adb_test -> TestScript()
-            else -> null
-        }?.run {
-            this.listener = { command, result, message ->
-                Log.d(tag, "$command: $result : $message")
-                GlobalScope.launch(Dispatchers.Main) {
-                    adapter.addMessage(message)
-                    mBinding.adbOutResult.scrollToPosition(adapter.itemCount - 1)
-                }
+        adapter = BaseFragmentAdapter(this) { position, data ->
+            if (position == (adapter?.itemCount ?: 0) - 1) {
+                AdbConnectFragment()
+            } else {
+                AdbClientFragment.create(position, data.address, data.port)
             }
-            this.start()
         }
-        return super.onOptionsItemSelected(item)
-    }
 
-    private fun init(){
-        mBinding.adbOutResult.run {
-            layoutManager = LinearLayoutManager(context).apply { stackFromEnd = true }
+        val viewModel = ViewModelProviders.of(this).get(ConnectViewModel::class.java)
+
+        mBinding.viewpager.run {
             adapter = this@AdbActivity.adapter
+            isUserInputEnabled = true
         }
+        TabLayoutMediator(mBinding.tabLay, mBinding.viewpager) { tab, position ->
+            tab.text = adapter?.getItem(position)?.name ?: ""
+        }.attach()
 
-        mBinding.adbInRun.setOnClickListener {
-            runCode()
+        viewModel.notificationList.observe(this) {
+            adapter?.replaceData(viewModel.connectList)
         }
-
-        mBinding.adbOutClean.setOnClickListener {
-            adapter.replaceData(emptyList())
-        }
-    }
-
-    private fun runCode(){
-        val codeCommand = codeEditText
-        codeEditText = ""
-        if (codeCommand.isEmpty()){
-            return
-        }
-        val actuator = DefaultActuator { command, result, message ->
-            Log.e(tag, message)
-            GlobalScope.launch(Dispatchers.Main) {
-                adapter.addMessage(message)
-                mBinding.adbOutResult.scrollToPosition(adapter.itemCount - 1)
-            }
-        }
-        actuator.addCommand(codeCommand)
-        GlobalScope.launch {
-            actuator.execCommand()
-        }
+        viewModel.connectList.add(ConnectConfig("...", "", 0))
+        viewModel.notificationList.value = (viewModel.notificationList.value ?: 0) + 1
     }
 }

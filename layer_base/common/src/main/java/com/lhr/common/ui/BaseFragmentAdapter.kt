@@ -13,27 +13,33 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
  * @Author: mac
  * @Description:
  */
-class BaseFragmentAdapter<T> : FragmentStateAdapter{
+open class BaseFragmentAdapter<T> : FragmentStateAdapter {
     private val mListData = ArrayList<T>()
 
     private var ids = mListData.map { it.hashCode().toLong() }.toMutableList()
 
     private val createdIds = hashSetOf<Long>()
 
-    private var creator: (Int, T)-> Fragment
+    private var creator: (Int, T) -> Fragment
 
-    constructor(fragment: Fragment, creator: (Int, T)-> Fragment) : super(fragment){
+    constructor(fragment: Fragment, creator: (Int, T) -> Fragment) : super(fragment) {
         this.creator = creator
     }
 
-    constructor(fragmentActivity: FragmentActivity, creator: (Int, T)-> Fragment) : super(fragmentActivity){
+    constructor(fragmentActivity: FragmentActivity, creator: (Int, T) -> Fragment) : super(
+        fragmentActivity
+    ) {
         this.creator = creator
     }
 
-    constructor(fragmentManager: FragmentManager, lifecycle: Lifecycle, creator: (Int, T)-> Fragment) : super(
+    constructor(
+        fragmentManager: FragmentManager,
+        lifecycle: Lifecycle,
+        creator: (Int, T) -> Fragment
+    ) : super(
         fragmentManager,
         lifecycle
-    ){
+    ) {
         this.creator = creator
     }
 
@@ -59,7 +65,11 @@ class BaseFragmentAdapter<T> : FragmentStateAdapter{
         return creator.invoke(position, item)
     }
 
-    fun addData(data: List<T>) {
+    fun addData(data: T){
+        addData(listOf(data))
+    }
+
+    fun addData(data: Collection<T>) {
         val startIndex = itemCount
         mListData.addAll(data)
         ids.addAll(data.map { it.hashCode().toLong() })
@@ -67,10 +77,20 @@ class BaseFragmentAdapter<T> : FragmentStateAdapter{
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun replaceData(data: List<T>) {
+    fun replaceData(data: Collection<T>) {
         mListData.clear()
         ids.clear()
         addData(data)
         notifyDataSetChanged()
+    }
+
+    fun removeFragment(position: Int) {
+        mListData.removeAt(position)
+        ids.removeAt(position)
+        notifyItemRangeChanged(position, mListData.size)
+    }
+
+    fun getItem(position: Int): T{
+        return mListData[position]
     }
 }
