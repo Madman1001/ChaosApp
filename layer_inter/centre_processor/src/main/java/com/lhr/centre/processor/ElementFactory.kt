@@ -1,7 +1,9 @@
 package com.lhr.centre.processor
 
+import com.lhr.centre.annotation.CElement
 import com.lhr.centre.element.TableConstant
 import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.Element
 
 /**
  * @author lhr
@@ -29,7 +31,7 @@ internal object ElementFactory {
     /**
      * 生成java源代码
      */
-    fun getJavaStringByElementConfig(packageName: String, className: String,config: CentreElementConfig): String{
+    private fun getJavaStringByElementConfig(packageName: String, className: String,config: CentreElementConfig): String{
         val sb = StringBuilder()
         //导入包命
         sb.append("package $packageName;")
@@ -59,28 +61,39 @@ internal object ElementFactory {
     /**
      * 生成配置信息json类
      */
-    fun getJsonStringByElementPluginConfig(extra: ArrayList<CentreElementPluginConfig>) : String {
+    private fun getJsonStringByElementPluginConfig(extra: ArrayList<Element>) : String {
         val jsonStringBuilder = StringBuilder()
 
         //json array start
         jsonStringBuilder.append("[")
 
         for (pluginConfig in extra) {
+            val className = pluginConfig.toString()
+            val plugin: CElement = pluginConfig.getAnnotation(CElement::class.java) ?: continue
+            val pluginName = plugin.name
+            val pluginFlag = plugin.flag
+
             //json object start
             jsonStringBuilder.append("{")
 
             jsonStringBuilder
                 .append("\\\"${TableConstant.EXTRA_NAME}\\\"")
                 .append(":")
-                .append("\\\"${pluginConfig.name}\\\"")
+                .append("\\\"${pluginName}\\\"")
 
             jsonStringBuilder.append(",")
 
             jsonStringBuilder
                 .append("\\\"${TableConstant.EXTRA_VALUE}\\\"")
                 .append(":")
-                .append("\\\"${pluginConfig.value}\\\"")
+                .append("\\\"${className}\\\"")
 
+            jsonStringBuilder.append(",")
+
+            jsonStringBuilder
+                .append("\\\"${TableConstant.EXTRA_FLAG}\\\"")
+                .append(":")
+                .append("\\\"${pluginFlag}\\\"")
             //json object end
             jsonStringBuilder.append("}")
 

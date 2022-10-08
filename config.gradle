@@ -1,4 +1,6 @@
 ext {
+    isComponent = true
+
     android = [
             applicationId    : 'com.lhr.chaos',
             versionCode      : 1,

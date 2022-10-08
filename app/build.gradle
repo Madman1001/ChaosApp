@@ -40,9 +40,14 @@ android {
 dependencies {
     implementation project(':crash')
     implementation project(':common')
+    kapt project(':centre_processor')
 
-    implementation project(':sys')
-    implementation project(':access')
-    implementation project(':learn')
-    implementation project(':adb')
+    def isApp = rootProject.ext.isComponent
+    if (!isApp){
+        implementation project(':sys')
+        implementation project(':access')
+        implementation project(':learn')
+        implementation project(':adb')
+    }
+
 }

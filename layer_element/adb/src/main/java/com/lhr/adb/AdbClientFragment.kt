@@ -53,11 +53,9 @@ class AdbClientFragment : BaseFragment<FragmentAdbClientBinding>() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (viewModel.connectList.size == 1){
+                    if (port != viewModel.connectList.size - 1){
                         viewModel.connectList.removeAt(index)
                         viewModel.notificationList.value = (viewModel.notificationList.value ?: 0) + 1
-                    } else {
-                        attachActivity.finish()
                     }
                 }
             })

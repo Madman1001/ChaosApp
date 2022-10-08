@@ -10,6 +10,6 @@ import com.cgutman.adblib.AdbBase64
  */
 class AdbClientBase64: AdbBase64{
     override fun encodeToString(data: ByteArray?): String {
-        return Base64.encodeToString(data, Base64.NO_WRAP);
+        return Base64.encodeToString(data, Base64.NO_WRAP)
     }
 }

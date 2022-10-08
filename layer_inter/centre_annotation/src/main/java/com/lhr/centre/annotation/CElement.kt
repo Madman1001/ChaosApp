@@ -7,4 +7,6 @@ package com.lhr.centre.annotation
  */
 @kotlin.annotation.Target(AnnotationTarget.CLASS)
 @kotlin.annotation.Retention(AnnotationRetention.BINARY)
-annotation class CElement(val name: String)
+annotation class CElement(val name: String, val flag: Int = 0)
+
+const val CELEMENT_FLAG_LAUNCHER = 0x01

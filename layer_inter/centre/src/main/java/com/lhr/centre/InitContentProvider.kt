@@ -43,7 +43,7 @@ class InitContentProvider : ContentProvider() {
         return 0
     }
 
-    fun getApplicationByReflect(): Application {
+    private fun getApplicationByReflect(): Application {
         try {
             @SuppressLint("PrivateApi") val activityThread =
                 Class.forName("android.app.ActivityThread")

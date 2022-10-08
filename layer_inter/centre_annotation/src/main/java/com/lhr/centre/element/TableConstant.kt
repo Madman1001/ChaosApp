@@ -14,7 +14,12 @@ object TableConstant {
     /**
      * 表项内容
      */
-    const val EXTRA_VALUE = "extra_value"
+    const val EXTRA_VALUE = "extra_class"
+
+    /**
+     * 配置项
+     */
+    const val EXTRA_FLAG = "extra_flag"
 
     /**
      * 路由表默认包名

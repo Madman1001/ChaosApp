@@ -69,14 +69,13 @@ class CentreProcessor: AbstractProcessor() {
         val elements = roundEnv.rootElements
         if (elements.isNotEmpty()) {
             for (value in elements) {
-                val plugin: CElement? = value.getAnnotation(CElement::class.java)
-                environment.messager.printMessage(Diagnostic.Kind.NOTE, "-----------------------")
-                if (plugin == null) {
-                    continue
-                }
+                val plugin: CElement = value.getAnnotation(CElement::class.java) ?: continue
+
+                environment.messager.printMessage(Diagnostic.Kind.NOTE, ">>>>>>>>>>>>>>>>>>>>>>")
                 environment.messager.printMessage(Diagnostic.Kind.NOTE, plugin.toString())
                 environment.messager.printMessage(Diagnostic.Kind.NOTE, value.toString())
-                elementConfig.extra.add(CentreElementPluginConfig(plugin.name,value.toString()))
+                environment.messager.printMessage(Diagnostic.Kind.NOTE, "<<<<<<<<<<<<<<<<<<<<<<")
+                elementConfig.extra.add(value)
             }
             /*处理注解*/
         }
