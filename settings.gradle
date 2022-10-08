@@ -20,8 +20,10 @@ project(':learn').projectDir = new File("layer_element/learn")
 //project(':anim').projectDir = new File("layer_element/anim")
 //project(':opengl').projectDir = new File("layer_element/opengl")
 project(':sys').projectDir = new File("layer_element/sys")
-//project(':vpn').projectDir = new File("layer_element/vpn")
+project(':vpn').projectDir = new File("layer_element/vpn")
 
 //应用层
 include ':app'
+
+//插件
 include ':analysis_plugin'

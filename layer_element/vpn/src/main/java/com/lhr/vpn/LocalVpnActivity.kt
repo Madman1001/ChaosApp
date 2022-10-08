@@ -2,18 +2,17 @@ package com.lhr.vpn
 
 import android.content.Intent
 import android.net.VpnService
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import com.lhr.centre.annotation.CElement
-import com.lhr.utils.NetworkUtils
+import com.lhr.common.ui.BaseActivity
+import com.lhr.common.utils.NetworkUtils
 import com.lhr.test.LocalVpnTest
+import com.lhr.vpn.databinding.ActivityLocalVpnBinding
 
 /**
  * @author lhr
@@ -21,7 +20,7 @@ import com.lhr.test.LocalVpnTest
  * @des
  */
 @CElement(name = "网络代理")
-class LocalVpnActivity : AppCompatActivity() {
+class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
 
     companion object {
         private const val VPN_REQUEST_CODE = 0xF0F
@@ -38,9 +37,8 @@ class LocalVpnActivity : AppCompatActivity() {
      */
     private lateinit var _launchActivity: ActivityResultLauncher<Intent>
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_local_vpn)
+    override fun initView(savedInstanceState: Bundle?) {
+        super.initView(savedInstanceState)
         _launchActivity = this.activityResultRegistry.register(
             VPN_REQUEST_KEY,
             this,
@@ -50,14 +48,13 @@ class LocalVpnActivity : AppCompatActivity() {
                     startService(Intent(this, LocalVpnService::class.java))
                 }
             })
-
-        this.findViewById<TextView>(R.id.vpn_edit_text).text = "Local IP: ${NetworkUtils.getHostIp()}"
+        mBinding.vpnEditText.setText("Local IP: ${NetworkUtils.getHostIp()}")
     }
 
     fun onClick(view: View){
-        val address = this.findViewById<EditText>(R.id.test_ip_edit_text).text.toString()
-        val port = this.findViewById<EditText>(R.id.test_port_edit_text).text.toString()
-        val data = this.findViewById<EditText>(R.id.vpn_edit_text).text.toString()
+        val address = mBinding.testIpEditText.text.toString()
+        val port = mBinding.testPortEditText.text.toString()
+        val data = mBinding.vpnEditText.text.toString()
         when(view.id){
             R.id.start_vpn_bt ->{
                 startVPN()

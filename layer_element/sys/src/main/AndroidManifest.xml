@@ -5,10 +5,5 @@
     <application>
         <activity android:name="com.lhr.sys.SysActivity"
             android:theme="@style/BaseStyle" />
-        <provider
-            android:name=".ServiceHookContentProvider"
-            android:authorities="@{applicationId}.ServiceHookContentProvider"
-            android:enabled="true"
-            android:exported="false" />
     </application>
 </manifest>
