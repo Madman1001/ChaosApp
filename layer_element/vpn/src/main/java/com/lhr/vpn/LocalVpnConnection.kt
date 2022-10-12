@@ -118,19 +118,11 @@ class LocalVpnConnection(
 
                         //可以进行拦截、修改、转发处理
                         val ipPacket = NetIpPacket(byteBuffer)
-                        Log.d(TAG, "in ip packet: $ipPacket")
-                        if (ipPacket.isUdp()){
-                            val udpPacket = NetUdpPacket(ipPacket.data)
-                            Log.d(TAG, "in udp packet: $udpPacket")
-                        }
-                        if (ipPacket.isTcp()){
-                            val tcpPacket = NetTcpPacket(ipPacket.data)
-                            Log.d(TAG, "in tcp packet: $tcpPacket")
-                        }
-//                        if (ipPacket.isValid()) {
-//                            Log.d(TAG, "in packet: ${ByteLog.binaryToString(byteBuffer)}")
+
+                        if (ipPacket.isUdp()) {
+                            Log.d(TAG, "in packet: $ipPacket")
 //                            this.inputData(ipPacket)
-//                        }
+                        }
                         packet.clear()
                     }
                 }

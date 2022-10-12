@@ -1,5 +1,6 @@
 package com.lhr.vpn.net.v4
 
+import com.lhr.vpn.net.CheckSum
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 
@@ -76,10 +77,60 @@ class NetIpPacket {
 
     fun encodePacket(): ByteBuffer{
         val size = 20 + ipHeader.optionWords.size + data.size
+        val upperChecksum = tcpUdpChecksum(data).toShort()
+        if (isTcp()){
+            data = ByteBuffer.wrap(data).run {
+                position(16)
+                putShort(upperChecksum)
+            }.array()
+        } else if (isUdp()){
+            data = ByteBuffer.wrap(data).run {
+                position(6)
+                putShort(upperChecksum)
+            }.array()
+        }
+
         val buffer = ByteBuffer.allocate(size)
+            .put(((ipHeader.version shl 4) or (5 + ipHeader.optionWords.size / 4)).toByte())
+            .put(ipHeader.type_of_service)
+            .putShort(size.toShort())
+            .putShort(ipHeader.identification)
+            .putShort((ipHeader.flag or ipHeader.offset_frag).toShort())
+            .put(ipHeader.time_to_live)
+            .put(ipHeader.upper_protocol)
+            .putShort(0) //设置校验和
+            .put(ipHeader.source_ip_address.address)
+            .put(ipHeader.target_ip_address.address)
+            .put(ipHeader.optionWords)
+            .put(data)
 
-
+        //设置ip端校验和
+        val ipChecksum = CheckSum.checksum(buffer.array(), 20 + ipHeader.optionWords.size)
+        buffer.position(10)
+        buffer.putShort(ipChecksum.toShort())
+        buffer.rewind()
         return buffer
+    }
+
+    private fun tcpUdpChecksum(data: ByteArray): Int {
+        val buffer = ByteBuffer.wrap(ByteArray(12 + data.size))
+        buffer.put(ipHeader.source_ip_address.address)
+        buffer.put(ipHeader.target_ip_address.address)
+        buffer.put(0)
+        buffer.put(ipHeader.upper_protocol)
+        buffer.putShort(data.size.toShort())
+        buffer.put(data)
+        if (isTcp()) {
+            buffer.position(12 + 16)
+            buffer.putShort(0)
+        }
+        if (isUdp()) {
+            buffer.position(12 + 6)
+            buffer.putShort(0)
+        }
+        buffer.rewind()
+        val checkData = buffer.array()
+        return CheckSum.checksum(checkData, checkData.size)
     }
 
     private fun readIpAddress(packet: ByteBuffer): Inet4Address {
@@ -90,13 +141,25 @@ class NetIpPacket {
 
     override fun toString(): String {
         val sb = StringBuilder()
-        sb.append("ip packet:\n")
-            .append("Ver:").append(ipHeader.version).append("\n")
-            .append("Proto:").append(ipHeader.upper_protocol).append("\n")
-            .append("Src:").append(ipHeader.source_ip_address.toString()).append("\n")
-            .append("Dst:").append(ipHeader.target_ip_address.toString()).append("\n")
-            .append("DataLength:").append(data.size).append("\n")
-
+        sb.append("IPv4 Packet {")
+            .append("\n  Version:        ").append(ipHeader.version)
+            .append("\n  Header length:  ").append(20 + ipHeader.optionWords.size)
+            .append("\n  Type:           ").append(ipHeader.type_of_service)
+            .append("\n  Total length:   ").append(20 + ipHeader.optionWords.size + data.size)
+            .append("\n  Identification: ").append(ipHeader.identification)
+            .append("\n  Flags + offset: ").append((ipHeader.flag or ipHeader.offset_frag).toShort())
+            .append("\n  Time to live:   ").append(ipHeader.time_to_live)
+            .append("\n  Protocol:       ").append(ipHeader.upper_protocol)
+            .append("\n  Source:         ").append(ipHeader.source_ip_address.hostAddress)
+            .append("\n  Destination:    ").append(ipHeader.target_ip_address.hostAddress)
+            .append("\n  Data: [")
+            for (i in data.indices) {
+                if (i % 16 == 0) {
+                    sb.append(String.format("\n%4s", ""))
+                }
+                sb.append(java.lang.String.format(" %02X", data[i].toUByte().toInt() and 0xFF))
+            }
+        sb.append("\n  ]")
         return sb.toString()
     }
 
@@ -105,13 +168,13 @@ class NetIpPacket {
         var version: Int = 0
 
         //头长度 4 bit (单位 32 bit)
-        var header_length: Int = 0
+        //var header_length: Int = 0
 
         //服务类型 8 bit
         var type_of_service: Byte = 0
 
         //总长度 16 bit (单位 8 bit)
-        var total_length: Short = 0
+        //var total_length: Short = 0
 
         //标识 16 bit
         var identification: Short = 0

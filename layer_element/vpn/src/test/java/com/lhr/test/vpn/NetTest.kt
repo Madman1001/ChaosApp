@@ -11,9 +11,11 @@ class NetTest {
 
     @Test
     fun ipReadTest(){
-        val i = 0x00001111
+        val i = ((4 shl 4) or (5 + 0 / 4)).toByte()
 
-        println(i.toByte())
-        println(i.toByte().toInt())
+        println(i)
+        println(4 shl 4)
+        println(5 + 0 / 4)
+
     }
 }

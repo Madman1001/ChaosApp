@@ -1,5 +1,6 @@
 package com.lhr.vpn.net.v4
 
+import java.net.Inet4Address
 import java.nio.ByteBuffer
 
 /**
@@ -8,12 +9,13 @@ import java.nio.ByteBuffer
  * @Description: tcp数据包解析
  */
 class NetTcpPacket {
-    constructor(){
+    constructor() {
         tcpHeader = TcpHeader()
     }
-    constructor(array: ByteArray): this(ByteBuffer.wrap(array))
 
-    constructor(buffer: ByteBuffer){
+    constructor(array: ByteArray) : this(ByteBuffer.wrap(array))
+
+    constructor(buffer: ByteBuffer) {
         decodePacket(buffer)
     }
 
@@ -24,7 +26,7 @@ class NetTcpPacket {
     //tcp数据
     var data: ByteArray = ByteArray(0)
 
-    fun decodePacket(buffer: ByteBuffer){
+    fun decodePacket(buffer: ByteBuffer) {
         val tcpHeader = TcpHeader()
         tcpHeader.source_port = buffer.short
         tcpHeader.target_port = buffer.short
@@ -55,30 +57,24 @@ class NetTcpPacket {
         this.data = data
     }
 
-    fun encodePacket(): ByteBuffer{
+    /**
+     * 返回数据包，无校验和
+     */
+    fun encodePacket(): ByteBuffer {
         val size = 20 + tcpHeader.optionWords.size + data.size
-        val buffer = ByteBuffer.allocate(size)
-        buffer.putShort(tcpHeader.source_port)
-        buffer.putShort(tcpHeader.target_port)
-        buffer.putInt(tcpHeader.sequence_number)
-        buffer.putInt(tcpHeader.acknowledgment_sequence_number)
 
-        //todo 需计算长度
-        buffer.put(tcpHeader.head_length)
-
-        buffer.put(tcpHeader.control_sign)
-
-        buffer.putShort(tcpHeader.window_size)
-
-        //todo 需计算校验和
-        buffer.putShort(tcpHeader.check_sum)
-
-        buffer.putShort(tcpHeader.urgent_pointer)
-
-        buffer.put(tcpHeader.optionWords)
-
-        buffer.put(data)
-        return buffer
+        return ByteBuffer.allocate(size)
+            .putShort(tcpHeader.source_port)
+            .putShort(tcpHeader.target_port)
+            .putInt(tcpHeader.sequence_number)
+            .putInt(tcpHeader.acknowledgment_sequence_number)
+            .put((((20 + tcpHeader.optionWords.size) / 4) shl 4).toByte())
+            .put(tcpHeader.control_sign)
+            .putShort(tcpHeader.window_size)
+            .putShort(0)
+            .putShort(tcpHeader.urgent_pointer)
+            .put(tcpHeader.optionWords)
+            .put(data)
     }
 
     override fun toString(): String {
@@ -87,14 +83,15 @@ class NetTcpPacket {
             .append("Src:").append(tcpHeader.source_port.toUShort()).append("\n")
             .append("Dst:").append(tcpHeader.target_port.toUShort()).append("\n")
             .append("SeqNumber:").append(tcpHeader.sequence_number.toUInt()).append("\n")
-            .append("AckNumber:").append(tcpHeader.acknowledgment_sequence_number.toUInt()).append("\n")
+            .append("AckNumber:").append(tcpHeader.acknowledgment_sequence_number.toUInt())
+            .append("\n")
             .append("WindowSize:").append(tcpHeader.window_size.toUShort()).append("\n")
             .append("ControlSign").append(tcpHeader.control_sign.toUByte()).append("\n")
             .append("DataLength:").append(data.size).append("\n")
         return sb.toString()
     }
 
-    class TcpHeader{
+    class TcpHeader {
         //源端口号 16 bit
         var source_port: Short = 0
 
@@ -107,8 +104,9 @@ class NetTcpPacket {
         //确认序号 32 bit
         var acknowledgment_sequence_number: Int = 0
 
-        //首部长度 4 bit (以 32 bit为单位)
-        var head_length: Byte = 0
+        // 首部长度 4 bit (以 32 bit为单位)
+        // var head_length: Byte = 0
+
         //控制位 6 bit (0 0 URG ACK PSH RST SYN FIN)
         var control_sign: Byte = 0
 

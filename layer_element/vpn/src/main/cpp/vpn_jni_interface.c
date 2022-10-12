@@ -581,11 +581,14 @@ JNIEXPORT jstring JNICALL Java_com_lhr_vpn_util_ByteLog_nativeBinaryToString
         (JNIEnv *env, jobject jobj, jbyteArray jba) {
     int len = (*env)->GetArrayLength(env, jba);
     jbyte *arrays = (jbyte *) malloc(len * sizeof(jbyte));
-    unsigned char *chars = malloc(len * 8 * sizeof(unsigned char) + len + 1);
+    unsigned char *chars = malloc(len * 8 * sizeof(unsigned char) + (len / 4) + len + 1);
     (*env)->GetByteArrayRegion(env, jba, 0, len, arrays);
     int byteIndex = 0;
     int charsIndex = 0;
     for (; byteIndex < len; ++byteIndex) {
+        if(byteIndex % 4 == 0){
+            chars[charsIndex++] = '\n';
+        }
         unsigned char uc = (unsigned char) arrays[byteIndex];
         unsigned char sign = 0x80;
         int z = 0;

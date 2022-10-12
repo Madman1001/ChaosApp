@@ -1,13 +1,11 @@
 package com.lhr.vpn.handle
 
 import android.net.VpnService
-import android.util.Log
 import com.lhr.vpn.pool.TCPProxyClientPool
 import com.lhr.vpn.pool.UDPProxyClientPool
 import com.lhr.vpn.protocol.IProtocol
 import com.lhr.vpn.protocol.TCPPacket
 import com.lhr.vpn.protocol.UDPPacket
-import com.lhr.vpn.util.ByteLog
 
 /**
  * @author lhr

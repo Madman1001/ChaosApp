@@ -28,27 +28,27 @@ class NetUdpPacket {
         val udpHeader = UdpHeader()
         udpHeader.source_port = buffer.short
         udpHeader.target_port = buffer.short
-        udpHeader.total_length = buffer.short
+        val totalLength = buffer.short
         udpHeader.check_sum = buffer.short
         this.udpHeader = udpHeader
 
-        val dataByteLength = udpHeader.total_length.toUShort().toInt() - 8
+        val dataByteLength = totalLength.toUShort().toInt() - 8
         val data = ByteArray(dataByteLength)
         buffer.get(data)
         this.data = data
     }
 
+    /**
+     * 返回数据包，无校验和
+     */
     fun encodePacket(): ByteBuffer {
         val size = 8 + data.size
-        val buffer = ByteBuffer.allocate(size)
-        buffer.putShort(udpHeader.source_port)
-        buffer.putShort(udpHeader.target_port)
-        //todo 需计算长度
-        buffer.putShort(udpHeader.total_length)
-        //todo 需计算校验和
-        buffer.putShort(udpHeader.check_sum)
-        buffer.put(data)
-        return buffer
+        return ByteBuffer.allocate(size)
+            .putShort(udpHeader.source_port)
+            .putShort(udpHeader.target_port)
+            .putShort(size.toShort())
+            .putShort(0)
+            .put(data)
     }
 
     override fun toString(): String {
@@ -68,7 +68,7 @@ class NetUdpPacket {
         var target_port: Short = 0
 
         //UDP长度(单位为：字节) 16 bit
-        var total_length: Short = 0
+        //var total_length: Short = 0
 
         //UDP校验和 16 bit
         var check_sum: Short = 0
