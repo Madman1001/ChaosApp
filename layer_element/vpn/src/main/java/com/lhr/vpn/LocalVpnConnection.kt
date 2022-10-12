@@ -6,9 +6,10 @@ import android.util.Log
 import com.lhr.vpn.handle.NetworkProxyHandle
 import com.lhr.vpn.handle.TransportProxyHandle
 import com.lhr.vpn.handle.VpnProxyHandle
-import com.lhr.vpn.protocol.IPPacket
+import com.lhr.vpn.net.v4.NetIpPacket
+import com.lhr.vpn.net.v4.NetTcpPacket
+import com.lhr.vpn.net.v4.NetUdpPacket
 import com.lhr.vpn.protocol.IProtocol
-import com.lhr.vpn.protocol.TCPPacket
 import com.lhr.vpn.util.ByteLog
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -101,18 +102,35 @@ class LocalVpnConnection(
                     //读取输入数据
                     val len = readToTun(packet, packetInput)
                     if (len > 0) {
+                        packet.rewind()
                         packet.limit(len)
-                        //可以进行拦截、修改、转发处理
                         val byteBuffer = ByteArray(len)
-                        for (i in 0 until len) {
-                            byteBuffer[i] = packet[i]
-                        }
                         Log.d(TAG, "虚拟网卡读取:${len}byte")
-                        val ipPacket = IPPacket(byteBuffer)
-                        if (ipPacket.isValid()) {
-                            Log.d(TAG, "in packet: ${ByteLog.binaryToString(byteBuffer)}")
-                            this.inputData(ipPacket)
+
+                        packet.get(byteBuffer)
+                        val headerLength = (byteBuffer[0].toUByte().toInt() and 0x0f)
+                        //非ip v4 包
+                        if (headerLength <= 0){
+                            Log.d(TAG, "This is no ipv4 packet: ${ByteLog.binaryToString(byteBuffer)}")
+                            packet.clear()
+                            continue
                         }
+
+                        //可以进行拦截、修改、转发处理
+                        val ipPacket = NetIpPacket(byteBuffer)
+                        Log.d(TAG, "in ip packet: $ipPacket")
+                        if (ipPacket.isUdp()){
+                            val udpPacket = NetUdpPacket(ipPacket.data)
+                            Log.d(TAG, "in udp packet: $udpPacket")
+                        }
+                        if (ipPacket.isTcp()){
+                            val tcpPacket = NetTcpPacket(ipPacket.data)
+                            Log.d(TAG, "in tcp packet: $tcpPacket")
+                        }
+//                        if (ipPacket.isValid()) {
+//                            Log.d(TAG, "in packet: ${ByteLog.binaryToString(byteBuffer)}")
+//                            this.inputData(ipPacket)
+//                        }
                         packet.clear()
                     }
                 }

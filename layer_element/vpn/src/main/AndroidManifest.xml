@@ -11,7 +11,8 @@
     <application
         android:usesCleartextTraffic="true">
         <activity android:name=".LocalVpnActivity"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan"
+            android:theme="@style/BaseStyle" />
 
         <service
             android:name=".LocalVpnService"

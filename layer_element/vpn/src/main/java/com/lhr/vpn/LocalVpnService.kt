@@ -29,12 +29,34 @@ class LocalVpnService : VpnService() {
         const val VPN_CONTROL_ACTION_STOP = "VPN_STOP"
 
         var vpnService: WeakReference<VpnService?> = WeakReference(null)
+        fun startVPN(context: Context): Boolean{
+            val intent = VpnService.prepare(context)
+            if (intent != null){
+                return false
+            } else {
+                context.startService(Intent(context, LocalVpnService::class.java))
+                return true
+            }
+        }
+
+        fun stopVPN(context: Context) {
+            val stopIntent = Intent().apply {
+                action = VPN_CONTROL_ACTION_STOP
+            }
+            LocalBroadcastManager.getInstance(context).sendBroadcast(stopIntent)
+        }
     }
 
     private val vpnConnection = AtomicReference<LocalVpnConnection>()
 
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            when(intent.action){
+                VPN_CONTROL_ACTION_STOP -> {
+                    vpnConnection.get()?.stopProxy()
+                    this@LocalVpnService.stopSelf()
+                }
+            }
         }
     }
 

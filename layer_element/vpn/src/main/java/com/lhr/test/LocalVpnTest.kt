@@ -1,11 +1,17 @@
 package com.lhr.test
 
+import android.app.Application
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.*
 import java.nio.charset.StandardCharsets
 
@@ -15,8 +21,34 @@ import java.nio.charset.StandardCharsets
  * @des 测试样例
  */
 object LocalVpnTest {
+    private val SP_NAME = this::class.java.simpleName + "_sp"
+
     private val mainHandler = Handler(Looper.getMainLooper())
     const val tag = "VpnTest"
+
+    private var app: Application? = null
+    private var sp: SharedPreferences? = null
+
+    private const val IP_KEY = "SP_IP_KEY"
+
+    fun initManager(application: Application){
+        app = application
+    }
+
+    fun getTestIp(): String {
+        if (sp == null){
+            sp = app?.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        }
+        return sp?.getString(IP_KEY, "192.168.2.249") ?: "192.168.2.249"
+    }
+
+    fun setTestIp(ip: String){
+        if (sp == null){
+            sp = app?.getSharedPreferences(SP_NAME, Context.MODE_PRIVATE)
+        }
+        sp?.edit()?.putString(IP_KEY, ip)?.apply()
+    }
+
     fun httpTest(){
         GlobalScope.launch {
             try {
@@ -34,6 +66,8 @@ object LocalVpnTest {
     }
 
     fun udpClientTest(address: String, port: Int, data: String){
+        LocalVpnTest.setTestIp(address)
+
         GlobalScope.launch(IO) {
             try {
                 val buf = data.toByteArray()
@@ -54,6 +88,10 @@ object LocalVpnTest {
                 Log.d(tag, "udp test receive $str")
 
                 udpSocket.close()
+
+                withContext(Dispatchers.Main){
+                    Toast.makeText(app, str, Toast.LENGTH_SHORT).show()
+                }
             }catch (e: Exception){
                 Log.d(tag, "udp test Exception ", e)
             }
@@ -89,6 +127,8 @@ object LocalVpnTest {
     }
 
     fun tcpClientTest(address: String, port: Int, data: String){
+        LocalVpnTest.setTestIp(address)
+
         GlobalScope.launch {
             try {
                 val tcpSocket = Socket(InetAddress.getByName(address), port)
@@ -104,6 +144,10 @@ object LocalVpnTest {
                 tcpSocket.shutdownInput()
 
                 tcpSocket.close()
+
+                withContext(Dispatchers.Main){
+                    Toast.makeText(app, str, Toast.LENGTH_SHORT).show()
+                }
                 Log.d(tag, "over tcp test")
             }catch (e: Exception){
 
