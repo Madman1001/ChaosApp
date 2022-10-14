@@ -1,6 +1,6 @@
-package com.lhr.vpn.net.v4
+package com.lhr.vpn.socks.net.v4
 
-import com.lhr.vpn.net.CheckSum
+import com.lhr.vpn.util.ByteLog
 import java.net.Inet4Address
 import java.nio.ByteBuffer
 
@@ -27,11 +27,11 @@ class NetIpPacket {
     var data: ByteArray = ByteArray(0)
 
     fun isTcp(): Boolean {
-        return ipHeader.upper_protocol.toUByte().toInt() == PROTO_TCP
+        return ipHeader.upper_protocol.toUByte().toInt() == NetV4Protocol.PROTO_TCP
     }
 
     fun isUdp(): Boolean {
-        return ipHeader.upper_protocol.toUByte().toInt() == PROTO_UDP
+        return ipHeader.upper_protocol.toUByte().toInt() == NetV4Protocol.PROTO_UDP
     }
 
     private fun decodePacket(rawData: ByteBuffer){
@@ -50,7 +50,7 @@ class NetIpPacket {
         ipHeader.identification = rawData.short
 
         val ipFlagAndFragOffset = rawData.short
-        ipHeader.flag = ipFlagAndFragOffset.toUShort().toInt() and 0xE000
+        ipHeader.flag = (ipFlagAndFragOffset.toUShort().toInt() and 0xE000) ushr 13
         ipHeader.offset_frag = ipFlagAndFragOffset.toUShort().toInt() and 0x1FFF
 
         ipHeader.time_to_live = rawData.get()
@@ -95,7 +95,7 @@ class NetIpPacket {
             .put(ipHeader.type_of_service)
             .putShort(size.toShort())
             .putShort(ipHeader.identification)
-            .putShort((ipHeader.flag or ipHeader.offset_frag).toShort())
+            .putShort(((ipHeader.flag shl 13) or ipHeader.offset_frag).toShort())
             .put(ipHeader.time_to_live)
             .put(ipHeader.upper_protocol)
             .putShort(0) //设置校验和
@@ -105,7 +105,7 @@ class NetIpPacket {
             .put(data)
 
         //设置ip端校验和
-        val ipChecksum = CheckSum.checksum(buffer.array(), 20 + ipHeader.optionWords.size)
+        val ipChecksum = NetV4Protocol.checksum(buffer.array(), 20 + ipHeader.optionWords.size)
         buffer.position(10)
         buffer.putShort(ipChecksum.toShort())
         buffer.rewind()
@@ -130,7 +130,7 @@ class NetIpPacket {
         }
         buffer.rewind()
         val checkData = buffer.array()
-        return CheckSum.checksum(checkData, checkData.size)
+        return NetV4Protocol.checksum(checkData, checkData.size)
     }
 
     private fun readIpAddress(packet: ByteBuffer): Inet4Address {
@@ -147,25 +147,23 @@ class NetIpPacket {
             .append("\n  Type:           ").append(ipHeader.type_of_service)
             .append("\n  Total length:   ").append(20 + ipHeader.optionWords.size + data.size)
             .append("\n  Identification: ").append(ipHeader.identification)
-            .append("\n  Flags + offset: ").append((ipHeader.flag or ipHeader.offset_frag).toShort())
+            .append("\n  Flags + offset: ").append(((ipHeader.flag shl 13) or ipHeader.offset_frag).toShort())
             .append("\n  Time to live:   ").append(ipHeader.time_to_live)
             .append("\n  Protocol:       ").append(ipHeader.upper_protocol)
             .append("\n  Source:         ").append(ipHeader.source_ip_address.hostAddress)
             .append("\n  Destination:    ").append(ipHeader.target_ip_address.hostAddress)
+            .append("\n  Options: [")
+            .append(ByteLog.hexToString(ipHeader.optionWords))
+            .append("\n  ]")
             .append("\n  Data: [")
-            for (i in data.indices) {
-                if (i % 16 == 0) {
-                    sb.append(String.format("\n%4s", ""))
-                }
-                sb.append(java.lang.String.format(" %02X", data[i].toUByte().toInt() and 0xFF))
-            }
-        sb.append("\n  ]")
+            .append(ByteLog.hexToString(data))
+            .append("\n  ]")
         return sb.toString()
     }
 
     class IpHeader{
         //版本号 4 bit
-        var version: Int = 0
+        var version: Int = NetV4Protocol.IP_VERSION
 
         //头长度 4 bit (单位 32 bit)
         //var header_length: Int = 0
@@ -202,12 +200,5 @@ class NetIpPacket {
 
         //可选字段 (单位 32 bit)
         var optionWords: ByteArray = ByteArray(0)
-    }
-
-    companion object{
-        const val PROTO_TCP = 6
-        const val PROTO_UDP = 17
-        const val PROTO_ICMP = 1
-        const val PROTO_IGMP = 2
     }
 }

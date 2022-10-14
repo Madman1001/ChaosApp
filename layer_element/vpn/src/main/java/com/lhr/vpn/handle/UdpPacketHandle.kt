@@ -1,6 +1,6 @@
 package com.lhr.vpn.handle
 
-import com.lhr.vpn.net.v4.NetUdpPacket
+import com.lhr.vpn.socks.net.v4.NetUdpPacket
 
 /**
  * @author lhr

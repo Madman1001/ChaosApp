@@ -1,5 +1,6 @@
-package com.lhr.vpn.net.v4
+package com.lhr.vpn.socks.net.v4
 
+import com.lhr.vpn.util.ByteLog
 import java.nio.ByteBuffer
 
 /**
@@ -53,10 +54,12 @@ class NetUdpPacket {
 
     override fun toString(): String {
         val sb = StringBuilder()
-        sb.append("udp packet:\n")
-            .append("Src:").append(udpHeader.source_port.toUShort()).append("\n")
-            .append("Dst:").append(udpHeader.target_port.toUShort()).append("\n")
-            .append("DataLength:").append(data.size).append("\n")
+        sb.append("UDP Packet {")
+            .append("\n  Src:            ").append(udpHeader.source_port.toUShort())
+            .append("\n  Dst:            ").append(udpHeader.target_port.toUShort())
+            .append("\n  Data: [")
+            .append(ByteLog.hexToString(data))
+            .append("\n  ]")
         return sb.toString()
     }
 

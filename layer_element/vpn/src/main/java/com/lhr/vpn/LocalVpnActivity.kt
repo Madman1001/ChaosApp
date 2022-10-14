@@ -26,9 +26,6 @@ import com.lhr.vpn.databinding.ActivityLocalVpnBinding
 class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
 
     companion object {
-        init {
-            System.loadLibrary("chaos_vpn")
-        }
 
         private const val VPN_REQUEST_CODE = 0xF0F
 

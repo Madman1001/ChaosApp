@@ -14,17 +14,6 @@ open class IPPacket : IProtocol {
     var mPacketRef: Long = 0L
         protected set
 
-    private external fun nativeInit()
-    private external fun nativeSetRawData(nativeRef: Long, bytes: ByteArray)
-    private external fun nativeGetRawData(nativeRef: Long): ByteArray?
-    private external fun nativeRelease(nativeRef: Long)
-    private external fun nativeGetAttribute(nativeRef: Long, dataType: Int): Any?
-    private external fun nativeSetAttribute(nativeRef: Long, dataType: Int, data: Any)
-
-    init {
-        nativeInit()
-    }
-
     constructor()
 
     constructor(byteArray: ByteArray){
@@ -32,7 +21,6 @@ open class IPPacket : IProtocol {
     }
 
     protected fun finalize() {
-        nativeRelease(mPacketRef)
         mPacketRef = 0
     }
 
@@ -46,11 +34,11 @@ open class IPPacket : IProtocol {
     }
 
     open fun getAttribute(dataType: PacketConstant.DataOperateType): Any? {
-        return nativeGetAttribute(mPacketRef, dataType.value)
+        return 0
     }
 
     open fun setAttribute(dataType: PacketConstant.DataOperateType, data: Any) {
-        nativeSetAttribute(mPacketRef, dataType.value, data)
+
     }
 
     open fun getIpVersion(): Int {
@@ -214,7 +202,7 @@ open class IPPacket : IProtocol {
     final override fun getRawData(): ByteArray {
         return if (mPacketRef != 0L) {
             try {
-                nativeGetRawData(mPacketRef) ?: ByteArray(0)
+                ByteArray(0)
             } catch (e: Exception) {
                 ByteArray(0)
             }
@@ -225,7 +213,6 @@ open class IPPacket : IProtocol {
 
     final override fun setRawData(byteArray: ByteArray) {
         if (mPacketRef != 0L) {
-            nativeSetRawData(mPacketRef, byteArray)
         }
     }
 }

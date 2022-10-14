@@ -1,6 +1,6 @@
-package com.lhr.vpn.net.v4
+package com.lhr.vpn.socks.net.v4
 
-import java.net.Inet4Address
+import com.lhr.vpn.util.ByteLog
 import java.nio.ByteBuffer
 
 /**
@@ -79,15 +79,16 @@ class NetTcpPacket {
 
     override fun toString(): String {
         val sb = StringBuilder()
-        sb.append("tcp packet:\n")
-            .append("Src:").append(tcpHeader.source_port.toUShort()).append("\n")
-            .append("Dst:").append(tcpHeader.target_port.toUShort()).append("\n")
-            .append("SeqNumber:").append(tcpHeader.sequence_number.toUInt()).append("\n")
-            .append("AckNumber:").append(tcpHeader.acknowledgment_sequence_number.toUInt())
-            .append("\n")
-            .append("WindowSize:").append(tcpHeader.window_size.toUShort()).append("\n")
-            .append("ControlSign").append(tcpHeader.control_sign.toUByte()).append("\n")
-            .append("DataLength:").append(data.size).append("\n")
+        sb.append("TCP Packet {")
+            .append("\n  Src:            ").append(tcpHeader.source_port.toUShort())
+            .append("\n  Dst:            ").append(tcpHeader.target_port.toUShort())
+            .append("\n  SeqNumber:      ").append(tcpHeader.sequence_number.toUInt())
+            .append("\n  AckNumber:      ").append(tcpHeader.acknowledgment_sequence_number.toUInt())
+            .append("\n  WindowSize:     ").append(tcpHeader.window_size.toUShort())
+            .append("\n  ControlSign     ").append(tcpHeader.control_sign.toUByte())
+            .append("\n  Data: [")
+            .append(ByteLog.hexToString(data))
+            .append("\n  ]")
         return sb.toString()
     }
 

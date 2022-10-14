@@ -12,6 +12,7 @@ import com.lhr.vpn.constant.LocalVpnConfig.PROXY_PORT
 import com.lhr.vpn.constant.LocalVpnConfig.PROXY_ROUTE_ADDRESS
 import com.lhr.vpn.constant.LocalVpnConfig.PROXY_ROUTE_PORT
 import com.lhr.vpn.constant.LocalVpnConfig.PROXY_SESSION_NAME
+import com.lhr.vpn.socks.Tun2Socks
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
@@ -47,7 +48,7 @@ class LocalVpnService : VpnService() {
         }
     }
 
-    private val vpnConnection = AtomicReference<LocalVpnConnection>()
+    private val vpnConnection = AtomicReference<Tun2Socks>()
 
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -84,7 +85,7 @@ class LocalVpnService : VpnService() {
             //创建vpn通道，开始代理网络
             .establish()
         if (tunInterface != null){
-            vpnConnection.set(LocalVpnConnection(this,tunInterface))
+            vpnConnection.set(Tun2Socks(tunInterface, this))
             vpnConnection.get()?.startProxy()
         }
     }
