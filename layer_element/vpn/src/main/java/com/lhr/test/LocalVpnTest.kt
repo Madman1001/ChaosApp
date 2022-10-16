@@ -100,6 +100,7 @@ object LocalVpnTest {
 
     fun udpServerTest() {
         GlobalScope.launch(IO) {
+            val tag = "udpServer"
             try {
                 Log.d(tag, "udpServerTest start")
                 val udpServerSocket = DatagramSocket(10086)

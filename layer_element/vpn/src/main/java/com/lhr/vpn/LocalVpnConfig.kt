@@ -1,4 +1,4 @@
-package com.lhr.vpn.constant
+package com.lhr.vpn
 
 /**
  * @author lhr
@@ -7,7 +7,7 @@ package com.lhr.vpn.constant
  */
 object LocalVpnConfig {
     //代理服务名称
-    const val PROXY_SESSION_NAME = "Local VPN"
+    const val PROXY_SESSION_NAME = "ChaosVPN"
 
     //代理的主机地址，暂时只支持 ipv4
     const val PROXY_ADDRESS = "192.168.2.2"

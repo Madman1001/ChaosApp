@@ -1,7 +1,6 @@
 package com.lhr.vpn.proxy
 
 import android.util.Log
-import com.lhr.vpn.handle.IProxyTun
 import com.lhr.vpn.protocol.IPPacket
 import com.lhr.vpn.protocol.UDPPacket
 import com.lhr.vpn.proxy.state.SocketAction

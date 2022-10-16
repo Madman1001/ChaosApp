@@ -63,7 +63,6 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
         LocalVpnTest.initManager(this.application)
-
         _launchActivity = this.activityResultRegistry.register(
             VPN_REQUEST_KEY,
             this,

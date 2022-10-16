@@ -7,11 +7,11 @@ import android.content.IntentFilter
 import android.net.VpnService
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.lhr.vpn.constant.LocalVpnConfig.PROXY_ADDRESS
-import com.lhr.vpn.constant.LocalVpnConfig.PROXY_PORT
-import com.lhr.vpn.constant.LocalVpnConfig.PROXY_ROUTE_ADDRESS
-import com.lhr.vpn.constant.LocalVpnConfig.PROXY_ROUTE_PORT
-import com.lhr.vpn.constant.LocalVpnConfig.PROXY_SESSION_NAME
+import com.lhr.vpn.LocalVpnConfig.PROXY_ADDRESS
+import com.lhr.vpn.LocalVpnConfig.PROXY_PORT
+import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_ADDRESS
+import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_PORT
+import com.lhr.vpn.LocalVpnConfig.PROXY_SESSION_NAME
 import com.lhr.vpn.socks.Tun2Socks
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference

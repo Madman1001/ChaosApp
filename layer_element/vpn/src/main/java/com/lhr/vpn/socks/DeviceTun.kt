@@ -12,7 +12,7 @@ import java.nio.ByteBuffer
  * @Author: mac
  * @Description: 虚拟网卡设备
  */
-class NetTun(private val tunInterface: ParcelFileDescriptor){
+class DeviceTun(private val tunInterface: ParcelFileDescriptor){
     private val tag = this::class.java.simpleName
 
     private val tunOutput: FileOutputStream by lazy { FileOutputStream(tunInterface.fileDescriptor) }
@@ -30,7 +30,7 @@ class NetTun(private val tunInterface: ParcelFileDescriptor){
         kotlin.runCatching {
             synchronized(buffer){
                 while (true){
-                    Thread.sleep(10)
+                    Thread.sleep(1)
                     len = tunInput.read(buffer.array())
                     if (len <= 0){
                         continue

@@ -45,7 +45,7 @@ abstract class StreamChannel<O> {
     }
 
     fun sendData(data: O){
-        queue.offer(data)
+        queue.add(data)
     }
 
     abstract fun writeData(o: O)
@@ -61,7 +61,6 @@ abstract class StreamChannel<O> {
                 kotlin.runCatching {
                     readData()
                 }
-                delay(1)
             }
         }
     }

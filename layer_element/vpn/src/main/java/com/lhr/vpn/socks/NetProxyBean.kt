@@ -1,6 +1,6 @@
 package com.lhr.vpn.socks
 
-import java.net.Inet4Address
+import java.net.InetAddress
 
 /**
  * @CreateDate: 2022/10/14
@@ -12,8 +12,8 @@ import java.net.Inet4Address
  * @param targetPort 目标端口
  */
 data class NetProxyBean(
-    val sourceAddress: Inet4Address,
+    val sourceAddress: InetAddress,
     val sourcePort: Int,
-    val targetAddress: Inet4Address,
+    val targetAddress: InetAddress,
     val targetPort: Int
 )
