@@ -1,14 +1,19 @@
-package com.lhr.vpn.socks.socks
+package com.lhr.vpn.socks.socket
 
+import android.util.Log
 import com.lhr.vpn.pool.RunPool
 import com.lhr.vpn.pool.TunRunnable
 import com.lhr.vpn.socks.NetProxyBean
+import com.lhr.vpn.socks.UdpSocks
+import com.lhr.vpn.socks.net.v4.NetUdpPacket
+import com.lhr.vpn.util.PacketV4Factory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.net.DatagramPacket
 import java.net.DatagramSocket
+import java.net.InetSocketAddress
 
 /**
  * @CreateDate: 2022/10/13
@@ -26,14 +31,27 @@ class UdpTunSocket(
 
     private var receiveJob: Job? = null
 
-    fun sendPacket(packet: DatagramPacket){
+    fun sendPacket(packet: NetUdpPacket){
+        Log.d(tag, "sendPacket $packet")
+
         RunPool.execute(TunRunnable("$tag$this-out"){
-            socket.send(packet)
+            val target = bean.targetAddress
+            val targetPort = bean.targetPort
+            val udpData = packet.data
+            val address = InetSocketAddress(target, targetPort)
+            val datagramPacket = DatagramPacket(udpData, udpData.size, address)
+            socket.send(datagramPacket)
         })
 
         if (receiveJob == null || receiveJob?.isActive != true){
             startReceive()
         }
+    }
+
+    fun receivePacket(packet: NetUdpPacket){
+        Log.d(tag, "receivePacket $packet")
+
+        tunSocks.socksToTun(bean, packet)
     }
 
     /**
@@ -47,7 +65,12 @@ class UdpTunSocket(
                 socket.receive(receivePacket)
                 val data = ByteArray(receivePacket.length)
                 System.arraycopy(receivePacket.data, 0, data, 0, data.size)
-                tunSocks.socksToTun(bean, data)
+                val udpPacket = PacketV4Factory.createUdpPacket(
+                    data = data,
+                    sourcePort = bean.targetPort,
+                    targetPort = bean.sourcePort
+                )
+                receivePacket(udpPacket)
             }
         }
         receiveJob = GlobalScope.launch(Dispatchers.IO){

@@ -1,18 +1,15 @@
-package com.lhr.vpn.socks.socks
+package com.lhr.vpn.socks
 
 import android.net.VpnService
 import android.util.Log
-import com.lhr.vpn.socks.NetProxyBean
-import com.lhr.vpn.socks.Tun2Socks
 import com.lhr.vpn.socks.handle.UdpPacketHandle
 import com.lhr.vpn.socks.net.v4.NetIpPacket
 import com.lhr.vpn.socks.net.v4.NetUdpPacket
 import com.lhr.vpn.socks.net.v4.NetV4Protocol
+import com.lhr.vpn.socks.socket.UdpTunSocket
 import com.lhr.vpn.util.PacketV4Factory
-import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
-import java.net.InetSocketAddress
 
 /**
  * @author lhr
@@ -36,35 +33,25 @@ class UdpSocks(
      */
     fun tunToSocks(packet: NetIpPacket) {
         val udpPacket = NetUdpPacket(packet.data)
-        val udpData = udpPacket.data
         val source = packet.sourceAddress
         val target = packet.targetAddress
         val sourcePort = udpPacket.sourcePort.toUShort().toInt()
         val targetPort = udpPacket.targetPort.toUShort().toInt()
         val socket = obtainUdpTunSocket(source, sourcePort, target, targetPort)
 
-        val address = InetSocketAddress(target, targetPort)
-        val datagramPacket = DatagramPacket(udpData, udpData.size, address)
-        Log.d(tag, "output $packet $udpPacket")
-        socket.sendPacket(datagramPacket)
+        socket.sendPacket(udpPacket)
     }
 
     /**
      * 接收数据
      */
-    fun socksToTun(bean: NetProxyBean, data: ByteArray) {
-        val udpPacket = PacketV4Factory.createUdpPacket(
-            data = data,
-            sourcePort = bean.targetPort,
-            targetPort = bean.sourcePort
-        )
+    fun socksToTun(bean: NetProxyBean, data: NetUdpPacket) {
         val packet = PacketV4Factory.createIpPacket(
-            data = udpPacket.encodePacket().array(),
+            data = data.encodePacket().array(),
             upperProtocol = NetV4Protocol.PROTO_UDP.toByte(),
             source = bean.targetAddress,
             target = bean.sourceAddress
         )
-        Log.d(tag, "input $packet $udpPacket")
         tun2Socks.sendData(packet)
     }
 

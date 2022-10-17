@@ -4,8 +4,6 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import com.lhr.vpn.channel.StreamChannel
 import com.lhr.vpn.socks.net.v4.NetIpPacket
-import com.lhr.vpn.socks.socks.TcpSocks
-import com.lhr.vpn.socks.socks.UdpSocks
 
 /**
  * @CreateDate: 2022/10/13

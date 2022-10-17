@@ -8,6 +8,14 @@ import java.nio.ByteBuffer
  * @Author: mac
  * @Description: tcp数据包解析
  */
+//(0 0 URG ACK PSH RST SYN FIN)
+const val SIGN_NUL = 0x00
+const val SIGN_URG = 0x20
+const val SIGN_ACK = 0x10
+const val SIGN_PSH = 0x08
+const val SIGN_RST = 0x04
+const val SIGN_SYN = 0x02
+const val SIGN_FIN = 0x01
 class NetTcpPacket {
     constructor()
     constructor(array: ByteArray) : this(ByteBuffer.wrap(array))
@@ -31,7 +39,7 @@ class NetTcpPacket {
     // var head_length: Byte = 0
 
     //控制位 6 bit (0 0 URG ACK PSH RST SYN FIN)
-    var controlSign: Byte = 0
+    var controlSign: Int = 0
 
     //窗口大小 16 bit
     var windowSize: Short = 0
@@ -57,7 +65,7 @@ class NetTcpPacket {
         val len = buffer.get().toUByte().toInt()
         val headLength = len ushr 4
 
-        controlSign = buffer.get()
+        controlSign = buffer.get().toUByte().toInt()
 
         windowSize = buffer.short
 
@@ -88,7 +96,7 @@ class NetTcpPacket {
             .putInt(sequenceNumber)
             .putInt(ackSequenceNumber)
             .put((((20 + optionWords.size) / 4) shl 4).toByte())
-            .put(controlSign)
+            .put(controlSign.toByte())
             .putShort(windowSize)
             .putShort(0)
             .putShort(urgentPointer)
@@ -104,7 +112,16 @@ class NetTcpPacket {
             .append("\n  SeqNumber:      ").append(sequenceNumber.toUInt())
             .append("\n  AckNumber:      ").append(ackSequenceNumber.toUInt())
             .append("\n  WindowSize:     ").append(windowSize.toUShort())
-            .append("\n  ControlSign     ").append(controlSign.toUByte())
+            .append("\n  ControlSign     ")
+            .append(if (controlSign and SIGN_URG != 0) "URG " else "")
+            .append(if (controlSign and SIGN_ACK != 0) "ACK " else "")
+            .append(if (controlSign and SIGN_PSH != 0) "PSH " else "")
+            .append(if (controlSign and SIGN_RST != 0) "RST " else "")
+            .append(if (controlSign and SIGN_SYN != 0) "SYN " else "")
+            .append(if (controlSign and SIGN_FIN != 0) "FIN " else "")
+            .append("\n  Options: [")
+            .append(ByteLog.hexToString(optionWords))
+            .append("\n  ]")
             .append("\n  Data: [")
             .append(ByteLog.hexToString(data))
             .append("\n  ]")

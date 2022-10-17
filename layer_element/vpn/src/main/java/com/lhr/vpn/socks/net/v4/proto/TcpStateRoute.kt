@@ -1,5 +1,7 @@
 package com.lhr.vpn.socks.net.v4.proto
 
+import com.lhr.vpn.socks.net.v4.SIGN_NUL
+
 /**
  * @author lhr
  * @date 15/10/2022
@@ -10,6 +12,10 @@ class TcpStateRoute(
     val waitSendSign: Int,
     val waitRecvSign: Int
 ) {
+    init {
+        reset()
+    }
+
     var isWaitSend = false
     var isWaitRecv = false
 
@@ -21,7 +27,7 @@ class TcpStateRoute(
 
     fun sendSign(sign: Int): Boolean{
         if (waitSendSign == 0) return false
-        if (isWaitSend && sign and waitSendSign != 0){
+        if (isWaitSend && (sign and waitSendSign != 0)){
             isWaitSend = false
         }
 
@@ -31,16 +37,19 @@ class TcpStateRoute(
         return false
     }
 
-    fun recvSign(sign: Int): Boolean{
-        if (waitRecvSign == 0) return false
-        if (isWaitRecv && sign and waitRecvSign != 0){
+    fun recvSign(sign: Int): Int{
+        if (waitRecvSign == 0) return 0
+
+        var returnSign = -1
+        if (isWaitRecv && (sign and waitRecvSign != 0)){
             isWaitRecv = false
+            returnSign = waitSendSign
         }
 
         if (isWaitSendComplete && isWaitRecvComplete){
-            return true
+            return SIGN_NUL
         }
-        return false
+        return returnSign
     }
 
     fun reset(){

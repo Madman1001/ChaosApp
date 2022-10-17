@@ -1,4 +1,4 @@
-package com.lhr.vpn
+package com.lhr.test
 
 import android.content.Intent
 import android.net.VpnService
@@ -14,7 +14,8 @@ import com.lhr.centre.annotation.CElement
 import com.lhr.common.ui.BaseActivity
 import com.lhr.common.ui.BaseAdapter
 import com.lhr.common.utils.NetworkUtils
-import com.lhr.test.LocalVpnTest
+import com.lhr.vpn.LocalVpnService
+import com.lhr.vpn.R
 import com.lhr.vpn.databinding.ActivityLocalVpnBinding
 
 /**

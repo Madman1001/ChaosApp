@@ -1,4 +1,4 @@
-package com.lhr.vpn.socks.socks
+package com.lhr.vpn.socks.socket
 
 /**
  * @author lhr

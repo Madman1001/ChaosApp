@@ -1,13 +1,12 @@
-package com.lhr.vpn.socks.socks
+package com.lhr.vpn.socks
 
 import android.net.VpnService
 import android.util.Log
-import com.lhr.vpn.socks.NetProxyBean
-import com.lhr.vpn.socks.Tun2Socks
 import com.lhr.vpn.socks.handle.TcpPacketHandle
 import com.lhr.vpn.socks.net.v4.NetIpPacket
 import com.lhr.vpn.socks.net.v4.NetTcpPacket
 import com.lhr.vpn.socks.net.v4.NetV4Protocol
+import com.lhr.vpn.socks.socket.TcpTunSocket
 import com.lhr.vpn.util.PacketV4Factory
 import java.net.InetAddress
 import java.net.Socket
@@ -34,34 +33,25 @@ class TcpSocks(
      */
     fun tunToSocks(packet: NetIpPacket) {
         val tcpPacket = NetTcpPacket(packet.data)
-        val tcpData = tcpPacket.data
         val source = packet.sourceAddress
         val target = packet.targetAddress
         val sourcePort = tcpPacket.sourcePort.toUShort().toInt()
         val targetPort = tcpPacket.targetPort.toUShort().toInt()
         val socket = obtainTcpTunSocket(source, sourcePort, target, targetPort)
-
-        Log.d(tag, "output $packet $tcpPacket")
-        socket.sendPacket(tcpData)
+        socket.sendPacket(tcpPacket)
     }
 
     /**
      * 接收数据
      */
-    fun socksToTun(bean: NetProxyBean, data: ByteArray) {
-        val tcpPacket = PacketV4Factory.createTcpPacket(
-            data = data,
-            sourcePort = bean.targetPort,
-            targetPort = bean.sourcePort
-        )
+    fun socksToTun(bean: NetProxyBean, data: NetTcpPacket) {
         val packet = PacketV4Factory.createIpPacket(
-            data = tcpPacket.encodePacket().array(),
+            data = data.encodePacket().array(),
             upperProtocol = NetV4Protocol.PROTO_TCP.toByte(),
             source = bean.targetAddress,
             target = bean.sourceAddress
         )
         tun2Socks.sendData(packet)
-        Log.d(tag, "input $packet $tcpPacket")
     }
 
     fun closeSocks() {
