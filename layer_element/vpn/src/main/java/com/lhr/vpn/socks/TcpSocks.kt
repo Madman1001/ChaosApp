@@ -10,6 +10,7 @@ import com.lhr.vpn.socks.socket.TcpTunSocket
 import com.lhr.vpn.util.PacketV4Factory
 import java.net.InetAddress
 import java.net.Socket
+import java.nio.channels.SocketChannel
 
 /**
  * @author lhr
@@ -38,6 +39,7 @@ class TcpSocks(
         val sourcePort = tcpPacket.sourcePort.toUShort().toInt()
         val targetPort = tcpPacket.targetPort.toUShort().toInt()
         val socket = obtainTcpTunSocket(source, sourcePort, target, targetPort)
+        Log.e(tag, "$socket tunToSocks")
         socket.sendPacket(tcpPacket)
     }
 
@@ -67,9 +69,9 @@ class TcpSocks(
         targetPort: Int
     ): String {
         return StringBuilder()
-            .append(source.address).append(":").append(sourcePort)
+            .append(source.hostAddress).append(":").append(sourcePort)
             .append("-")
-            .append(target.address).append(":").append(targetPort)
+            .append(target.hostAddress).append(":").append(targetPort)
             .toString()
     }
 

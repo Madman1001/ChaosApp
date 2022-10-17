@@ -85,9 +85,9 @@ class UdpSocks(
         targetPort: Int
     ): String {
         return StringBuilder()
-            .append(source.address).append(":").append(sourcePort)
+            .append(source.hostAddress).append(":").append(sourcePort)
             .append("-")
-            .append(target.address).append(":").append(targetPort)
+            .append(target.hostAddress).append(":").append(targetPort)
             .toString()
     }
 }

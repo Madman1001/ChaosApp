@@ -2,9 +2,8 @@ package com.lhr.vpn.channel
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.LinkedBlockingDeque
 
 /**
  * @CreateDate: 2022/10/14
@@ -12,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue
  * @Description:
  */
 abstract class StreamChannel<O> {
-    protected val queue: LinkedBlockingQueue<O> = LinkedBlockingQueue()
+    protected val queue: LinkedBlockingDeque<O> = LinkedBlockingDeque()
 
     private var inputJob: Job? = null
 
@@ -45,7 +44,7 @@ abstract class StreamChannel<O> {
     }
 
     fun sendData(data: O){
-        queue.add(data)
+        queue.putLast(data)
     }
 
     abstract fun writeData(o: O)
@@ -72,7 +71,7 @@ abstract class StreamChannel<O> {
         return GlobalScope.launch {
             while (true){
                 kotlin.runCatching {
-                    val data = queue.take()
+                    val data = queue.takeFirst()
                     writeData(data)
                 }
             }
