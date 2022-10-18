@@ -1,7 +1,6 @@
 package com.lhr.vpn.socks
 
 import android.net.VpnService
-import android.util.Log
 import com.lhr.vpn.socks.handle.TcpPacketHandle
 import com.lhr.vpn.socks.net.v4.NetIpPacket
 import com.lhr.vpn.socks.net.v4.NetTcpPacket
@@ -10,7 +9,6 @@ import com.lhr.vpn.socks.socket.TcpTunSocket
 import com.lhr.vpn.util.PacketV4Factory
 import java.net.InetAddress
 import java.net.Socket
-import java.nio.channels.SocketChannel
 
 /**
  * @author lhr
@@ -39,7 +37,6 @@ class TcpSocks(
         val sourcePort = tcpPacket.sourcePort.toUShort().toInt()
         val targetPort = tcpPacket.targetPort.toUShort().toInt()
         val socket = obtainTcpTunSocket(source, sourcePort, target, targetPort)
-        Log.e(tag, "$socket tunToSocks")
         socket.sendPacket(tcpPacket)
     }
 

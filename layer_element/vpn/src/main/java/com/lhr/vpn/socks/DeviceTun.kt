@@ -39,7 +39,7 @@ class DeviceTun(private val tunInterface: ParcelFileDescriptor){
                     buffer.limit(len)
                     val data = ByteArray(len)
                     buffer.get(data)
-                    Log.d(tag, "虚拟网卡读取:${data.size}byte")
+                    Log.d(tag, "虚拟网卡读取<<<${data.size}byte")
                     buffer.clear()
                     return data
                 }
@@ -56,7 +56,7 @@ class DeviceTun(private val tunInterface: ParcelFileDescriptor){
         //写入数据
         synchronized(tunOutput){
             kotlin.runCatching {
-                Log.d(tag, "写入数据到虚拟网卡:${data.size}byte")
+                Log.d(tag, "虚拟网卡写入>>>${data.size}byte")
                 tunOutput.write(data)
             }
         }

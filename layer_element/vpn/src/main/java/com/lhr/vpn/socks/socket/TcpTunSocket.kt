@@ -80,15 +80,19 @@ class TcpTunSocket(
         val inputRunnable = TunRunnable("$tag$this-in") {
             val inputStream = socket.getInputStream()
             while (true) {
-                val len = inputStream.read(receiveBuffer)
-                val data = ByteArray(len)
-                System.arraycopy(receiveBuffer, 0, data, 0, len)
-                val tcpPacket = PacketV4Factory.createTcpPacket(
-                    data = data,
-                    sourcePort = bean.targetPort,
-                    targetPort = bean.sourcePort
-                )
-                receivePacket(tcpPacket)
+                kotlin.runCatching {
+                    val len = inputStream.read(receiveBuffer)
+                    val data = ByteArray(len)
+                    System.arraycopy(receiveBuffer, 0, data, 0, len)
+                    val tcpPacket = PacketV4Factory.createTcpPacket(
+                        data = data,
+                        sourcePort = bean.targetPort,
+                        targetPort = bean.sourcePort
+                    )
+                    tunTcpServer.receive(tcpPacket)
+                }.onFailure {
+                    return@TunRunnable
+                }
             }
         }
         receiveJob = GlobalScope.launch(Dispatchers.IO) {

@@ -2,6 +2,7 @@ package com.lhr.vpn.socks
 
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import com.lhr.vpn.channel.StreamChannel
 import com.lhr.vpn.socks.net.v4.NetIpPacket
 
@@ -46,6 +47,7 @@ class Tun2Socks(
 
     fun sendData(ipPacket: NetIpPacket) {
         synchronized(tunChannel) {
+            Log.d(tag, "write ip packet:$ipPacket")
             tunChannel.sendData(ipPacket.encodePacket().array())
         }
     }
@@ -64,6 +66,7 @@ class Tun2Socks(
                 return
             }
             val ipPacket = NetIpPacket(data)
+            Log.d(tag, "read ip packet:$ipPacket")
             if (ipPacket.data.isEmpty()) {
                 return
             }

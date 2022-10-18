@@ -37,4 +37,3 @@ const val STATE_CLOSE_WAIT = 9
 
 //等待先前发送到远程TCP的连接终止请求的确认
 const val STATE_LAST_ACK = 10
-data class TcpState(val state: Int, val routes: List<TcpStateRoute>)
