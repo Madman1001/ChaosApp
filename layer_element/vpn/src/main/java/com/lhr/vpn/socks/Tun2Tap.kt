@@ -12,7 +12,7 @@ import java.nio.ByteBuffer
  * @Author: mac
  * @Description: 虚拟网卡设备
  */
-class DeviceTun(private val tunInterface: ParcelFileDescriptor){
+class Tun2Tap(private val tunInterface: ParcelFileDescriptor){
     private val tag = this::class.java.simpleName
 
     private val tunOutput: FileOutputStream by lazy { FileOutputStream(tunInterface.fileDescriptor) }

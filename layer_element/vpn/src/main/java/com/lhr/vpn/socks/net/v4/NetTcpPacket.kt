@@ -1,6 +1,6 @@
 package com.lhr.vpn.socks.net.v4
 
-import com.lhr.vpn.util.ByteLog
+import com.lhr.vpn.ext.hexToString
 import java.nio.ByteBuffer
 
 /**
@@ -120,10 +120,10 @@ class NetTcpPacket {
             .append(if (controlSign and SIGN_SYN != 0) "SYN " else "")
             .append(if (controlSign and SIGN_FIN != 0) "FIN " else "")
             .append("\n  Options: [")
-            .append(ByteLog.hexToString(optionWords))
+            .append(optionWords.hexToString())
             .append("\n  ]")
             .append("\n  Data: [")
-            .append(ByteLog.hexToString(data))
+            .append(data.hexToString())
             .append("\n  ]")
         return sb.toString()
     }

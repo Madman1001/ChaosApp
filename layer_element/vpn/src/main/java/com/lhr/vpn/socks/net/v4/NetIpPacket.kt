@@ -1,6 +1,6 @@
 package com.lhr.vpn.socks.net.v4
 
-import com.lhr.vpn.util.ByteLog
+import com.lhr.vpn.ext.hexToString
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.nio.ByteBuffer
@@ -182,10 +182,10 @@ class NetIpPacket {
             .append("\n  Source:         ").append(sourceAddress.hostAddress)
             .append("\n  Destination:    ").append(targetAddress.hostAddress)
             .append("\n  Options: [")
-            .append(ByteLog.hexToString(optionWords))
+            .append(optionWords.hexToString())
             .append("\n  ]")
             .append("\n  Data: [")
-            .append(ByteLog.hexToString(data))
+            .append(data.hexToString())
             .append("\n  ]")
         return sb.toString()
     }

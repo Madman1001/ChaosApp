@@ -7,7 +7,9 @@ import android.content.IntentFilter
 import android.net.VpnService
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.lhr.test.LocalVpnTest
 import com.lhr.vpn.LocalVpnConfig.PROXY_ADDRESS
+import com.lhr.vpn.LocalVpnConfig.PROXY_DNS_SERVER
 import com.lhr.vpn.LocalVpnConfig.PROXY_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_ADDRESS
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_PORT
@@ -80,6 +82,8 @@ class LocalVpnService : VpnService() {
         val tunInterface = builder.setSession(PROXY_SESSION_NAME)
             .addAddress(PROXY_ADDRESS, PROXY_PORT)
             .addRoute(PROXY_ROUTE_ADDRESS, PROXY_ROUTE_PORT)
+            //设置dns服务器
+            //.addDnsServer(PROXY_DNS_SERVER)
             //暂时只代理自身网络
             .addAllowedApplication(this.packageName)
             //创建vpn通道，开始代理网络

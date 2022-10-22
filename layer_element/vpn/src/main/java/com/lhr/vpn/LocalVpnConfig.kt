@@ -20,4 +20,6 @@ object LocalVpnConfig {
 
     //允许通过的路由端口
     const val PROXY_ROUTE_PORT = 0
+
+    const val PROXY_DNS_SERVER = "192.168.1.1"
 }

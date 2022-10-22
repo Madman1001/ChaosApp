@@ -57,6 +57,8 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
         TestData("关闭VPN"){stopVPN()},
         TestData("UDP测试"){udpClientTest()},
         TestData("TCP测试"){tcpClientTest()},
+        TestData("UDP Server测试"){udpServerTest()},
+        TestData("TCP Server测试"){tcpServerTest()},
         TestData("Http测试"){httpClientTest()},
         TestData("Https测试"){httpsClientTest()},
     )
@@ -64,7 +66,6 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
     override fun initView(savedInstanceState: Bundle?) {
         super.initView(savedInstanceState)
         LocalVpnTest.initManager(this.application)
-        LocalVpnTest.udpServerTest()
 
         _launchActivity = this.activityResultRegistry.register(
             VPN_REQUEST_KEY,
@@ -105,6 +106,14 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
         if (address.isNotEmpty() || port.isNotEmpty()){
             LocalVpnTest.tcpClientTest(address, port.toInt(), data)
         }
+    }
+
+    private fun udpServerTest(){
+        LocalVpnTest.udpServerTest()
+    }
+
+    private fun tcpServerTest(){
+        LocalVpnTest.tcpServerTest()
     }
 
     private fun httpClientTest(){

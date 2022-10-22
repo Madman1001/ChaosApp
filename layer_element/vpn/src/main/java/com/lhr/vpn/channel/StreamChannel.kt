@@ -1,5 +1,7 @@
 package com.lhr.vpn.channel
 
+import com.lhr.vpn.pool.TunRunnable
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -17,14 +19,10 @@ abstract class StreamChannel<O> {
 
     private var outputJob: Job? = null
 
-    @Volatile
-    var isOpened = false
-        private set
+    val isOpened get() = inputJob?.isActive == true && outputJob?.isActive == true
 
     fun openChannel(){
         if (isOpened) return
-
-        isOpened = true
 
         outputJob = startOutputJob()
 
@@ -32,9 +30,6 @@ abstract class StreamChannel<O> {
     }
 
     fun closeChannel(){
-        if (!isOpened) return
-
-        isOpened = false
 
         inputJob?.cancel()
         inputJob = null
@@ -55,12 +50,17 @@ abstract class StreamChannel<O> {
      * 启动读取线程
      */
     private fun startInputJob(): Job {
-        return GlobalScope.launch {
+        inputJob?.cancel()
+        inputJob = null
+        val inputRunnable = TunRunnable("$this-InputJob"){
             while (true){
                 kotlin.runCatching {
                     readData()
                 }
             }
+        }
+        return GlobalScope.launch(Dispatchers.IO){
+            inputRunnable.run()
         }
     }
 
@@ -68,13 +68,16 @@ abstract class StreamChannel<O> {
      * 启动写入线程
      */
     private fun startOutputJob(): Job {
-        return GlobalScope.launch {
+        outputJob?.cancel()
+        outputJob = null
+        val outputRunnable = TunRunnable("$this-OutputJob"){
             while (true){
-                kotlin.runCatching {
-                    val data = queue.takeFirst()
-                    writeData(data)
-                }
+                val data = queue.takeFirst()
+                writeData(data)
             }
+        }
+        return GlobalScope.launch(Dispatchers.IO){
+            outputRunnable.run()
         }
     }
 }
