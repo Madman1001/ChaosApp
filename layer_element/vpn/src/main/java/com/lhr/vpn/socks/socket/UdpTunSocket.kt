@@ -3,7 +3,7 @@ package com.lhr.vpn.socks.socket
 import android.net.VpnService
 import android.util.Log
 import com.lhr.vpn.channel.StreamChannel
-import com.lhr.vpn.ext.hexToString
+import com.lhr.vpn.ext.toHexString
 import com.lhr.vpn.ext.isInsideToOutside
 import com.lhr.vpn.ext.isOutsideToInside
 import com.lhr.vpn.pool.RunPool
@@ -112,38 +112,30 @@ class UdpTunSocket(
             val localReceivePacket = DatagramPacket(ByteArray(1024), 1024)
             localChannel = object : StreamChannel<ByteArray>(){
                 override fun writeData(o: ByteArray) {
-                    if (remoteSocket.isClosed) {
-                        return
-                    }
 
                     //将数据发送到内部
                     val target = bean.targetAddress
                     val targetPort = bean.targetPort
                     val address = InetSocketAddress(target, targetPort)
                     val datagramPacket = DatagramPacket(o, o.size, address)
-                    Log.d(tag, "localSocket send $target $targetPort ${o.hexToString()}")
+                    Log.d(tag, "localSocket send $target $targetPort ${o.toHexString()}")
                     localServerSocket.send(datagramPacket)
                 }
 
                 override fun readData() {
-                    if (remoteSocket.isClosed) {
-                        tunSocks.unregisterSession(bean)
-                        return
-                    }
-
                     //接收内部数据
                     localServerSocket.receive(localReceivePacket)
                     if (localReceivePacket.length > 0){
                         val data = ByteArray(localReceivePacket.length)
                         System.arraycopy(localReceivePacket.data, 0, data, 0, data.size)
-                        Log.d(tag, "localSocket receive ${data.hexToString()}")
+                        Log.d(tag, "localSocket receive ${data.toHexString()}")
                         remoteChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
                     }
                 }
-
             }
+            localChannel?.openChannel()
         }
         localConnectJob = GlobalScope.launch(Dispatchers.IO){
             inputRunnable.run()
@@ -161,38 +153,31 @@ class UdpTunSocket(
             val remoteReceivePacket = DatagramPacket(ByteArray(1024), 1024)
             remoteChannel = object : StreamChannel<ByteArray>(){
                 override fun writeData(o: ByteArray) {
-                    if (remoteSocket.isClosed) {
-                        return
-                    }
 
                     //将数据发送到外部
                     val target = bean.targetAddress
                     val targetPort = bean.targetPort
                     val address = InetSocketAddress(target, targetPort)
                     val datagramPacket = DatagramPacket(o, o.size, address)
-                    Log.d(tag, "remoteSocket send $target $targetPort ${o.hexToString()}")
+                    Log.d(tag, "remoteSocket send $target $targetPort ${o.toHexString()}")
                     remoteSocket.send(datagramPacket)
                 }
 
                 override fun readData() {
-                    if (remoteSocket.isClosed) {
-                        tunSocks.unregisterSession(bean)
-                        return
-                    }
 
                     //接收外部数据
                     remoteSocket.receive(remoteReceivePacket)
                     if (remoteReceivePacket.length > 0){
                         val data = ByteArray(remoteReceivePacket.length)
                         System.arraycopy(remoteReceivePacket.data, 0, data, 0, data.size)
-                        Log.d(tag, "remoteSocket receive ${data.hexToString()}")
+                        Log.d(tag, "remoteSocket receive ${data.toHexString()}")
                         localChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
                     }
                 }
-
             }
+            remoteChannel?.openChannel()
         }
         remoteConnectJob = GlobalScope.launch(Dispatchers.IO){
             inputRunnable.run()

@@ -2,7 +2,7 @@ package com.lhr.vpn.socks
 
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import com.lhr.vpn.socks.net.v4.NetV4Protocol
+import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -19,7 +19,7 @@ class Tun2Tap(private val tunInterface: ParcelFileDescriptor){
 
     private val tunInput: FileInputStream by lazy { FileInputStream(tunInterface.fileDescriptor) }
 
-    private val buffer: ByteBuffer by lazy { ByteBuffer.allocate(NetV4Protocol.MAX_PACKET_SIZE) }
+    private val buffer: ByteBuffer by lazy { ByteBuffer.allocate(MAX_PACKET_SIZE) }
 
     /**
      * read ip packet data

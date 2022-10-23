@@ -3,7 +3,7 @@ package com.lhr.vpn.socks.socket
 import android.net.VpnService
 import android.util.Log
 import com.lhr.vpn.channel.StreamChannel
-import com.lhr.vpn.ext.hexToString
+import com.lhr.vpn.ext.toHexString
 import com.lhr.vpn.ext.isInsideToOutside
 import com.lhr.vpn.ext.isOutsideToInside
 import com.lhr.vpn.pool.RunPool
@@ -125,7 +125,7 @@ class TcpTunSocket(
                         return
                     }
 
-                    Log.d(tag, "localSocket send ${o.hexToString()}")
+                    Log.d(tag, "localSocket send ${o.toHexString()}")
                     output.write(o)
                 }
 
@@ -143,7 +143,7 @@ class TcpTunSocket(
                     if (len > 0) {
                         val data = ByteArray(len)
                         System.arraycopy(localReceiveBuffer, 0, data, 0, data.size)
-                        Log.d(tag, "localSocket receive ${data.hexToString()}")
+                        Log.d(tag, "localSocket receive ${data.toHexString()}")
                         remoteChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
@@ -188,7 +188,7 @@ class TcpTunSocket(
                         return
                     }
 
-                    Log.d(tag, "remoteSocket send ${o.hexToString()}")
+                    Log.d(tag, "remoteSocket send ${o.toHexString()}")
                     output.write(o)
                 }
 
@@ -206,7 +206,7 @@ class TcpTunSocket(
                     if (len > 0) {
                         val data = ByteArray(len)
                         System.arraycopy(remoteReceiveBuffer, 0, data, 0, data.size)
-                        Log.d(tag, "remoteSocket receive ${data.hexToString()}")
+                        Log.d(tag, "remoteSocket receive ${data.toHexString()}")
                         localChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)

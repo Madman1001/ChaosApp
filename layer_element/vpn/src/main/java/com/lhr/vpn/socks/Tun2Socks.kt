@@ -4,9 +4,12 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.lhr.vpn.channel.StreamChannel
-import com.lhr.vpn.ext.hexToString
+import com.lhr.vpn.ext.toBinString
+import com.lhr.vpn.ext.toHexString
 import com.lhr.vpn.socks.handle.TcpPacketHandle
 import com.lhr.vpn.socks.handle.UdpPacketHandle
+import com.lhr.vpn.socks.net.IP_VERSION_4
+import com.lhr.vpn.socks.net.IP_VERSION_6
 import com.lhr.vpn.socks.net.v4.NetIpPacket
 import com.lhr.vpn.socks.socket.ITunSocket
 import com.lhr.vpn.socks.socket.ProxyRouteSession
@@ -69,28 +72,50 @@ class Tun2Socks(
         if (data.isEmpty()) return
 
         kotlin.runCatching {
-            Log.d(tag, "ip data: ${data.hexToString()}")
-            val headerLength = (data[0].toUByte().toInt() and 0x0f)
-            //非ip v4 包
-            if (headerLength <= 0) {
-                return
+            val ipVersion = ((data[0].toUByte().toInt()) and 0xf0) ushr 4
+            when(ipVersion){
+                IP_VERSION_4 -> receiveIpV4(data)
+                IP_VERSION_6 -> receiveIpV6(data)
+                else -> {
+                    Log.d(tag, "ip data: ${data.toBinString()}")
+                }
             }
-            val packet = NetIpPacket(data)
-            Log.d(tag, "read ip packet:$packet")
-            if (packet.data.isEmpty()) {
-                return
-            }
-            //传递ip数据包
-            if (!packet.isUdp() && !packet.isTcp()) return
-
-            var session = obtainSession(packet)
-            if (session == null){
-                session = registerSession(packet, vpnService, this)
-            }
-            if (session.state == ProxyRouteSession.STATE_VALID){
-                session.proxyTunSocket?.handlePacket(packet)
-            }
+        }.onFailure {
+            it.printStackTrace()
         }
+    }
+
+    /**
+     * 转发ipv4数据
+     */
+    private fun receiveIpV4(data: ByteArray){
+        val headerLength = (data[0].toUByte().toInt() and 0x0f)
+        //非ip v4 包
+        if (headerLength <= 0) {
+            return
+        }
+        val packet = NetIpPacket(data)
+        Log.d(tag, "read ip packet:$packet")
+        if (packet.data.isEmpty()) {
+            return
+        }
+        //传递ip数据包
+        if (!packet.isUdp() && !packet.isTcp()) return
+
+        var session = obtainSession(packet)
+        if (session == null){
+            session = registerSession(packet, vpnService, this)
+        }
+        if (session.state == ProxyRouteSession.STATE_VALID){
+            session.proxyTunSocket?.handlePacket(packet)
+        }
+    }
+
+    /**
+     * 接收到ipv6数据
+     */
+    private fun receiveIpV6(data: ByteArray){
+        Log.d(tag, "ip data: ${data.toHexString()}")
     }
 
     /**

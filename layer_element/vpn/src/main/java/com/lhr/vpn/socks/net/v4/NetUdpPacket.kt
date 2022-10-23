@@ -1,6 +1,6 @@
 package com.lhr.vpn.socks.net.v4
 
-import com.lhr.vpn.ext.hexToString
+import com.lhr.vpn.ext.toHexString
 import java.nio.ByteBuffer
 
 /**
@@ -60,7 +60,7 @@ class NetUdpPacket {
             .append("\n  Src:            ").append(sourcePort.toUShort())
             .append("\n  Dst:            ").append(targetPort.toUShort())
             .append("\n  Data: [")
-            .append(data.hexToString())
+            .append(data.toHexString())
             .append("\n  ]")
         return sb.toString()
     }

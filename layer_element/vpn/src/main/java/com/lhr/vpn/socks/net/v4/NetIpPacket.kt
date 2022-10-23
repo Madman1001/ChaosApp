@@ -1,6 +1,10 @@
 package com.lhr.vpn.socks.net.v4
 
-import com.lhr.vpn.ext.hexToString
+import android.util.Log
+import com.lhr.vpn.ext.toHexString
+import com.lhr.vpn.socks.net.IP_VERSION_4
+import com.lhr.vpn.socks.net.PROTO_TCP
+import com.lhr.vpn.socks.net.PROTO_UDP
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.nio.ByteBuffer
@@ -18,7 +22,7 @@ class NetIpPacket {
     }
 
     //版本号 4 bit
-    var version: Int = NetV4Protocol.IP_VERSION
+    var version: Int = IP_VERSION_4
 
     //头长度 4 bit (单位 32 bit)
     //var header_length: Int = 0
@@ -32,7 +36,7 @@ class NetIpPacket {
     //标识 16 bit
     var identification: Short = 0
 
-    //标志 3 bit
+    //标志 3 bit R　DF　MF
     var flag: Int = 0
 
     //片偏移 13 bit (记录分片在原报文中的相对位置，以8个字节为偏移单位)
@@ -60,11 +64,11 @@ class NetIpPacket {
     var data: ByteArray = ByteArray(0)
 
     fun isTcp(): Boolean {
-        return upperProtocol.toUByte().toInt() == NetV4Protocol.PROTO_TCP
+        return upperProtocol.toUByte().toInt() == PROTO_TCP
     }
 
     fun isUdp(): Boolean {
-        return upperProtocol.toUByte().toInt() == NetV4Protocol.PROTO_UDP
+        return upperProtocol.toUByte().toInt() == PROTO_UDP
     }
 
     private fun decodePacket(rawData: ByteBuffer){
@@ -134,7 +138,7 @@ class NetIpPacket {
             .put(data)
 
         //设置ip端校验和
-        val ipChecksum = NetV4Protocol.checksum(buffer.array(), 20 + optionWords.size)
+        val ipChecksum = ChecksumUtil.checksum(buffer.array(), 20 + optionWords.size)
         buffer.position(10)
         buffer.putShort(ipChecksum.toShort())
         buffer.rewind()
@@ -159,7 +163,7 @@ class NetIpPacket {
         }
         buffer.rewind()
         val checkData = buffer.array()
-        return NetV4Protocol.checksum(checkData, checkData.size)
+        return ChecksumUtil.checksum(checkData, checkData.size)
     }
 
     private fun readIpAddress(packet: ByteBuffer): Inet4Address {
@@ -182,10 +186,10 @@ class NetIpPacket {
             .append("\n  Source:         ").append(sourceAddress.hostAddress)
             .append("\n  Destination:    ").append(targetAddress.hostAddress)
             .append("\n  Options: [")
-            .append(optionWords.hexToString())
+            .append(optionWords.toHexString())
             .append("\n  ]")
             .append("\n  Data: [")
-            .append(data.hexToString())
+            .append(data.toHexString())
             .append("\n  ]")
         return sb.toString()
     }

@@ -1,6 +1,7 @@
 package com.lhr.vpn.socks.net.v4
 
-import com.lhr.vpn.ext.hexToString
+import com.lhr.vpn.ext.toHexString
+import com.lhr.vpn.socks.net.*
 import java.nio.ByteBuffer
 
 /**
@@ -8,14 +9,6 @@ import java.nio.ByteBuffer
  * @Author: mac
  * @Description: tcp数据包解析
  */
-//(0 0 URG ACK PSH RST SYN FIN)
-const val SIGN_NUL = 0x00
-const val SIGN_URG = 0x20
-const val SIGN_ACK = 0x10
-const val SIGN_PSH = 0x08
-const val SIGN_RST = 0x04
-const val SIGN_SYN = 0x02
-const val SIGN_FIN = 0x01
 class NetTcpPacket {
     constructor()
     constructor(array: ByteArray) : this(ByteBuffer.wrap(array))
@@ -120,10 +113,10 @@ class NetTcpPacket {
             .append(if (controlSign and SIGN_SYN != 0) "SYN " else "")
             .append(if (controlSign and SIGN_FIN != 0) "FIN " else "")
             .append("\n  Options: [")
-            .append(optionWords.hexToString())
+            .append(optionWords.toHexString())
             .append("\n  ]")
             .append("\n  Data: [")
-            .append(data.hexToString())
+            .append(data.toHexString())
             .append("\n  ]")
         return sb.toString()
     }
