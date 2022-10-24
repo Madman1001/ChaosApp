@@ -35,7 +35,7 @@ class Tun2Tap(private val tunInterface: ParcelFileDescriptor){
                     if (len <= 0){
                         continue
                     }
-                    buffer.rewind()
+                    buffer.flip()
                     buffer.limit(len)
                     val data = ByteArray(len)
                     buffer.get(data)

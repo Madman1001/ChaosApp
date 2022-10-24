@@ -118,7 +118,7 @@ class UdpTunSocket(
                     val targetPort = bean.targetPort
                     val address = InetSocketAddress(target, targetPort)
                     val datagramPacket = DatagramPacket(o, o.size, address)
-                    Log.d(tag, "localSocket send $target $targetPort ${o.toHexString()}")
+                    Log.e(tag, "localSocket send $target $targetPort ${o.toHexString()}")
                     localServerSocket.send(datagramPacket)
                 }
 
@@ -128,7 +128,7 @@ class UdpTunSocket(
                     if (localReceivePacket.length > 0){
                         val data = ByteArray(localReceivePacket.length)
                         System.arraycopy(localReceivePacket.data, 0, data, 0, data.size)
-                        Log.d(tag, "localSocket receive ${data.toHexString()}")
+                        Log.e(tag, "localSocket receive ${data.toHexString()}")
                         remoteChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
@@ -159,7 +159,7 @@ class UdpTunSocket(
                     val targetPort = bean.targetPort
                     val address = InetSocketAddress(target, targetPort)
                     val datagramPacket = DatagramPacket(o, o.size, address)
-                    Log.d(tag, "remoteSocket send $target $targetPort ${o.toHexString()}")
+                    Log.e(tag, "remoteSocket send $target $targetPort ${o.toHexString()}")
                     remoteSocket.send(datagramPacket)
                 }
 
@@ -170,7 +170,7 @@ class UdpTunSocket(
                     if (remoteReceivePacket.length > 0){
                         val data = ByteArray(remoteReceivePacket.length)
                         System.arraycopy(remoteReceivePacket.data, 0, data, 0, data.size)
-                        Log.d(tag, "remoteSocket receive ${data.toHexString()}")
+                        Log.e(tag, "remoteSocket receive ${data.toHexString()}")
                         localChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
@@ -224,5 +224,7 @@ class UdpTunSocket(
         kotlin.runCatching {
             localServerSocket.close()
         }
+
+        Log.e(tag, "close udp socket ${localServerSocket.localPort} ${remoteSocket.localPort}")
     }
 }

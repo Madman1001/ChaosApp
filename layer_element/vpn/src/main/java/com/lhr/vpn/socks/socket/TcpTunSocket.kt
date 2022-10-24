@@ -42,11 +42,16 @@ class TcpTunSocket(
 
     //local proxy socket
     private val localServerSocket = ServerSocket(0)
+    private var localSocket: Socket? = null
     private var localChannel: StreamChannel<ByteArray>? = null
     private var localConnectJob: Job? = null
 
     @Volatile
     private var isOver = false
+    @Volatile
+    private var isLocalSocketClose = false
+    @Volatile
+    private var isRemoteSocketClose = false
 
     override fun handlePacket(packet: NetIpPacket) {
         if (bean.state == ProxyRouteSession.STATE_INVALID) return
@@ -68,10 +73,14 @@ class TcpTunSocket(
                 //outside to inside
             }
         })
-        if (localChannel?.isOpened != true && localConnectJob?.isActive != true) {
+        if (!isLocalSocketClose
+            && localChannel?.isOpened != true
+            && localConnectJob?.isActive != true) {
             startLocalJob()
         }
-        if (remoteChannel?.isOpened != true && remoteConnectJob?.isActive != true) {
+        if (!isRemoteSocketClose
+            && remoteChannel?.isOpened != true
+            && remoteConnectJob?.isActive != true) {
             startRemoteJob()
         }
     }
@@ -111,39 +120,36 @@ class TcpTunSocket(
         localChannel = null
 
         val inputRunnable = TunRunnable("$tag$this-local") {
-            val socket = localServerSocket.accept()
+            localSocket = localServerSocket.accept()
+            val socket = localSocket ?: return@TunRunnable
             val input = socket.getInputStream()
             val output = socket.getOutputStream()
             val localReceiveBuffer = ByteArray(1024)
             localChannel = object : StreamChannel<ByteArray>() {
                 override fun writeData(o: ByteArray) {
-                    if (isOver){
-                        Thread.sleep(Long.MAX_VALUE)
-                        return
-                    }
-                    if (localServerSocket.isClosed) {
+                    if (socket.isOutputShutdown){
+                        closeLocalSocket()
+                        Object().wait()
                         return
                     }
 
-                    Log.d(tag, "localSocket send ${o.toHexString()}")
+                    Log.e(tag, "localSocket send ${o.toHexString()}")
                     output.write(o)
                 }
 
                 override fun readData() {
-                    if (isOver){
-                        Thread.sleep(Long.MAX_VALUE)
-                        return
-                    }
-                    if (localServerSocket.isClosed) {
-                        tunSocks.unregisterSession(bean)
-                        return
-                    }
-
                     val len = input.read(localReceiveBuffer)
+                    if (len == -1){
+                        Log.e(tag, "${Thread.currentThread().name}===================localSocket close=================")
+                        closeLocalSocket()
+                        tunSocks.unregisterSession(bean)
+                        Object().wait()
+                        return
+                    }
                     if (len > 0) {
                         val data = ByteArray(len)
                         System.arraycopy(localReceiveBuffer, 0, data, 0, data.size)
-                        Log.d(tag, "localSocket receive ${data.toHexString()}")
+                        Log.e(tag, "localSocket receive ${data.toHexString()}")
                         remoteChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
@@ -179,34 +185,27 @@ class TcpTunSocket(
             val remoteReceiveBuffer = ByteArray(1024)
             remoteChannel = object : StreamChannel<ByteArray>() {
                 override fun writeData(o: ByteArray) {
-                    if (isOver){
-                        Thread.sleep(Long.MAX_VALUE)
-                        return
-                    }
-                    if (remoteSocket.isClosed) {
-                        Thread.sleep(Long.MAX_VALUE)
+                    if (remoteSocket.isOutputShutdown){
+                        Object().wait()
                         return
                     }
 
-                    Log.d(tag, "remoteSocket send ${o.toHexString()}")
+                    Log.e(tag, "remoteSocket send ${o.toHexString()}")
                     output.write(o)
                 }
 
                 override fun readData() {
-                    if (isOver){
-                        Thread.sleep(Long.MAX_VALUE)
-                        return
-                    }
-                    if (remoteSocket.isClosed) {
-                        Thread.sleep(Long.MAX_VALUE)
-                        return
-                    }
-
                     val len = input.read(remoteReceiveBuffer)
+                    if (len == -1){
+                        Log.e(tag, "${Thread.currentThread().name}===================remoteSocket close=================")
+                        closeRemoteSocket()
+                        Object().wait()
+                        return
+                    }
                     if (len > 0) {
                         val data = ByteArray(len)
                         System.arraycopy(remoteReceiveBuffer, 0, data, 0, data.size)
-                        Log.d(tag, "remoteSocket receive ${data.toHexString()}")
+                        Log.e(tag, "remoteSocket receive ${data.toHexString()}")
                         localChannel?.sendData(data)
                     } else {
                         Thread.sleep(100)
@@ -244,15 +243,17 @@ class TcpTunSocket(
         return sb.toString()
     }
 
-    @Synchronized
     override fun close() {
-        kotlin.runCatching {
-            localConnectJob?.cancel()
-            localConnectJob = null
-            localChannel?.closeChannel()
-            localChannel = null
-        }
+        closeLocalSocket()
 
+        closeRemoteSocket()
+
+        isOver = true
+
+        Log.e(tag, "close tcp socket ${localServerSocket.localPort} ${remoteSocket.localPort}")
+    }
+
+    private fun closeRemoteSocket(){
         kotlin.runCatching {
             remoteConnectJob?.cancel()
             remoteConnectJob = null
@@ -261,13 +262,34 @@ class TcpTunSocket(
         }
 
         kotlin.runCatching {
+            remoteSocket.shutdownInput()
+            remoteSocket.shutdownOutput()
+        }
+        kotlin.runCatching {
             remoteSocket.close()
+        }
+        isRemoteSocketClose = true
+    }
+
+    private fun closeLocalSocket(){
+        kotlin.runCatching {
+            localConnectJob?.cancel()
+            localConnectJob = null
+            localChannel?.closeChannel()
+            localChannel = null
         }
 
         kotlin.runCatching {
+            localSocket?.shutdownInput()
+            localSocket?.shutdownOutput()
+        }
+        kotlin.runCatching {
+            localSocket?.close()
+            localSocket = null
+        }
+        kotlin.runCatching {
             localServerSocket.close()
         }
-
-        isOver = true
+        isLocalSocketClose = true
     }
 }

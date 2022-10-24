@@ -103,7 +103,12 @@ class NetIpPacket {
         this.optionWords = optionWords
 
         val dataByteLength = totalLength - headerLength * 4
-        val data = ByteArray(dataByteLength)
+        val dataLength = if (dataByteLength <= rawData.limit() - rawData.position()){
+            dataByteLength
+        } else {
+            rawData.limit() - rawData.position()
+        }
+        val data = ByteArray(dataLength)
         rawData.get(data)
         this.data = data
     }

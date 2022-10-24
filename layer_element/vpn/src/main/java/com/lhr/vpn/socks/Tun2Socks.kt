@@ -77,10 +77,11 @@ class Tun2Socks(
                 IP_VERSION_4 -> receiveIpV4(data)
                 IP_VERSION_6 -> receiveIpV6(data)
                 else -> {
-                    Log.d(tag, "ip data: ${data.toBinString()}")
+                    Log.d(tag, "ip data: ${data.toHexString()}")
                 }
             }
         }.onFailure {
+            Log.d(tag, "ip data: ${data.toBinString()}")
             it.printStackTrace()
         }
     }
