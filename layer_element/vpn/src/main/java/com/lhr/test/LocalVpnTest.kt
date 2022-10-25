@@ -51,6 +51,23 @@ object LocalVpnTest {
     fun httpTest(){
         GlobalScope.launch(IO) {
             try {
+                val httpTestUrl = URL("http://192.168.2.249:8080/myServer")
+                val http = httpTestUrl.openConnection() as HttpURLConnection
+                http.connect()
+                val input = http.inputStream
+                val str = input.readText()
+                Log.e(tag, "http receive $str")
+                http.disconnect()
+                Log.d(tag, "over http test")
+            }catch (e: Exception){
+
+            }
+        }
+    }
+
+    fun httpsTest(){
+        GlobalScope.launch(IO) {
+            try {
                 val httpTestUrl = URL("http://www.baidu.com")
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 http.connect()

@@ -1,10 +1,7 @@
 package com.lhr.vpn.channel
 
 import com.lhr.vpn.pool.TunRunnable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.concurrent.LinkedBlockingDeque
 
 /**
@@ -53,14 +50,15 @@ abstract class StreamChannel<O> {
         inputJob?.cancel()
         inputJob = null
         val inputRunnable = TunRunnable("$this-InputJob"){
-            while (true){
-                kotlin.runCatching {
-                    readData()
-                }
+            kotlin.runCatching {
+                readData()
             }
+
         }
         return GlobalScope.launch(Dispatchers.IO){
-            inputRunnable.run()
+            while (isActive){
+                inputRunnable.run()
+            }
         }
     }
 
@@ -71,13 +69,13 @@ abstract class StreamChannel<O> {
         outputJob?.cancel()
         outputJob = null
         val outputRunnable = TunRunnable("$this-OutputJob"){
-            while (true){
-                val data = queue.takeFirst()
-                writeData(data)
-            }
+            val data = queue.takeFirst()
+            writeData(data)
         }
         return GlobalScope.launch(Dispatchers.IO){
-            outputRunnable.run()
+            while (isActive){
+                outputRunnable.run()
+            }
         }
     }
 }

@@ -121,7 +121,7 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
     }
 
     private fun httpsClientTest(){
-        LocalVpnTest.httpTest()
+        LocalVpnTest.httpsTest()
     }
 
     private fun startVPN() {

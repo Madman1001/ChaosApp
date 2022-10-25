@@ -140,7 +140,6 @@ class TcpTunSocket(
                 override fun readData() {
                     val len = input.read(localReceiveBuffer)
                     if (len == -1){
-                        Log.e(tag, "${Thread.currentThread().name}===================localSocket close=================")
                         closeLocalSocket()
                         tunSocks.unregisterSession(bean)
                         Object().wait()
@@ -197,7 +196,6 @@ class TcpTunSocket(
                 override fun readData() {
                     val len = input.read(remoteReceiveBuffer)
                     if (len == -1){
-                        Log.e(tag, "${Thread.currentThread().name}===================remoteSocket close=================")
                         closeRemoteSocket()
                         Object().wait()
                         return
