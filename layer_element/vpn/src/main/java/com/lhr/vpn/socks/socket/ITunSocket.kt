@@ -6,9 +6,8 @@ import java.io.Closeable
 /**
  * @author lhr
  * @date 15/10/2022
- * @des 中转接口
+ * @des 中转处理接口
  */
 interface ITunSocket: Closeable {
     fun handlePacket(packet: NetIpPacket)
-    fun createLocalKey(): String
 }

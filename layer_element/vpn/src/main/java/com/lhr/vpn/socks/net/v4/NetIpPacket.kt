@@ -1,6 +1,5 @@
 package com.lhr.vpn.socks.net.v4
 
-import android.util.Log
 import com.lhr.vpn.ext.toHexString
 import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.PROTO_TCP

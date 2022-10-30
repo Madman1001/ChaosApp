@@ -97,6 +97,9 @@ object LocalVpnTest {
                             val dp = DatagramPacket(buffer, buffer.size)
                             udpSocket.receive(dp)
                             val str = String(dp.data, 0, dp.length)
+                            withContext(Dispatchers.Main){
+                                Toast.makeText(app, str, Toast.LENGTH_SHORT).show()
+                            }
                             Log.d(tag, "udp test receive $str")
                         }
                     }
@@ -162,21 +165,23 @@ object LocalVpnTest {
                 GlobalScope.launch {
                     val buffer = ByteArray(1024)
                     val inputStream = tcpSocket.getInputStream()
-                    while (true){
-                        if (tcpSocket.isInputShutdown) return@launch
-                        kotlin.runCatching {
+                    kotlin.runCatching {
+                        while (!tcpSocket.isInputShutdown){
                             val len = inputStream.read(buffer)
-                            val str = String(buffer,0,len, StandardCharsets.UTF_8)
-                            Log.d(tag, "receive: $str")
-                            withContext(Dispatchers.Main){
-                                Toast.makeText(app, str, Toast.LENGTH_SHORT).show()
-                            }
-                        }.onFailure {
-                            kotlin.runCatching {
-                                tcpSocket.shutdownInput()
+                            if (len == -1) break
+                            if (len > 0){
+                                val str = String(buffer,0,len, StandardCharsets.UTF_8)
+                                Log.d(tag, "receive: $str")
+                                withContext(Dispatchers.Main){
+                                    Toast.makeText(app, str, Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
+                    }.onFailure {
+                        it.printStackTrace()
+                        tcpSocket.close()
                     }
+
                 }
                 GlobalScope.launch {
                     kotlin.runCatching {

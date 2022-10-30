@@ -2,21 +2,17 @@ package com.lhr.vpn.socks.socket
 
 import android.net.VpnService
 import android.util.Log
-import com.lhr.vpn.channel.StreamChannel
-import com.lhr.vpn.ext.toHexString
 import com.lhr.vpn.ext.isInsideToOutside
-import com.lhr.vpn.ext.isOutsideToInside
+import com.lhr.vpn.ext.toHexString
 import com.lhr.vpn.pool.RunPool
 import com.lhr.vpn.pool.TunRunnable
 import com.lhr.vpn.socks.SessionTable
 import com.lhr.vpn.socks.Tun2Socks
+import com.lhr.vpn.socks.channel.BaseTunChannel
+import com.lhr.vpn.socks.channel.UdpTunChannel
 import com.lhr.vpn.socks.net.v4.NetIpPacket
 import com.lhr.vpn.socks.net.v4.NetUdpPacket
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import java.net.DatagramPacket
+import kotlinx.coroutines.*
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
 
@@ -26,50 +22,69 @@ import java.net.InetSocketAddress
  * @Description: udp packet 2 Socket
  */
 class UdpTunSocket(
-    val bean: ProxyRouteSession,
+    val proxySession: ProxySession,
     val vpnService: VpnService,
     private val tunSocks: Tun2Socks,
-): ITunSocket{
+) : ITunSocket {
     private val tag = this::class.java.simpleName
 
-    //remote proxy socket
-    private val remoteSocket = DatagramSocket().apply { vpnService.protect(this) }
     @Volatile
-    private var remoteChannel: StreamChannel<ByteArray>? = null
-    @Volatile
-    private var remoteConnectJob: Job? = null
+    private var isValid = true
 
-    //local proxy socket
-    private val localServerSocket = DatagramSocket()
     @Volatile
-    private var localChannel: StreamChannel<ByteArray>? = null
+    private var isWaitClose = false
+
+    private val socketScope = CoroutineScope(Dispatchers.IO + Job())
+
+    //remote proxy datagram socket
     @Volatile
-    private var localConnectJob: Job? = null
+    private var remoteJob: Job? = null
+    private val remoteSocket = DatagramSocket().apply {
+        this.soTimeout = DEFAULT_UDP_SO_TIMEOUT
+        vpnService.protect(this)
+    }
+    private val remoteChannel by lazy {
+        UdpTunChannel(
+            remoteSocket,
+            InetSocketAddress(proxySession.targetAddress, proxySession.targetPort)
+        )
+    }
 
-    override fun handlePacket(packet: NetIpPacket){
-        if (bean.state == ProxyRouteSession.STATE_INVALID) return
+    //local proxy datagram socket
+    @Volatile
+    private var localJob: Job? = null
+    private val localServerSocket = DatagramSocket().apply {
+        this.soTimeout = DEFAULT_UDP_SO_TIMEOUT
+    }
+    private val localChannel by lazy {
+        UdpTunChannel(
+            localServerSocket,
+            InetSocketAddress(proxySession.targetAddress, proxySession.targetPort)
+        )
+    }
 
-        RunPool.execute(TunRunnable("$tag$this-out"){
+    override fun handlePacket(packet: NetIpPacket) {
+        if (!isValid) return
+
+        RunPool.execute(TunRunnable("$tag$this-out") {
             val udpPacket = NetUdpPacket(packet.data)
-            if (packet.isInsideToOutside()){
+            if (packet.isInsideToOutside()) {
                 //inside to outside
                 val packetSourcePort = udpPacket.sourcePort.toUShort().toInt()
                 val packetTargetPort = udpPacket.targetPort.toUShort().toInt()
-                val sourceSocketPort = bean.sourcePort
+                val sourceSocketPort = proxySession.sourcePort
                 val localSocketPort = localServerSocket.localPort
-                if (packetSourcePort == localSocketPort){
+                if (packetSourcePort == localSocketPort) {
                     forwardToAppSocket(packet, udpPacket)
-                } else if (packetSourcePort == sourceSocketPort){
+                } else if (packetSourcePort == sourceSocketPort) {
                     forwardToLocalSocket(packet, udpPacket)
                 }
-            } else if (packet.isOutsideToInside()){
-                //outside to inside
             }
         })
-        if (localChannel?.isOpened != true && localConnectJob?.isActive != true){
+
+        if (!isWaitClose){
             startLocalJob()
-        }
-        if (remoteChannel?.isOpened != true && remoteConnectJob?.isActive != true){
+
             startRemoteJob()
         }
     }
@@ -77,154 +92,136 @@ class UdpTunSocket(
     /**
      * 通过虚拟网卡转发到app socket
      */
-    private fun forwardToAppSocket(packet: NetIpPacket, udpPacket: NetUdpPacket){
-        udpPacket.targetPort = bean.sourcePort.toShort()
-        udpPacket.sourcePort = bean.targetPort.toShort()
-        packet.sourceAddress = bean.targetAddress
-        packet.targetAddress = bean.sourceAddress
+    private fun forwardToAppSocket(packet: NetIpPacket, udpPacket: NetUdpPacket) {
+        udpPacket.targetPort = proxySession.sourcePort.toShort()
+        udpPacket.sourcePort = proxySession.targetPort.toShort()
+        packet.sourceAddress = proxySession.targetAddress
+        packet.targetAddress = proxySession.sourceAddress
         packet.data = udpPacket.encodePacket().array()
-        Log.d(tag, "forwardToAppSocket $packet $udpPacket")
+        Log.d(tag, "forwardToAppSocket ${packet.sourceAddress.hostAddress}:${udpPacket.sourcePort.toUShort()} >> ${packet.targetAddress.hostAddress}:${udpPacket.targetPort.toUShort()}")
         tunSocks.sendData(packet)
     }
 
     /**
      * 通过虚拟网卡转发到local socket
      */
-    private fun forwardToLocalSocket(packet: NetIpPacket, udpPacket: NetUdpPacket){
+    private fun forwardToLocalSocket(packet: NetIpPacket, udpPacket: NetUdpPacket) {
         //set local port
         udpPacket.targetPort = localServerSocket.localPort.toShort()
-        udpPacket.sourcePort = bean.targetPort.toShort()
-        packet.sourceAddress = bean.targetAddress
-        packet.targetAddress = bean.sourceAddress
+        udpPacket.sourcePort = proxySession.targetPort.toShort()
+        packet.sourceAddress = proxySession.targetAddress
+        packet.targetAddress = proxySession.sourceAddress
         packet.data = udpPacket.encodePacket().array()
-        Log.d(tag, "forwardToLocalSocket $packet $udpPacket")
+        Log.d(tag, "forwardToLocalSocket ${packet.sourceAddress.hostAddress}:${udpPacket.sourcePort.toUShort()} >> ${packet.targetAddress.hostAddress}:${udpPacket.targetPort.toUShort()}")
         tunSocks.sendData(packet)
     }
 
     /**
      * 启动Local接收线程
      */
-    private fun startLocalJob(){
-        localChannel?.closeChannel()
-        localChannel = null
-
-        val inputRunnable = TunRunnable("$tag$this-local_in"){
-            val localReceivePacket = DatagramPacket(ByteArray(1024), 1024)
-            localChannel = object : StreamChannel<ByteArray>(){
-                override fun writeData(o: ByteArray) {
-
-                    //将数据发送到内部
-                    val target = bean.targetAddress
-                    val targetPort = bean.targetPort
-                    val address = InetSocketAddress(target, targetPort)
-                    val datagramPacket = DatagramPacket(o, o.size, address)
-                    Log.e(tag, "localSocket send $target $targetPort ${o.toHexString()}")
-                    localServerSocket.send(datagramPacket)
-                }
-
-                override fun readData() {
+    private fun startLocalJob() {
+        if (localJob?.isActive != true){
+            localJob = socketScope.launch(Dispatchers.IO){
+                while (isActive){
                     //接收内部数据
-                    localServerSocket.receive(localReceivePacket)
-                    if (localReceivePacket.length > 0){
-                        val data = ByteArray(localReceivePacket.length)
-                        System.arraycopy(localReceivePacket.data, 0, data, 0, data.size)
-                        Log.e(tag, "localSocket receive ${data.toHexString()}")
-                        remoteChannel?.sendData(data)
-                    } else {
-                        Thread.sleep(100)
+                    val data = localChannel.receive()
+                    if (data === BaseTunChannel.CloseSign){
+                        waitClose()
+                        Log.d(tag, "localJob over")
+                        return@launch
                     }
+                    if (data.isNotEmpty()){
+                        remoteChannel.send(data)
+                    }
+                    Log.e(tag, "localChannel receive ${data.toHexString()}")
                 }
             }
-            localChannel?.openChannel()
         }
-        localConnectJob = GlobalScope.launch(Dispatchers.IO){
-            inputRunnable.run()
-        }
+
+        localChannel.openChannel(socketScope)
     }
 
     /**
      * 启动Remote接收线程
      */
-    private fun startRemoteJob(){
-        remoteChannel?.closeChannel()
-        remoteChannel = null
-
-        val inputRunnable = TunRunnable("$tag$this-remote_in"){
-            val remoteReceivePacket = DatagramPacket(ByteArray(1024), 1024)
-            remoteChannel = object : StreamChannel<ByteArray>(){
-                override fun writeData(o: ByteArray) {
-
-                    //将数据发送到外部
-                    val target = bean.targetAddress
-                    val targetPort = bean.targetPort
-                    val address = InetSocketAddress(target, targetPort)
-                    val datagramPacket = DatagramPacket(o, o.size, address)
-                    Log.e(tag, "remoteSocket send $target $targetPort ${o.toHexString()}")
-                    remoteSocket.send(datagramPacket)
-                }
-
-                override fun readData() {
-
-                    //接收外部数据
-                    remoteSocket.receive(remoteReceivePacket)
-                    if (remoteReceivePacket.length > 0){
-                        val data = ByteArray(remoteReceivePacket.length)
-                        System.arraycopy(remoteReceivePacket.data, 0, data, 0, data.size)
-                        Log.e(tag, "remoteSocket receive ${data.toHexString()}")
-                        localChannel?.sendData(data)
-                    } else {
-                        Thread.sleep(100)
+    private fun startRemoteJob() {
+        if (remoteJob?.isActive != true) {
+            remoteJob = socketScope.launch(Dispatchers.IO) {
+                while (isActive) {
+                    val data = remoteChannel.receive()
+                    if (data === BaseTunChannel.CloseSign){
+                        Log.d(tag, "remoteJob over")
+                        waitClose()
+                        return@launch
                     }
+                    if (data.isNotEmpty()) {
+                        localChannel.send(data)
+                    }
+                    Log.e(tag, "remoteChannel receive ${data.toHexString()}")
                 }
             }
-            remoteChannel?.openChannel()
         }
-        remoteConnectJob = GlobalScope.launch(Dispatchers.IO){
-            inputRunnable.run()
-        }
-    }
 
-    override fun createLocalKey(): String{
-        return  SessionTable.createSessionKey(
-            bean.sourceAddress,
-            localServerSocket.localPort,
-            bean.targetAddress,
-            bean.targetPort
-        )
+        remoteChannel.openChannel(socketScope)
     }
 
     override fun toString(): String {
-        val sb = StringBuilder()
-        sb.append("\n").append("source port ").append(bean.sourcePort)
-        sb.append("\n").append("target port ").append(bean.targetPort)
-        sb.append("\n").append("local socket port ").append(localServerSocket.localPort)
-        sb.append("\n").append("remote socket port ").append(remoteSocket.localPort)
-        return sb.toString()
+        return desc
+    }
+
+    private fun waitClose(){
+        isWaitClose = true
+        if (!remoteChannel.isWaitClose){
+            remoteChannel.waitClose()
+        }
+        if (!localChannel.isWaitClose){
+            localChannel.waitClose()
+        }
+
+        if (!localChannel.isValid && !remoteChannel.isValid){
+            close()
+        }
     }
 
     override fun close() {
-        kotlin.runCatching {
-            localConnectJob?.cancel()
-            localConnectJob = null
-            localChannel?.closeChannel()
-            localChannel = null
-        }
+        if (!isValid) return
+        isValid = false
 
-        kotlin.runCatching {
-            remoteConnectJob?.cancel()
-            remoteConnectJob = null
-            remoteChannel?.closeChannel()
-            remoteChannel = null
-        }
+        proxySession.state = ProxySession.STATE_INVALID
 
-        kotlin.runCatching {
-            remoteSocket.close()
-        }
+        socketScope.cancel()
 
-        kotlin.runCatching {
+        if (!localServerSocket.isClosed){
             localServerSocket.close()
         }
+        if (!remoteSocket.isClosed){
+            remoteSocket.close()
+        }
+        tunSocks.unregisterSession(proxySession)
+        Log.e(tag, "close ${toString()}")
+    }
 
-        Log.e(tag, "close udp socket ${localServerSocket.localPort} ${remoteSocket.localPort}")
+
+    val desc: String
+
+    val localKey: String
+
+    init {
+        val sb = StringBuilder()
+        sb.append("UdpTunSocket$").append(this.hashCode())
+        sb.append("\n").append("local: ${proxySession.sourcePort} <-> ${localServerSocket.localPort}")
+        sb.append("\n").append("remote: ${proxySession.sourceAddress.hostAddress}:${proxySession.sourcePort} <-> ${proxySession.targetAddress.hostAddress}:${proxySession.targetPort}")
+        desc = sb.toString()
+
+        localKey = ProxySession.createSessionKey(
+            proxySession.sourceAddress,
+            localServerSocket.localPort,
+            proxySession.targetAddress,
+            proxySession.targetPort
+        )
+    }
+
+    companion object {
+        const val DEFAULT_UDP_SO_TIMEOUT = 3000
     }
 }
