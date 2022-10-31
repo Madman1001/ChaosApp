@@ -54,13 +54,26 @@ class NetIpPacket {
     var sourceAddress: InetAddress = Inet4Address.getByAddress(ByteArray(4)) as Inet4Address
 
     //目标ip地址 32 bit
-    var targetAddress: InetAddress = Inet4Address.getByAddress(ByteArray(4)) as Inet4Address
+    var destinationAddress: InetAddress = Inet4Address.getByAddress(ByteArray(4)) as Inet4Address
 
     //可选字段 (单位 32 bit)
     var optionWords: ByteArray = ByteArray(0)
 
     //ip数据
     var data: ByteArray = ByteArray(0)
+
+    var sourcePort
+        get() = (data.getOrNull(0)?.toUByte()?.toInt() ?: 0) shl 8 or (data.getOrNull(1)?.toUByte()?.toInt() ?: 0)
+        set(value) {
+            data[0] = (value ushr 8).toByte()
+            data[1] = (value and 0xFF).toByte()
+        }
+
+    var destinationPort get() = (data.getOrNull(2)?.toUByte()?.toInt() ?: 3) shl 8 or (data.getOrNull(3)?.toUByte()?.toInt() ?: 0)
+        set(value) {
+            data[2] = (value ushr 8).toByte()
+            data[3] = (value and 0xFF).toByte()
+        }
 
     fun isTcp(): Boolean {
         return upperProtocol.toUByte().toInt() == PROTO_TCP
@@ -94,7 +107,7 @@ class NetIpPacket {
 
         sourceAddress = readIpAddress(rawData)
 
-        targetAddress = readIpAddress(rawData)
+        destinationAddress = readIpAddress(rawData)
 
         val optionByteLength = (headerLength - 5) * 4
         val optionWords = ByteArray(optionByteLength)
@@ -137,7 +150,7 @@ class NetIpPacket {
             .put(upperProtocol)
             .putShort(0) //设置校验和
             .put(sourceAddress.address)
-            .put(targetAddress.address)
+            .put(destinationAddress.address)
             .put(optionWords)
             .put(data)
 
@@ -152,7 +165,7 @@ class NetIpPacket {
     private fun tcpUdpChecksum(data: ByteArray): Int {
         val buffer = ByteBuffer.wrap(ByteArray(12 + data.size))
         buffer.put(sourceAddress.address)
-        buffer.put(targetAddress.address)
+        buffer.put(destinationAddress.address)
         buffer.put(0)
         buffer.put(upperProtocol)
         buffer.putShort(data.size.toShort())
@@ -188,7 +201,7 @@ class NetIpPacket {
             .append("\n  Time to live:   ").append(timeToLive)
             .append("\n  Protocol:       ").append(upperProtocol)
             .append("\n  Source:         ").append(sourceAddress.hostAddress)
-            .append("\n  Destination:    ").append(targetAddress.hostAddress)
+            .append("\n  Destination:    ").append(destinationAddress.hostAddress)
             .append("\n  Options: [")
             .append(optionWords.toHexString())
             .append("\n  ]")

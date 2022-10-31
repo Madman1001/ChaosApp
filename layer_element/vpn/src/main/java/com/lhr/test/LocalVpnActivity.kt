@@ -28,8 +28,6 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
 
     companion object {
 
-        private const val VPN_REQUEST_CODE = 0xF0F
-
         private const val VPN_REQUEST_KEY = "VPN_REQUEST_KEY"
     }
 

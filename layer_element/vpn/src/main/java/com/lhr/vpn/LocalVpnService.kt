@@ -5,16 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.lhr.test.LocalVpnTest
 import com.lhr.vpn.LocalVpnConfig.PROXY_ADDRESS
-import com.lhr.vpn.LocalVpnConfig.PROXY_DNS_SERVER
 import com.lhr.vpn.LocalVpnConfig.PROXY_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_ADDRESS
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_SESSION_NAME
-import com.lhr.vpn.socks.Tun2Socks
+import com.lhr.vpn.socks.TunSocks
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
@@ -50,8 +49,10 @@ class LocalVpnService : VpnService() {
         }
     }
 
-    private val vpnConnection = AtomicReference<Tun2Socks>()
+    private val vpnConnection = AtomicReference<TunSocks>()
 
+    lateinit var tunInterface: ParcelFileDescriptor
+        private set
     private val controlReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             when(intent.action){
@@ -79,7 +80,7 @@ class LocalVpnService : VpnService() {
 
     private fun connect() {
         val builder = Builder()
-        val tunInterface = builder.setSession(PROXY_SESSION_NAME)
+        tunInterface = builder.setSession(PROXY_SESSION_NAME)
             .addAddress(PROXY_ADDRESS, PROXY_PORT)
             .addRoute(PROXY_ROUTE_ADDRESS, PROXY_ROUTE_PORT)
             //设置dns服务器
@@ -87,11 +88,9 @@ class LocalVpnService : VpnService() {
             //暂时只代理自身网络
             .addAllowedApplication(this.packageName)
             //创建vpn通道，开始代理网络
-            .establish()
-        if (tunInterface != null){
-            vpnConnection.set(Tun2Socks(tunInterface, this))
-            vpnConnection.get()?.startProxy()
-        }
+            .establish()!!
+        vpnConnection.set(TunSocks(this))
+        vpnConnection.get()?.startProxy()
     }
 
     private fun disconnect() {

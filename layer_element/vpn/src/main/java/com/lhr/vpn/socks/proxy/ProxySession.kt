@@ -1,4 +1,4 @@
-package com.lhr.vpn.socks.socket
+package com.lhr.vpn.socks.proxy
 
 import java.net.InetAddress
 import java.util.*
@@ -9,10 +9,8 @@ import java.util.*
  * @des 代理session
  */
 class ProxySession(
-    val sourceAddress: InetAddress,
-    val sourcePort: Int,
-    val targetAddress: InetAddress,
-    val targetPort: Int,
+    val address: InetAddress,
+    val port: Int,
 ) {
     /**
      * A unique, universal identifier for the session data structure.
@@ -49,21 +47,6 @@ class ProxySession(
      * Maximum number of minutes before the client contacts OpenSSO Enterprise to refresh cached session information.
      */
     var maximumCachingTime = 0L
-
-    /**
-     * 代理tun socket
-     */
-    var proxyTunSocket: ITunSocket? = null
-
-    /**
-     * 主要的映射key
-     */
-    val mainKey = createSessionKey(sourceAddress, sourcePort, targetAddress, targetPort)
-
-    /**
-     * 次要的映射key
-     */
-    var localKey = ""
 
     companion object {
         @JvmField
