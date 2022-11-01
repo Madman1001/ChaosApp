@@ -8,12 +8,15 @@ import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.IP_VERSION_6
 import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
 import com.lhr.vpn.socks.net.v4.NetIpPacket
+import com.lhr.vpn.socks.net.v4.NetUdpPacket
 import com.lhr.vpn.socks.proxy.ProxySession
 import com.lhr.vpn.socks.proxy.TcpProxyServer
 import com.lhr.vpn.socks.proxy.UdpProxyServer
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.net.InetSocketAddress
+import java.nio.ByteBuffer
 
 /**
  * @CreateDate: 2022/10/13
@@ -33,7 +36,7 @@ class TunSocks(
 
     private val proxyTcpServer by lazy { TcpProxyServer(vpnService, socksScope) }
 
-    private val proxyUdpServer by lazy { UdpProxyServer(vpnService, socksScope) }
+    private val proxyUdpServer by lazy { UdpProxyServer(vpnService, this, socksScope) }
 
     @Volatile
     private var workJob: Job? = null
@@ -41,12 +44,18 @@ class TunSocks(
     fun startProxy() { //开始数据代理
         startWorkJob()
         proxyTcpServer.startProxy()
+        proxyUdpServer.startProxy()
     }
 
     fun stopProxy() { //停止数据代理
         socksScope.cancel()
         proxyTcpServer.stopProxy()
+        proxyUdpServer.stopProxy()
         vpnService.tunInterface.close()
+    }
+
+    fun sendTunData(byteArray: ByteArray){
+        tunOutput.write(byteArray)
     }
 
     private fun startWorkJob(){
@@ -75,7 +84,7 @@ class TunSocks(
             IP_VERSION_4 -> receiveIpV4(byteArray)
             IP_VERSION_6 -> receiveIpV6(byteArray)
             else -> {
-                Log.d(tag, "ip data: ${byteArray.toHexString()}")
+                Log.d(tag, "ip  data: ${byteArray.toHexString()}")
                 false
             }
         }
@@ -90,7 +99,7 @@ class TunSocks(
             return false
         }
         val ipPacket = NetIpPacket(data)
-//        Log.d(tag, "read ip packet:$packet")
+        Log.d(tag, "read ip packet:$ipPacket")
         if (ipPacket.sourceAddress.hostAddress != LocalVpnConfig.PROXY_ADDRESS) {
             return false
         }
@@ -119,6 +128,13 @@ class TunSocks(
             }
             true
         } else if (ipPacket.isUdp()){
+            var channel = proxyUdpServer.getChannel(ipPacket.sourcePort)
+            if (channel == null){
+               channel = proxyUdpServer.registerProxy(ipPacket.sourcePort)
+            }
+            val buffer = ByteBuffer.wrap(NetUdpPacket(ipPacket.data).data)
+            Log.d(tag, "SEND ${String(buffer.array(), buffer.position(), buffer.limit() - buffer.position())}")
+            channel.send(buffer, InetSocketAddress(ipPacket.destinationAddress, ipPacket.destinationPort))
             true
         } else {
             false
