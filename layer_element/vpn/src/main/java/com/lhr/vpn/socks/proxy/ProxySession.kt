@@ -9,8 +9,8 @@ import java.util.*
  * @des 代理session
  */
 class ProxySession(
-    val address: InetAddress,
-    val port: Int,
+    val address: Int,
+    val port: Short,
 ) {
     /**
      * A unique, universal identifier for the session data structure.

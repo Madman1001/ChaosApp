@@ -4,6 +4,7 @@ import android.net.VpnService
 import android.util.Log
 import com.lhr.vpn.socks.Tunnel
 import com.lhr.vpn.socks.bind
+import com.lhr.vpn.toNetInt
 import kotlinx.coroutines.*
 import java.net.InetSocketAddress
 import java.nio.channels.SelectionKey
@@ -22,8 +23,8 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
     private val selector = Selector.open()
     private var workJob: Job? = null
 
-    val serverPort: Int
-    val tcpSessions by lazy { mutableMapOf<Int, ProxySession>() }
+    val serverPort: Short
+    val tcpSessions by lazy { mutableMapOf<Short, ProxySession>() }
 
     init {
         serverSocketChannel.run {
@@ -31,7 +32,7 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
             socket().bind(InetSocketAddress(0))
             register(selector, SelectionKey.OP_ACCEPT)
         }
-        serverPort = serverSocketChannel.socket().localPort
+        serverPort = serverSocketChannel.socket().localPort.toShort()
     }
 
     fun startProxy(){
@@ -65,7 +66,7 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
     private fun onAccept(){
         val socketChannel = serverSocketChannel.accept()
         Log.d(TAG, "socket channel ${socketChannel.socket().inetAddress}")
-        val session = tcpSessions[socketChannel.socket().port.toUShort().toInt()]
+        val session = tcpSessions[socketChannel.socket().port.toShort()]
             ?: throw RuntimeException("no tcp proxy session")
         val localChannel = Tunnel(socketChannel.apply {
             this.configureBlocking(false)
@@ -76,7 +77,7 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
         localChannel.bind(remoteChannel)
         assert(vpnService.protect(remoteChannel.channel.socket()))
         remoteChannel.channel.register(selector, SelectionKey.OP_CONNECT, remoteChannel)
-        remoteChannel.channel.connect(InetSocketAddress(socketChannel.socket().inetAddress, session.port))
+        remoteChannel.channel.connect(InetSocketAddress(socketChannel.socket().inetAddress, session.port.toNetInt()))
     }
 
     private fun onConnect(selectionKey: SelectionKey){

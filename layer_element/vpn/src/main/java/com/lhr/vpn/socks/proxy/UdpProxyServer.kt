@@ -5,14 +5,14 @@ import android.util.Log
 import com.lhr.vpn.LocalVpnConfig
 import com.lhr.vpn.socks.TunSocks
 import com.lhr.vpn.socks.net.PROTO_UDP
-import com.lhr.vpn.socks.net.v4.NetIpPacket
-import com.lhr.vpn.socks.net.v4.NetUdpPacket
+import com.lhr.vpn.socks.net.v4.NetIPHeader
+import com.lhr.vpn.socks.net.v4.NetPacket
+import com.lhr.vpn.socks.net.v4.NetUdpHeader
+import com.lhr.vpn.toIpInt
 import kotlinx.coroutines.*
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.nio.IntBuffer
-import java.nio.ShortBuffer
 import java.nio.channels.DatagramChannel
 import java.nio.channels.Pipe
 import java.nio.channels.SelectionKey
@@ -31,6 +31,7 @@ class UdpProxyServer(
     private val TAG = this::class.java.simpleName
     private val selector = Selector.open()
     private var workJob: Job? = null
+    private val hostIp = LocalVpnConfig.PROXY_ADDRESS.toIpInt()
 
     private var pipe = Pipe.open().apply {
         source().apply {
@@ -39,22 +40,22 @@ class UdpProxyServer(
         }
     }
     //本地ip地址映射
-    private val localPortTable by lazy { mutableMapOf<Int, DatagramChannel>() }
+    private val localPortTable by lazy { mutableMapOf<Short, DatagramChannel>() }
     private val receiveBuffer = ByteBuffer.allocate(1500)
 
     private val registerBuffer = ByteBuffer.allocate(4)
-    fun getChannel(port: Int): DatagramChannel? {
-        return localPortTable[Integer.valueOf(port)]
+    fun getChannel(port: Short): DatagramChannel? {
+        return localPortTable[port]
     }
 
-    fun registerProxy(port: Int): DatagramChannel {
+    fun registerProxy(port: Short): DatagramChannel {
         localPortTable[port]?.close()
         val channel = DatagramChannel.open().apply {
             configureBlocking(false)
             socket().bind(InetSocketAddress(0))
 
-            val bb = ByteBuffer.allocate(4)
-            bb.asIntBuffer().put(port)
+            val bb = ByteBuffer.allocate(2)
+            bb.asShortBuffer().put(port)
             pipe.sink().write(bb)
 
             vpnService.protect(socket())
@@ -105,13 +106,13 @@ class UdpProxyServer(
         val len = pipe.source().read(registerBuffer)
         if (len != 4) return
         registerBuffer.flip()
-        val port = registerBuffer.asIntBuffer().get(0)
+        val port = registerBuffer.asShortBuffer().get(0)
         val channel = localPortTable[port] ?: return
         channel.register(selector, SelectionKey.OP_READ, port)
     }
 
     private fun onRead(key: SelectionKey){
-        val port = key.attachment() as Int
+        val port = key.attachment() as Short
         val channel = localPortTable[port]
         if (channel == null){
             //没有注册对于的数据
@@ -121,21 +122,28 @@ class UdpProxyServer(
         val remoteAddress = channel?.receive(receiveBuffer) as InetSocketAddress
         receiveBuffer.flip()
         Log.d(TAG, "RECEIVE ${String(receiveBuffer.array(), receiveBuffer.position(), receiveBuffer.limit() - receiveBuffer.position())}")
-        val udpPacket = NetUdpPacket().apply {
-            this.sourcePort = remoteAddress.port.toShort()
-            this.targetPort = port.toShort()
-            this.data = receiveBuffer.array().copyInto(ByteArray(receiveBuffer.limit() - receiveBuffer.position()), startIndex = receiveBuffer.position(), endIndex = receiveBuffer.limit())
-        }
-        val ipPacket = NetIpPacket().apply {
-            data = udpPacket.encodePacket().array()
-            flag = 2
-            offsetFrag = 0
+        val dataLen = receiveBuffer.limit() - receiveBuffer.position()
+        val packetData = ByteArray(20 + 8 + dataLen)
+        NetIPHeader(packetData).run{
             timeToLive = 64
             identification = Random(System.currentTimeMillis()).nextInt().toShort()
-            sourceAddress = remoteAddress.address
-            destinationAddress = InetAddress.getByName(LocalVpnConfig.PROXY_ADDRESS)
+            sourceIp = remoteAddress.hostString.toIpInt()
+            destinationIp = hostIp
             upperProtocol = PROTO_UDP.toByte()
+            flagAndOffsetFrag = 0x4000
+            totalLength = packetData.size.toShort()
+            headerLength = 5
+            Log.d(TAG, "send Ip $this")
         }
-        tunSocks.sendTunData(ipPacket.encodePacket().array())
+        NetUdpHeader(packetData, 20).run {
+            sourcePort = remoteAddress.port.toShort()
+            destinationPort = port
+            totalLength = (dataLen + 8).toShort()
+            Log.d(TAG, "send Udp $this")
+        }
+        System.arraycopy(receiveBuffer.array(), receiveBuffer.position(), packetData, 28, dataLen)
+        NetPacket(packetData).setChecksum()
+
+        tunSocks.sendTunData(packetData)
     }
 }

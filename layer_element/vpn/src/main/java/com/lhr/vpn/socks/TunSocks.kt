@@ -1,14 +1,11 @@
 package com.lhr.vpn.socks
 
 import android.util.Log
-import com.lhr.vpn.LocalVpnConfig
-import com.lhr.vpn.LocalVpnService
-import com.lhr.vpn.ext.toHexString
+import com.lhr.vpn.*
 import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.IP_VERSION_6
 import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
-import com.lhr.vpn.socks.net.v4.NetIpPacket
-import com.lhr.vpn.socks.net.v4.NetUdpPacket
+import com.lhr.vpn.socks.net.v4.NetPacket
 import com.lhr.vpn.socks.proxy.ProxySession
 import com.lhr.vpn.socks.proxy.TcpProxyServer
 import com.lhr.vpn.socks.proxy.UdpProxyServer
@@ -21,7 +18,7 @@ import java.nio.ByteBuffer
 /**
  * @CreateDate: 2022/10/13
  * @Author: mac
- * @Description: Tun2Socks 门面类，负责ip包传递
+ * @Description: Tun2Socks 负责ip包传递
  */
 class TunSocks(
     private val vpnService: LocalVpnService
@@ -38,6 +35,8 @@ class TunSocks(
 
     private val proxyUdpServer by lazy { UdpProxyServer(vpnService, this, socksScope) }
 
+    private val hostIp = LocalVpnConfig.PROXY_ADDRESS.toIpInt()
+    
     @Volatile
     private var workJob: Job? = null
 
@@ -79,7 +78,7 @@ class TunSocks(
 
     private fun onReceive(byteArray: ByteArray, len: Int): Boolean{
         if (len <= 0) return false
-        val ipVersion = ((byteArray[0].toUByte().toInt()) and 0xf0) ushr 4
+        val ipVersion = ((byteArray[0].toNetInt()) and 0xf0) ushr 4
         return when(ipVersion){
             IP_VERSION_4 -> receiveIpV4(byteArray)
             IP_VERSION_6 -> receiveIpV6(byteArray)
@@ -94,47 +93,61 @@ class TunSocks(
      * 转发ipv4数据
      */
     private fun receiveIpV4(data: ByteArray): Boolean{
-        val headerLength = (data[0].toUByte().toInt() and 0x0f)
+        val headerLength = (data[0].toNetInt() and 0x0f)
         if (headerLength <= 0) {
             return false
         }
-        val ipPacket = NetIpPacket(data)
-        Log.d(tag, "read ip packet:$ipPacket")
-        if (ipPacket.sourceAddress.hostAddress != LocalVpnConfig.PROXY_ADDRESS) {
-            return false
-        }
+        val packet = NetPacket(data)
+        Log.d(tag, "read ip packet:${packet.ipHeader}")
+        if (packet.ipHeader.sourceIp != hostIp) return false
         //传递ip数据包
-        return if (ipPacket.isTcp()){
-            if (ipPacket.sourcePort == proxyTcpServer.serverPort){
-                val session = proxyTcpServer.tcpSessions[ipPacket.destinationPort] ?: return false
-                val sourceAddr = ipPacket.sourceAddress
-                ipPacket.sourceAddress = ipPacket.destinationAddress
-                ipPacket.sourcePort = session.port
-                ipPacket.destinationAddress = sourceAddr
-                tunOutput.write(ipPacket.encodePacket().array())
+        return if (packet.isTcp()){
+            val preChecksum = packet.ipHeader.checksum
+            val preTcpChecksum = packet.tcpHeader.checksum
+            packet.setChecksum()
+            packet.ipHeader.checksum
+            packet.tcpHeader.checksum
+            Log.d(tag, "read tcp packet:${packet.tcpHeader}")
+            if (packet.tcpHeader.sourcePort == proxyTcpServer.serverPort){
+                val session = proxyTcpServer.tcpSessions[packet.tcpHeader.destinationPort] ?: return false
+                val sourceIp = packet.ipHeader.sourceIp
+                packet.ipHeader.sourceIp = packet.ipHeader.destinationIp
+                packet.tcpHeader.sourcePort = session.port
+                packet.ipHeader.destinationIp = sourceIp
+                packet.setChecksum()
+                tunOutput.write(packet.rawData)
             } else {
-                val port = ipPacket.sourcePort
+                val port = packet.tcpHeader.sourcePort
                 proxyTcpServer.tcpSessions[port]?.takeIf {
-                    it.address.hostAddress == ipPacket.destinationAddress.hostAddress
-                            && it.port == ipPacket.destinationPort
-                } ?: ProxySession(ipPacket.destinationAddress, ipPacket.destinationPort).also {
+                    it.address == packet.ipHeader.destinationIp && it.port == packet.tcpHeader.destinationPort
+                } ?: ProxySession(packet.ipHeader.destinationIp, packet.tcpHeader.destinationPort).also {
+                    it.type = ProxySession.TYPE_TCP
                     proxyTcpServer.tcpSessions[port] = it
                 }
-                val sourceAddr = ipPacket.sourceAddress
-                ipPacket.sourceAddress = ipPacket.destinationAddress
-                ipPacket.destinationAddress = sourceAddr
-                ipPacket.destinationPort = proxyTcpServer.serverPort
-                tunOutput.write(ipPacket.encodePacket().array())
+                val sourceIp = packet.ipHeader.sourceIp
+                packet.ipHeader.sourceIp = packet.ipHeader.destinationIp
+                packet.ipHeader.destinationIp = sourceIp
+                packet.tcpHeader.destinationPort = proxyTcpServer.serverPort
+                packet.setChecksum()
+                tunOutput.write(packet.rawData)
             }
             true
-        } else if (ipPacket.isUdp()){
-            var channel = proxyUdpServer.getChannel(ipPacket.sourcePort)
+        } else if (packet.isUdp()){
+            val preChecksum = packet.ipHeader.checksum
+            val preTcpChecksum = packet.udpHeader.checksum
+            packet.setChecksum()
+            packet.ipHeader.checksum
+            packet.udpHeader.checksum
+            Log.d(tag, "read udp packet:${packet.udpHeader}")
+            var channel = proxyUdpServer.getChannel(packet.udpHeader.sourcePort)
             if (channel == null){
-               channel = proxyUdpServer.registerProxy(ipPacket.sourcePort)
+               channel = proxyUdpServer.registerProxy(packet.udpHeader.sourcePort)
             }
-            val buffer = ByteBuffer.wrap(NetUdpPacket(ipPacket.data).data)
+            val buffer = ByteBuffer.wrap(packet.data)
             Log.d(tag, "SEND ${String(buffer.array(), buffer.position(), buffer.limit() - buffer.position())}")
-            channel.send(buffer, InetSocketAddress(ipPacket.destinationAddress, ipPacket.destinationPort))
+            Log.d(tag, "SEND TO ${packet.ipHeader.destinationIp.toIpString()}:${packet.udpHeader.destinationPort.toNetInt()}")
+
+            channel.send(buffer, InetSocketAddress(packet.ipHeader.destinationIp.toIpString(), packet.udpHeader.destinationPort.toNetInt()))
             true
         } else {
             false

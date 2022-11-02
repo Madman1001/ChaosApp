@@ -51,14 +51,15 @@ object LocalVpnTest {
     fun httpTest(){
         GlobalScope.launch(IO) {
             try {
-                val httpTestUrl = URL("http://192.168.2.249:8080/myServer")
+                val time = System.currentTimeMillis()
+                val httpTestUrl = URL("http://192.168.1.68:8080/myserver")
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 http.connect()
                 val input = http.inputStream
                 val str = input.readText()
                 Log.e(tag, "http receive $str")
                 http.disconnect()
-                Log.d(tag, "over http test")
+                Log.d(tag, "over http test, cost ${System.currentTimeMillis() - time}ms")
             }catch (e: Exception){
 
             }
@@ -68,14 +69,15 @@ object LocalVpnTest {
     fun httpsTest(){
         GlobalScope.launch(IO) {
             try {
+                val time = System.currentTimeMillis()
                 val httpTestUrl = URL("http://www.baidu.com")
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 http.connect()
                 val input = http.inputStream
                 val str = input.readText()
-                Log.e(tag, "http receive $str")
+                Log.e(tag, "https receive $str")
                 http.disconnect()
-                Log.d(tag, "over http test")
+                Log.d(tag, "over https test, cost ${System.currentTimeMillis() - time}ms")
             }catch (e: Exception){
 
             }
@@ -87,8 +89,6 @@ object LocalVpnTest {
 
         GlobalScope.launch(IO) {
             try {
-                Log.d(tag, "udp test send $data")
-
                 val udpSocket = DatagramSocket()
                 GlobalScope.launch {
                     val buffer = ByteArray(1024)
@@ -106,8 +106,9 @@ object LocalVpnTest {
                 }
 
                 val addr = InetSocketAddress(address, port)
+                Log.d(tag, "udp test send to ${addr.hostName}:${udpSocket.localPort}\n $data")
                 for (i in 0..10){
-                    val buf = ("$data----$i").toByteArray()
+                    val buf = ("port:${udpSocket.localPort} $data----$i").toByteArray()
                     val packet = DatagramPacket(buf, buf.size)
                     packet.socketAddress = addr
                     udpSocket.send(packet)
