@@ -2,7 +2,6 @@ package com.lhr.vpn.socks.net.v4
 
 import com.lhr.vpn.getShort
 import com.lhr.vpn.setShort
-import com.lhr.vpn.toNetInt
 
 /**
  * @CreateDate: 2022/10/12

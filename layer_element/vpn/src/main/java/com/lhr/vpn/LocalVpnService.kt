@@ -87,6 +87,8 @@ class LocalVpnService : VpnService() {
             //.addDnsServer(PROXY_DNS_SERVER)
             //暂时只代理自身网络
             .addAllowedApplication(this.packageName)
+            .setMtu(1500)
+            .setBlocking(true)
             //创建vpn通道，开始代理网络
             .establish()!!
         vpnConnection.set(TunSocks(this))

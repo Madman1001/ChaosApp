@@ -69,9 +69,9 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
 
     //紧急指针 16 bit ----- [18-19]
     var urgentPointer: Short
-        get() = rawData.getShort(offset + 16)
+        get() = rawData.getShort(offset + 18)
         set(value) {
-            rawData.setShort(offset + 16, value)
+            rawData.setShort(offset + 18, value)
         }
 
     //其它选项 (单位 32 bit)

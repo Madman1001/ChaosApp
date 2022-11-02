@@ -52,7 +52,7 @@ object LocalVpnTest {
         GlobalScope.launch(IO) {
             try {
                 val time = System.currentTimeMillis()
-                val httpTestUrl = URL("http://192.168.1.68:8080/myserver")
+                val httpTestUrl = URL("http://192.168.2.249:8080/myServer")
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 http.connect()
                 val input = http.inputStream
@@ -61,7 +61,7 @@ object LocalVpnTest {
                 http.disconnect()
                 Log.d(tag, "over http test, cost ${System.currentTimeMillis() - time}ms")
             }catch (e: Exception){
-
+                e.printStackTrace()
             }
         }
     }
@@ -106,7 +106,7 @@ object LocalVpnTest {
                 }
 
                 val addr = InetSocketAddress(address, port)
-                Log.d(tag, "udp test send to ${addr.hostName}:${udpSocket.localPort}\n $data")
+                Log.d(tag, "udp test send to ${addr.address.hostAddress}:${udpSocket.localPort}\n $data")
                 for (i in 0..10){
                     val buf = ("port:${udpSocket.localPort} $data----$i").toByteArray()
                     val packet = DatagramPacket(buf, buf.size)

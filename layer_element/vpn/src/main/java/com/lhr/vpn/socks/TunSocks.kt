@@ -98,7 +98,7 @@ class TunSocks(
             return false
         }
         val packet = NetPacket(data)
-//        Log.d(tag, "read ip packet:${packet.ipHeader}")
+        Log.d(tag, "read ip packet:${packet.ipHeader}")
         if (packet.ipHeader.sourceIp != hostIp) return false
         //传递ip数据包
         return if (packet.isTcp()){
