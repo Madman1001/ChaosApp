@@ -111,6 +111,7 @@ class NetIPHeader(val rawData: ByteArray, val offset: Int = 0) {
             .append("\n  Flags + offset: ").append(flagAndOffsetFrag)
             .append("\n  Time to live:   ").append(timeToLive)
             .append("\n  Protocol:       ").append(upperProtocol)
+            .append("\n  Checksum:       ").append(checksum.toUShort())
             .append("\n  Source:         ").append(sourceIp.toIpString())
             .append("\n  Destination:    ").append(destinationIp.toIpString())
             .append("\n  Options: [")

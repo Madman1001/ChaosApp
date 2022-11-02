@@ -16,16 +16,18 @@ class NetPacket(val rawData: ByteArray, val offset: Int = 0) {
     val tcpHeader = NetTcpHeader(rawData, offset + ipHeader.headerLength * 4)
     val udpHeader = NetUdpHeader(rawData, offset + ipHeader.headerLength * 4)
 
-    var data: ByteArray
-    init {
-        if (isTcp()){
-            data = ByteArray(ipHeader.totalLength - (ipHeader.headerLength * 4) - (tcpHeader.headerLength * 4))
-            System.arraycopy(rawData, offset + (ipHeader.headerLength * 4) + (tcpHeader.headerLength * 4), data, 0, data.size)
-        } else {
-            data = ByteArray(udpHeader.totalLength.toNetInt() - 8)
-            System.arraycopy(rawData, offset + ipHeader.headerLength * 4 + 8, data, 0, data.size)
+    val data: ByteArray
+        get() {
+            val tempData: ByteArray
+            if (isTcp()){
+                tempData = ByteArray(ipHeader.totalLength - (ipHeader.headerLength * 4) - (tcpHeader.headerLength * 4))
+                System.arraycopy(rawData, offset + (ipHeader.headerLength * 4) + (tcpHeader.headerLength * 4), tempData, 0, tempData.size)
+            } else {
+                tempData = ByteArray(udpHeader.totalLength.toNetInt() - 8)
+                System.arraycopy(rawData, offset + ipHeader.headerLength * 4 + 8, tempData, 0, tempData.size)
+            }
+            return tempData
         }
-    }
 
     fun isTcp(): Boolean {
         return ipHeader.upperProtocol == PROTO_TCP.toByte()
@@ -55,7 +57,8 @@ class NetPacket(val rawData: ByteArray, val offset: Int = 0) {
         if (isUdp()){
             udpHeader.checksum = ChecksumUtil.checksum(checksumData, 0, checksumData.size).toShort()
         }
-        
+
+        ipHeader.checksum = 0
         ipHeader.checksum = ChecksumUtil.checksum(ipHeader.rawData, ipHeader.offset, ipHeader.headerLength * 4).toShort()
     }
 }

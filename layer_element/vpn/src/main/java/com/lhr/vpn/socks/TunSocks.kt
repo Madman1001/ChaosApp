@@ -98,15 +98,10 @@ class TunSocks(
             return false
         }
         val packet = NetPacket(data)
-        Log.d(tag, "read ip packet:${packet.ipHeader}")
+//        Log.d(tag, "read ip packet:${packet.ipHeader}")
         if (packet.ipHeader.sourceIp != hostIp) return false
         //传递ip数据包
         return if (packet.isTcp()){
-            val preChecksum = packet.ipHeader.checksum
-            val preTcpChecksum = packet.tcpHeader.checksum
-            packet.setChecksum()
-            packet.ipHeader.checksum
-            packet.tcpHeader.checksum
             Log.d(tag, "read tcp packet:${packet.tcpHeader}")
             if (packet.tcpHeader.sourcePort == proxyTcpServer.serverPort){
                 val session = proxyTcpServer.tcpSessions[packet.tcpHeader.destinationPort] ?: return false
@@ -133,11 +128,6 @@ class TunSocks(
             }
             true
         } else if (packet.isUdp()){
-            val preChecksum = packet.ipHeader.checksum
-            val preTcpChecksum = packet.udpHeader.checksum
-            packet.setChecksum()
-            packet.ipHeader.checksum
-            packet.udpHeader.checksum
             Log.d(tag, "read udp packet:${packet.udpHeader}")
             var channel = proxyUdpServer.getChannel(packet.udpHeader.sourcePort)
             if (channel == null){

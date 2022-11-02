@@ -99,6 +99,7 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
             .append(if (controlSign and SIGN_SYN != 0) "SYN " else "")
             .append(if (controlSign and SIGN_FIN != 0) "FIN " else "")
             .append("\n  WindowSize:     ").append(windowSize.toUShort())
+            .append("\n  Checksum:       ").append(checksum.toUShort())
             .append("\n  UrgentPointer:  ").append(urgentPointer.toUShort())
             .append("\n  Options: [")
             .append(optionData.toHexString())

@@ -38,7 +38,7 @@ fun ByteArray.getShort(offset: Int): Short{
 
 fun ByteArray.setShort(offset: Int, value: Short){
     this[offset] = (value.toNetInt() ushr 8).toByte()
-    this[offset] = (value.toNetInt() and 0xFF).toByte()
+    this[offset + 1] = (value.toNetInt() and 0xFF).toByte()
 }
 
 fun ByteArray.getInt(offset: Int): Int {

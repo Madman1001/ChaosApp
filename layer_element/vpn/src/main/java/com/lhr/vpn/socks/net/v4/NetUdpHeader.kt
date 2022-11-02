@@ -2,6 +2,7 @@ package com.lhr.vpn.socks.net.v4
 
 import com.lhr.vpn.getShort
 import com.lhr.vpn.setShort
+import com.lhr.vpn.toNetInt
 
 /**
  * @CreateDate: 2022/10/12
@@ -43,6 +44,8 @@ class NetUdpHeader(val rawData: ByteArray, val offset: Int) {
         sb.append("UDP Header {")
             .append("\n  Src:            ").append(sourcePort.toUShort())
             .append("\n  Dst:            ").append(destinationPort.toUShort())
+            .append("\n  TotalLength:    ").append(totalLength.toUShort())
+            .append("\n  Checksum:       ").append(checksum.toUShort())
             .append("\n }")
         return sb.toString()
     }
