@@ -11,13 +11,14 @@ import com.lhr.vpn.socks.net.v4.NetPacket
 import com.lhr.vpn.socks.net.v4.NetUdpHeader
 import com.lhr.vpn.toIpInt
 import kotlinx.coroutines.*
-import java.net.InetAddress
+import java.net.DatagramPacket
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.DatagramChannel
 import java.nio.channels.Pipe
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
+import kotlin.collections.ArrayDeque
 import kotlin.random.Random
 
 /**
@@ -34,35 +35,31 @@ class UdpProxyServer(
     private var workJob: Job? = null
     private val hostIp = LocalVpnConfig.PROXY_ADDRESS.toIpInt()
 
+    //本地ip地址映射
+    private val localPortTable by lazy { mutableMapOf<Short, DatagramChannel>() }
+    private val receiveBuffer = ByteBuffer.allocate(1500)
+
     private var pipe = Pipe.open().apply {
         source().apply {
             configureBlocking(false)
             register(selector, SelectionKey.OP_READ)
         }
     }
-    //本地ip地址映射
-    private val localPortTable by lazy { mutableMapOf<Short, DatagramChannel>() }
-    private val receiveBuffer = ByteBuffer.allocate(1500)
-
     private val registerBuffer = ByteBuffer.allocate(4)
-    fun getChannel(port: Short): DatagramChannel? {
-        return localPortTable[port]
+    private val sendQueue = ArrayDeque<DatagramPacket>()
+
+    fun sendData(port: Short, datagramPacket: DatagramPacket){
+        sendQueue.addLast(datagramPacket)
+
+        val bb = ByteBuffer.allocate(2)
+        bb.asShortBuffer().put(port)
+        pipe.sink().write(bb)
     }
 
-    fun registerProxy(port: Short): DatagramChannel {
+    fun registerProxy(port: Short, channel: DatagramChannel) {
         localPortTable[port]?.close()
-        val channel = DatagramChannel.open().apply {
-            configureBlocking(false)
-            socket().bind(InetSocketAddress(0))
-
-            val bb = ByteBuffer.allocate(2)
-            bb.asShortBuffer().put(port)
-            pipe.sink().write(bb)
-
-            vpnService.protect(socket())
-        }
         localPortTable[port] = channel
-        return channel
+        Log.d(TAG, "isRegister $port = ${channel.socket().localPort}")
     }
 
     fun startProxy(){
@@ -76,7 +73,7 @@ class UdpProxyServer(
                         when{
                             key.isReadable ->{
                                 if (key.channel() === pipe.source()){
-                                    onRegister(key)
+                                    onWrite(key)
                                 } else {
                                     onRead(key)
                                 }
@@ -88,27 +85,39 @@ class UdpProxyServer(
             }.onFailure {
                 it.printStackTrace()
             }
+            for (entry in localPortTable) {
+                entry.value.use {  }
+            }
+            selector.use {  }
+            localPortTable.clear()
         }
     }
 
     fun stopProxy(){
         workJob?.cancel()
-        selector.use {  }
-        for (entry in localPortTable) {
-            entry.value.use {  }
-        }
-        localPortTable.clear()
     }
 
-    private fun onRegister(key: SelectionKey){
+    private fun onWrite(key: SelectionKey){
         registerBuffer.clear()
         val len = pipe.source().read(registerBuffer)
         if (len != Short.SIZE_BYTES) return
         registerBuffer.flip()
         val port = registerBuffer.asShortBuffer().get(0)
-        val channel = localPortTable[port] ?: return
-        channel.register(selector, SelectionKey.OP_READ, port)
-        Log.d(TAG, "isRegister $port = ${channel.socket().localPort}")
+
+        if (sendQueue.isEmpty()) return
+
+        val packet = sendQueue.removeFirst()
+
+        val channel = localPortTable[port] ?: DatagramChannel.open().apply {
+            configureBlocking(false)
+            socket().bind(InetSocketAddress(0))
+            vpnService.protect(socket())
+            register(selector, SelectionKey.OP_READ, port)
+            registerProxy(port, this)
+        }
+
+        channel.send(ByteBuffer.wrap(packet.data), packet.socketAddress)
+        Log.d(TAG, "SEND ${String(packet.data)} TO ${packet.address.hostAddress}:${packet.port}")
     }
 
     private fun onRead(key: SelectionKey){

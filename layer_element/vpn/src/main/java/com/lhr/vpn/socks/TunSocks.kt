@@ -12,8 +12,8 @@ import com.lhr.vpn.socks.proxy.UdpProxyServer
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.net.DatagramPacket
 import java.net.InetSocketAddress
-import java.nio.ByteBuffer
 
 /**
  * @CreateDate: 2022/10/13
@@ -36,7 +36,7 @@ class TunSocks(
     private val proxyUdpServer by lazy { UdpProxyServer(vpnService, this, socksScope) }
 
     private val hostIp = LocalVpnConfig.PROXY_ADDRESS.toIpInt()
-    
+
     @Volatile
     private var workJob: Job? = null
 
@@ -53,8 +53,9 @@ class TunSocks(
         vpnService.tunInterface.close()
     }
 
-    fun sendTunData(byteArray: ByteArray){
-        tunOutput.write(byteArray)
+    fun sendTunData(byteArray: ByteArray, offset: Int = 0, len: Int = byteArray.size){
+        tunOutput.write(byteArray, offset, len)
+        tunOutput.flush()
     }
 
     private fun startWorkJob(){
@@ -80,8 +81,8 @@ class TunSocks(
         if (len <= 0) return false
         val ipVersion = ((byteArray[0].toNetInt()) and 0xf0) ushr 4
         return when(ipVersion){
-            IP_VERSION_4 -> receiveIpV4(byteArray)
-            IP_VERSION_6 -> receiveIpV6(byteArray)
+            IP_VERSION_4 -> receiveIpV4(byteArray, len)
+            IP_VERSION_6 -> receiveIpV6(byteArray, len)
             else -> {
                 Log.d(tag, "ip  data: ${byteArray.toHexString()}")
                 false
@@ -92,7 +93,7 @@ class TunSocks(
     /**
      * 转发ipv4数据
      */
-    private fun receiveIpV4(data: ByteArray): Boolean{
+    private fun receiveIpV4(data: ByteArray, len: Int): Boolean{
         val headerLength = (data[0].toNetInt() and 0x0f)
         if (headerLength <= 0) {
             return false
@@ -100,6 +101,9 @@ class TunSocks(
         val packet = NetPacket(data)
         Log.d(tag, "read ip packet:${packet.ipHeader}")
         if (packet.ipHeader.sourceIp != hostIp) return false
+        if (!packet.checkChecksum()) {
+            throw RuntimeException("")
+        }
         //传递ip数据包
         return if (packet.isTcp()){
             Log.d(tag, "read tcp packet:${packet.tcpHeader}")
@@ -110,7 +114,7 @@ class TunSocks(
                 packet.tcpHeader.sourcePort = session.port
                 packet.ipHeader.destinationIp = sourceIp
                 packet.setChecksum()
-                tunOutput.write(packet.rawData)
+                sendTunData(packet.rawData, 0, len)
             } else {
                 val port = packet.tcpHeader.sourcePort
                 proxyTcpServer.tcpSessions[port]?.takeIf {
@@ -124,20 +128,13 @@ class TunSocks(
                 packet.ipHeader.destinationIp = sourceIp
                 packet.tcpHeader.destinationPort = proxyTcpServer.serverPort
                 packet.setChecksum()
-                tunOutput.write(packet.rawData)
+                sendTunData(packet.rawData, 0, len)
             }
             true
         } else if (packet.isUdp()){
             Log.d(tag, "read udp packet:${packet.udpHeader}")
-            var channel = proxyUdpServer.getChannel(packet.udpHeader.sourcePort)
-            if (channel == null){
-               channel = proxyUdpServer.registerProxy(packet.udpHeader.sourcePort)
-            }
-            val buffer = ByteBuffer.wrap(packet.data)
-            Log.d(tag, "SEND ${String(buffer.array(), buffer.position(), buffer.limit() - buffer.position())}")
-            Log.d(tag, "SEND TO ${packet.ipHeader.destinationIp.toIpString()}:${packet.udpHeader.destinationPort.toNetInt()}")
-
-            channel.send(buffer, InetSocketAddress(packet.ipHeader.destinationIp.toIpString(), packet.udpHeader.destinationPort.toNetInt()))
+            val datagramPacket = DatagramPacket(packet.data, packet.data.size, InetSocketAddress(packet.ipHeader.destinationIp.toIpString(), packet.udpHeader.destinationPort.toNetInt()))
+            proxyUdpServer.sendData(packet.udpHeader.sourcePort, datagramPacket)
             true
         } else {
             false
@@ -147,7 +144,7 @@ class TunSocks(
     /**
      * 接收到ipv6数据
      */
-    private fun receiveIpV6(data: ByteArray): Boolean{
+    private fun receiveIpV6(data: ByteArray, len: Int): Boolean{
 //        Log.d(tag, "ip data: ${data.toHexString()}")
         return false
     }

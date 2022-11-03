@@ -2,7 +2,6 @@ package com.lhr.vpn.socks.net.v4
 
 import com.lhr.vpn.*
 import com.lhr.vpn.socks.net.*
-import java.nio.ByteBuffer
 
 /**
  * @CreateDate: 2022/10/12
@@ -45,6 +44,8 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
         set(value) {
             rawData[offset + 12] = ((value shl 4 and 0xf0) or rawData[offset + 12].toNetInt()).toByte()
         }
+    val headerLengthByte: Int get() = headerLength * 4
+
 
     //控制位 6 bit (0 0 URG ACK PSH RST SYN FIN) ----- [13]
     var controlSign: Int

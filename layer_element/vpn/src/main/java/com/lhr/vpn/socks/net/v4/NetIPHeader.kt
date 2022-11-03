@@ -1,8 +1,6 @@
 package com.lhr.vpn.socks.net.v4
 
 import com.lhr.vpn.*
-import com.lhr.vpn.socks.net.PROTO_TCP
-import com.lhr.vpn.socks.net.PROTO_UDP
 
 /**
  * @CreateDate: 2022/10/12
@@ -24,6 +22,7 @@ class NetIPHeader(val rawData: ByteArray, val offset: Int = 0) {
         set(value) {
             rawData[offset] = ((value and 0x0f) or rawData[offset].toNetInt()).toByte()
         }
+    val headerLengthByte: Int get() = headerLength * 4
 
     //服务类型 8 bit ----- [1]
     var typeOfService: Byte

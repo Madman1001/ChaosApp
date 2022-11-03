@@ -9,10 +9,12 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lhr.vpn.LocalVpnConfig.PROXY_ADDRESS
+import com.lhr.vpn.LocalVpnConfig.PROXY_MTU
 import com.lhr.vpn.LocalVpnConfig.PROXY_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_ADDRESS
 import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_PORT
 import com.lhr.vpn.LocalVpnConfig.PROXY_SESSION_NAME
+import com.lhr.vpn.LocalVpnConfig.PROXY_TUN_IS_BLOCKING
 import com.lhr.vpn.socks.TunSocks
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
@@ -87,8 +89,8 @@ class LocalVpnService : VpnService() {
             //.addDnsServer(PROXY_DNS_SERVER)
             //暂时只代理自身网络
             .addAllowedApplication(this.packageName)
-            .setMtu(1500)
-            .setBlocking(true)
+            .setMtu(PROXY_MTU)
+            .setBlocking(PROXY_TUN_IS_BLOCKING)
             //创建vpn通道，开始代理网络
             .establish()!!
         vpnConnection.set(TunSocks(this))
