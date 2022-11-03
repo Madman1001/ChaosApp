@@ -23,7 +23,7 @@ object LocalVpnConfig {
 
     const val PROXY_DNS_SERVER = "8.8.8.8"
 
-    const val PROXY_MTU = 1500
+    const val PROXY_MTU = 255
 
     const val PROXY_TUN_IS_BLOCKING = true
 }

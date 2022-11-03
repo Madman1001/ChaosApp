@@ -152,7 +152,7 @@ class UdpProxyServer(
             Log.d(TAG, "send Udp $this")
         }
         System.arraycopy(receiveBuffer.array(), receiveBuffer.position(), packetData, 28, dataLen)
-        NetPacket(packetData).setChecksum()
+        NetPacket(packetData).resetChecksum()
 
         tunSocks.sendTunData(packetData)
     }

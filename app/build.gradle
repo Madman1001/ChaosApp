@@ -48,6 +48,7 @@ dependencies {
         implementation project(':access')
         implementation project(':learn')
         implementation project(':adb')
+        implementation project(':vpn')
     }
 
 }

@@ -76,7 +76,7 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
         }
 
     //其它选项 (单位 32 bit)
-    var optionData: ByteArray = ByteArray(0)
+    val optionData: ByteArray
         get() {
             val optionByteLength = headerLength * 4 - 20
             val tempData = ByteArray(optionByteLength)
@@ -91,7 +91,7 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
             .append("\n  Dst:            ").append(destinationPort.toUShort())
             .append("\n  SeqNumber:      ").append(seqNumber.toUInt())
             .append("\n  AckNumber:      ").append(ackNumber.toUInt())
-            .append("\n  HeaderLen:      ").append(headerLength)
+            .append("\n  HeaderLen:      ").append(headerLength.toUInt())
             .append("\n  ControlSign     ")
             .append(if (controlSign and SIGN_URG != 0) "URG " else "")
             .append(if (controlSign and SIGN_ACK != 0) "ACK " else "")

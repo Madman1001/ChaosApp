@@ -86,3 +86,9 @@ fun Short.toNetInt(): Int{
 fun Byte.toNetInt(): Int{
     return this.toUByte().toInt()
 }
+
+fun ByteArray.copy(offset: Int, len: Int): ByteArray{
+    val copyData = ByteArray(len)
+    System.arraycopy(this, offset, copyData, 0, len)
+    return copyData
+}
