@@ -108,6 +108,7 @@ class TcpConnection(
             queue.put(buf.duplicate())
         } else {
             selectionKey.cancel()
+            Log.e(TAG, "tcp is over ${if (tunnel === remoteChannel) "remote" else "local"}")
             throw IOException("read $len bytes,")
         }
     }

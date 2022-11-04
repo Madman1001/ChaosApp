@@ -24,7 +24,7 @@ import kotlin.random.Random
 /**
  * @author lhr
  * @date 31/10/2022
- * @des
+ * @des udp 代理服务器
  */
 class UdpProxyServer(
     private val vpnService: VpnService,
@@ -37,6 +37,8 @@ class UdpProxyServer(
 
     //本地ip地址映射
     private val localPortTable by lazy { mutableMapOf<Short, DatagramChannel>() }
+    private val useTimeTable by lazy { mutableMapOf<Short, Long>() }
+
     private val receiveBuffer = ByteBuffer.allocate(1500)
 
     private var pipe = Pipe.open().apply {
@@ -59,6 +61,7 @@ class UdpProxyServer(
     fun registerProxy(port: Short, channel: DatagramChannel) {
         localPortTable[port]?.close()
         localPortTable[port] = channel
+        useTimeTable[port] = System.currentTimeMillis()
         Log.d(TAG, "isRegister $port = ${channel.socket().localPort}")
     }
 
@@ -70,7 +73,7 @@ class UdpProxyServer(
                     val ite = selector.selectedKeys().iterator()
                     while (ite.hasNext()){
                         val key = ite.next()
-                        when{
+                        when {
                             key.isReadable ->{
                                 if (key.channel() === pipe.source()){
                                     onWrite(key)
@@ -80,6 +83,14 @@ class UdpProxyServer(
                             }
                         }
                         ite.remove()
+                    }
+
+                    val keysIte = selector.keys().iterator()
+                    while (keysIte.hasNext()){
+                        val key = keysIte.next()
+                        if (key.channel() is DatagramChannel){
+                            onSoTimeout(key)
+                        }
                     }
                 }
             }.onFailure {
@@ -109,12 +120,15 @@ class UdpProxyServer(
         val packet = sendQueue.removeFirst()
 
         val channel = localPortTable[port] ?: DatagramChannel.open().apply {
+            socket().soTimeout = 5 * 1000
             configureBlocking(false)
             socket().bind(InetSocketAddress(0))
             vpnService.protect(socket())
             register(selector, SelectionKey.OP_READ, port)
             registerProxy(port, this)
         }
+
+        useTimeTable[port] = System.currentTimeMillis()
 
         channel.send(ByteBuffer.wrap(packet.data), packet.socketAddress)
         Log.d(TAG, "SEND ${String(packet.data)} TO ${packet.address.hostAddress}:${packet.port}")
@@ -126,6 +140,7 @@ class UdpProxyServer(
         if (channel == null){
             //没有注册对于的数据
             key.channel().close()
+            key.cancel()
         }
         receiveBuffer.clear()
         val remoteAddress = channel?.receive(receiveBuffer) as InetSocketAddress
@@ -154,6 +169,25 @@ class UdpProxyServer(
         System.arraycopy(receiveBuffer.array(), receiveBuffer.position(), packetData, 28, dataLen)
         NetPacket(packetData).resetChecksum()
 
+        useTimeTable[port] = System.currentTimeMillis()
         tunSocks.sendTunData(packetData)
+    }
+
+    private fun onSoTimeout(key: SelectionKey) {
+        val port = key.attachment() as Short
+        val lastUseTime = System.currentTimeMillis() - (useTimeTable[port] ?: System.currentTimeMillis())
+        val channel = localPortTable[port]
+        if (channel == null){
+            useTimeTable[port] = 0
+            key.cancel()
+            return
+        }
+        if (channel.socket().soTimeout <= lastUseTime){
+            channel.close()
+            localPortTable.remove(port)
+            useTimeTable.remove(port)
+            key.cancel()
+            Log.e(TAG, "datagram channel is over")
+        }
     }
 }
