@@ -1,9 +1,10 @@
-package com.lhr.vpn.socks.proxy
+package com.lhr.vpn.socks.proxy.tcp
 
 import android.net.VpnService
 import android.util.Log
 import com.lhr.vpn.socks.Tunnel
 import com.lhr.vpn.socks.bind
+import com.lhr.vpn.socks.proxy.ProxySession
 import com.lhr.vpn.toNetInt
 import kotlinx.coroutines.*
 import java.net.InetSocketAddress

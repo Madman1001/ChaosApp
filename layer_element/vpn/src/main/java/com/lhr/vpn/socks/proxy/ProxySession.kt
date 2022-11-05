@@ -9,6 +9,7 @@ import java.util.*
  * @des 代理session
  */
 class ProxySession(
+    val localPort: Short,
     val address: Int,
     val port: Short,
 ) {

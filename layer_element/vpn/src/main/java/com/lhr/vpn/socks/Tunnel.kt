@@ -5,7 +5,7 @@ import java.nio.channels.SocketChannel
 /**
  * @author lhr
  * @date 31/10/2022
- * @des
+ * @des tcp proxy tunnel
  */
 class Tunnel(val channel: SocketChannel){
     var bindChannel: Tunnel? = null

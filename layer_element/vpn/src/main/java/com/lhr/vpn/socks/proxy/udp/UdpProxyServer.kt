@@ -1,8 +1,9 @@
-package com.lhr.vpn.socks.proxy
+package com.lhr.vpn.socks.proxy.udp
 
 import android.net.VpnService
 import android.util.Log
 import com.lhr.vpn.LocalVpnConfig
+import com.lhr.vpn.LocalVpnConfig.Companion.HostIp
 import com.lhr.vpn.socks.TunSocks
 import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.PROTO_UDP
@@ -33,7 +34,6 @@ class UdpProxyServer(
     private val TAG = this::class.java.simpleName
     private val selector = Selector.open()
     private var workJob: Job? = null
-    private val hostIp = LocalVpnConfig.PROXY_ADDRESS.toIpInt()
 
     //本地ip地址映射
     private val localPortTable by lazy { mutableMapOf<Short, DatagramChannel>() }
@@ -153,7 +153,7 @@ class UdpProxyServer(
             timeToLive = 64
             identification = Random(System.currentTimeMillis()).nextInt().toShort()
             sourceIp = remoteAddress.hostString.toIpInt()
-            destinationIp = hostIp
+            destinationIp = HostIp
             upperProtocol = PROTO_UDP.toByte()
             flagAndOffsetFrag = 0x4000
             totalLength = packetData.size.toShort()

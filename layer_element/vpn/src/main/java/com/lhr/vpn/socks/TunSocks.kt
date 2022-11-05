@@ -7,8 +7,8 @@ import com.lhr.vpn.socks.net.IP_VERSION_6
 import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
 import com.lhr.vpn.socks.net.v4.NetPacket
 import com.lhr.vpn.socks.proxy.ProxySession
-import com.lhr.vpn.socks.proxy.TcpProxyServer
-import com.lhr.vpn.socks.proxy.UdpProxyServer
+import com.lhr.vpn.socks.proxy.tcp.TcpProxyServer
+import com.lhr.vpn.socks.proxy.udp.UdpProxyServer
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -119,7 +119,7 @@ class TunSocks(
                 val port = packet.tcpHeader.sourcePort
                 proxyTcpServer.tcpSessions[port]?.takeIf {
                     it.address == packet.ipHeader.destinationIp && it.port == packet.tcpHeader.destinationPort
-                } ?: ProxySession(packet.ipHeader.destinationIp, packet.tcpHeader.destinationPort).also {
+                } ?: ProxySession(port, packet.ipHeader.destinationIp, packet.tcpHeader.destinationPort).also {
                     it.type = ProxySession.TYPE_TCP
                     proxyTcpServer.tcpSessions[port] = it
                 }

@@ -8,13 +8,6 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.lhr.vpn.LocalVpnConfig.PROXY_ADDRESS
-import com.lhr.vpn.LocalVpnConfig.PROXY_MTU
-import com.lhr.vpn.LocalVpnConfig.PROXY_PORT
-import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_ADDRESS
-import com.lhr.vpn.LocalVpnConfig.PROXY_ROUTE_PORT
-import com.lhr.vpn.LocalVpnConfig.PROXY_SESSION_NAME
-import com.lhr.vpn.LocalVpnConfig.PROXY_TUN_IS_BLOCKING
 import com.lhr.vpn.socks.TunSocks
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
@@ -31,6 +24,8 @@ class LocalVpnService : VpnService() {
         const val VPN_CONTROL_ACTION_START = "VPN_START"
 
         const val VPN_CONTROL_ACTION_STOP = "VPN_STOP"
+
+        var config: LocalVpnConfig = LocalVpnConfig()
 
         var vpnService: WeakReference<VpnService?> = WeakReference(null)
         fun startVPN(context: Context): Boolean{
@@ -82,15 +77,15 @@ class LocalVpnService : VpnService() {
 
     private fun connect() {
         val builder = Builder()
-        tunInterface = builder.setSession(PROXY_SESSION_NAME)
-            .addAddress(PROXY_ADDRESS, PROXY_PORT)
-            .addRoute(PROXY_ROUTE_ADDRESS, PROXY_ROUTE_PORT)
+        tunInterface = builder.setSession(config.sessionName)
+            .addAddress(config.address, config.port)
+            .addRoute(config.routeAddress, config.routePort)
             //设置dns服务器
-            //.addDnsServer(PROXY_DNS_SERVER)
+//            .addDnsServer(config.dnsServerAddress)
             //暂时只代理自身网络
             .addAllowedApplication(this.packageName)
-            .setMtu(PROXY_MTU)
-            .setBlocking(PROXY_TUN_IS_BLOCKING)
+            .setMtu(config.mtu)
+            .setBlocking(config.isBlocking)
             //创建vpn通道，开始代理网络
             .establish()!!
         vpnConnection.set(TunSocks(this))

@@ -91,7 +91,7 @@ class NetIPHeader(val rawData: ByteArray, val offset: Int = 0) {
         }
 
     //可选字段 (单位 32 bit)
-    var optionData: ByteArray = ByteArray(0)
+    val optionData: ByteArray
         get() {
             val optionByteLength = headerLength * 4 - 20
             val tempData = ByteArray(optionByteLength)

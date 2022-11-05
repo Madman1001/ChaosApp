@@ -1,4 +1,4 @@
-package com.lhr.vpn.socks.proxy
+package com.lhr.vpn.socks.proxy.tcp
 
 import android.util.Log
 import com.lhr.vpn.socks.Tunnel
