@@ -9,7 +9,7 @@ object ChecksumUtil{
     /**
      * 计算校验和
      */
-    fun checksum(data: ByteArray, len: Int): Short{
+    fun checksum(data: ByteArray, len: Int = data.size): Short{
         var sum = 0
         for (i in 0 until len step 2){
             sum += (data[i].toInt() and 0xFF) shl 8

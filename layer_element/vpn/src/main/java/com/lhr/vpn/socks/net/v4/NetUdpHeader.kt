@@ -8,7 +8,9 @@ import com.lhr.vpn.setShort
  * @Author: mac
  * @Description: udp数据包解析
  */
-class NetUdpHeader(val rawData: ByteArray, val offset: Int) {
+class NetUdpHeader {
+    val rawData: ByteArray = ByteArray(8)
+    val offset: Int = 0
 
     //源端口号 16 bit ----- [0-1]
     var sourcePort: Short
@@ -47,5 +49,10 @@ class NetUdpHeader(val rawData: ByteArray, val offset: Int) {
             .append("\n  Checksum:       ").append(checksum.toUShort())
             .append("\n }")
         return sb.toString()
+    }
+
+    fun decode(data: ByteArray, offset: Int): NetUdpHeader {
+        System.arraycopy(data, offset, rawData, 0, 8)
+        return this
     }
 }

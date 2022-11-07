@@ -147,30 +147,32 @@ class UdpProxyServer(
         receiveBuffer.flip()
         Log.d(TAG, "RECEIVE ${String(receiveBuffer.array(), receiveBuffer.position(), receiveBuffer.limit() - receiveBuffer.position())}")
         val dataLen = receiveBuffer.limit() - receiveBuffer.position()
-        val packetData = ByteArray(20 + 8 + dataLen)
-        NetIPHeader(packetData).run{
-            version = IP_VERSION_4
-            timeToLive = 64
-            identification = Random(System.currentTimeMillis()).nextInt().toShort()
-            sourceIp = remoteAddress.hostString.toIpInt()
-            destinationIp = HostIp
-            upperProtocol = PROTO_UDP.toByte()
-            flagAndOffsetFrag = 0x4000
-            totalLength = packetData.size.toShort()
-            headerLength = 5
-            Log.d(TAG, "send Ip $this")
+        val packet = NetPacket().apply {
+            ipHeader.run {
+                version = IP_VERSION_4
+                timeToLive = 64
+                identification = Random(System.currentTimeMillis()).nextInt().toShort()
+                sourceIp = remoteAddress.hostString.toIpInt()
+                destinationIp = HostIp
+                upperProtocol = PROTO_UDP.toByte()
+                flagAndOffsetFrag = 0x4000
+                totalLength = (20 + 8 + dataLen).toShort()
+                headerLength = 5
+                Log.d(TAG, "send Ip $this")
+            }
+            udpHeader.run {
+                sourcePort = remoteAddress.port.toShort()
+                destinationPort = port
+                totalLength = (dataLen + 8).toShort()
+                Log.d(TAG, "send Udp $this")
+            }
+            data = ByteArray(dataLen).apply {
+                receiveBuffer.get(this)
+            }
         }
-        NetUdpHeader(packetData, 20).run {
-            sourcePort = remoteAddress.port.toShort()
-            destinationPort = port
-            totalLength = (dataLen + 8).toShort()
-            Log.d(TAG, "send Udp $this")
-        }
-        System.arraycopy(receiveBuffer.array(), receiveBuffer.position(), packetData, 28, dataLen)
-        NetPacket(packetData).resetChecksum()
 
         useTimeTable[port] = System.currentTimeMillis()
-        tunSocks.sendTunData(packetData)
+        tunSocks.sendTunData(packet.encodePacket())
     }
 
     private fun onSoTimeout(key: SelectionKey) {

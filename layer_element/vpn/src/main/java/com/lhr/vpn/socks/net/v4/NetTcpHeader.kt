@@ -8,7 +8,9 @@ import com.lhr.vpn.socks.net.*
  * @Author: mac
  * @Description: tcp数据包解析
  */
-class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
+class NetTcpHeader {
+    val rawData: ByteArray = ByteArray(20)
+    val offset: Int = 0
 
     //源端口号 16 bit ----- [0-1]
     var sourcePort: Short
@@ -74,13 +76,7 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
         }
 
     //其它选项 (单位 32 bit)
-    val optionData: ByteArray
-        get() {
-            val optionByteLength = headerLength * 4 - 20
-            val tempData = ByteArray(optionByteLength)
-            System.arraycopy(rawData, 20, tempData, 0, optionByteLength)
-            return tempData
-        }
+    var optionData: ByteArray = ByteArray(0)
 
     override fun toString(): String {
         val sb = StringBuilder()
@@ -101,9 +97,19 @@ class NetTcpHeader(val rawData: ByteArray, val offset: Int = 0) {
             .append("\n  Checksum:       ").append(checksum.toUShort())
             .append("\n  UrgentPointer:  ").append(urgentPointer.toUShort())
             .append("\n  Options: [")
-            .append(optionData.toHexString())
-            .append("\n  ]")
+            .append(optionData.toHexString() + "\n")
+            .append("   ]")
             .append("\n }")
         return sb.toString()
+    }
+
+    fun decode(data: ByteArray, offset: Int = 0): NetTcpHeader {
+        return this.apply {
+            System.arraycopy(data, offset, rawData, 0, 20)
+            val optionByteLength = headerLength * 4 - 20
+            val tempData = ByteArray(optionByteLength)
+            System.arraycopy(data, 20, tempData, 0, optionByteLength)
+            optionData = tempData
+        }
     }
 }

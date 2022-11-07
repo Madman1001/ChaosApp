@@ -1,13 +1,17 @@
 package com.lhr.vpn.socks.net.v4
 
 import com.lhr.vpn.*
+import com.lhr.vpn.socks.net.PROTO_TCP
+import com.lhr.vpn.socks.net.PROTO_UDP
 
 /**
  * @CreateDate: 2022/10/12
  * @Author: mac
  * @Description: ip数据包解析
  */
-class NetIPHeader(val rawData: ByteArray, val offset: Int = 0) {
+class NetIPHeader {
+    val rawData: ByteArray = ByteArray(20)
+    val offset = 0
 
     //版本号 4 bit ----- [0] and 0xf0 ushr 4
     var version: Int
@@ -91,13 +95,7 @@ class NetIPHeader(val rawData: ByteArray, val offset: Int = 0) {
         }
 
     //可选字段 (单位 32 bit)
-    val optionData: ByteArray
-        get() {
-            val optionByteLength = headerLength * 4 - 20
-            val tempData = ByteArray(optionByteLength)
-            System.arraycopy(rawData, 20, tempData, 0, optionByteLength)
-            return tempData
-        }
+    var optionData: ByteArray = ByteArray(0)
 
     override fun toString(): String {
         val sb = StringBuilder()
@@ -114,9 +112,27 @@ class NetIPHeader(val rawData: ByteArray, val offset: Int = 0) {
             .append("\n  Source:         ").append(sourceIp.toIpString())
             .append("\n  Destination:    ").append(destinationIp.toIpString())
             .append("\n  Options: [")
-            .append(optionData.toHexString())
-            .append("\n  ]")
+            .append(optionData.toHexString() + "\n")
+            .append("   ]")
             .append("\n }")
         return sb.toString()
+    }
+
+    fun isTcp(): Boolean {
+        return upperProtocol == PROTO_TCP.toByte()
+    }
+
+    fun isUdp(): Boolean {
+        return upperProtocol == PROTO_UDP.toByte()
+    }
+
+    fun decode(data: ByteArray, offset: Int = 0): NetIPHeader {
+        return this.apply {
+            System.arraycopy(data, offset, rawData, 0, 20)
+            val optionByteLength = headerLength * 4 - 20
+            val tempData = ByteArray(optionByteLength)
+            System.arraycopy(data, 20, tempData, 0, optionByteLength)
+            optionData = tempData
+        }
     }
 }

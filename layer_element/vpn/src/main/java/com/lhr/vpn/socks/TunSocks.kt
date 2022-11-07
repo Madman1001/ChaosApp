@@ -62,11 +62,22 @@ class TunSocks(
         if (workJob?.isActive == true) return
         workJob = socksScope.launch(Dispatchers.IO){
             kotlin.runCatching {
+                val packet = NetPacket()
                 val byteArray = ByteArray(MAX_PACKET_SIZE)
                 tunInput.use {
                     while (isActive){
                         val len = it.read(byteArray)
-                        if (len <= 0 || !onReceive(byteArray.copy(0, len))){
+                        if (len <= 0){
+                            delay(100)
+                            continue
+                        }
+                        packet.decodePacket(byteArray, 0, len)
+                        if (!packet.isValid){
+                            delay(100)
+                            continue
+                        }
+                        Log.d(tag, "read:${len}byte\n ip packet:${packet.ipHeader}")
+                        if (!onReceive(packet)){
                             delay(100)
                         }
                     }
@@ -77,15 +88,12 @@ class TunSocks(
         }
     }
 
-    private fun onReceive(byteArray: ByteArray): Boolean{
-        if (byteArray.isEmpty()) return false
-        val ipVersion = ((byteArray[0].toNetInt()) and 0xf0) ushr 4
-        Log.d(tag, "ip  data: ${byteArray.toHexString()}")
-        return when(ipVersion){
-            IP_VERSION_4 -> receiveIpV4(byteArray)
-            IP_VERSION_6 -> receiveIpV6(byteArray)
+    private fun onReceive(packet: NetPacket): Boolean{
+        return when(packet.ipHeader.version){
+            IP_VERSION_4 -> receiveIpV4(packet)
+            IP_VERSION_6 -> receiveIpV6(packet)
             else -> {
-                Log.d(tag, "ip  data: ${byteArray.toHexString()}")
+                Log.e(tag, "unknown ip  data: ${packet.ipHeader}")
                 false
             }
         }
@@ -94,27 +102,23 @@ class TunSocks(
     /**
      * 转发ipv4数据
      */
-    private fun receiveIpV4(data: ByteArray): Boolean{
-        val headerLength = (data[0].toNetInt() and 0x0f)
-        if (headerLength <= 0) {
+    private fun receiveIpV4(packet: NetPacket): Boolean{
+        if (packet.ipHeader.headerLength <= 0) {
             return false
         }
-        val packet = NetPacket(data)
-        Log.d(tag, "read ip packet:${packet.ipHeader}")
         if (packet.ipHeader.sourceIp != hostIp) return false
-        assert(packet.checkIpChecksum())
+        assert(packet.calculateIpChecksum().toInt() == 0)
         //传递ip数据包
         return if (packet.isTcp()){
             Log.d(tag, "read tcp packet:${packet.tcpHeader}")
-            assert(packet.checkTcpUdpChecksum())
+            assert(packet.calculateTcpChecksum().toInt() == 0)
             if (packet.tcpHeader.sourcePort == proxyTcpServer.serverPort){
                 val session = proxyTcpServer.tcpSessions[packet.tcpHeader.destinationPort] ?: return false
                 val sourceIp = packet.ipHeader.sourceIp
                 packet.ipHeader.sourceIp = packet.ipHeader.destinationIp
                 packet.tcpHeader.sourcePort = session.port
                 packet.ipHeader.destinationIp = sourceIp
-                packet.resetChecksum()
-                sendTunData(packet.rawData)
+                sendTunData(packet.encodePacket())
             } else {
                 val port = packet.tcpHeader.sourcePort
                 proxyTcpServer.tcpSessions[port]?.takeIf {
@@ -127,13 +131,12 @@ class TunSocks(
                 packet.ipHeader.sourceIp = packet.ipHeader.destinationIp
                 packet.ipHeader.destinationIp = sourceIp
                 packet.tcpHeader.destinationPort = proxyTcpServer.serverPort
-                packet.resetChecksum()
-                sendTunData(packet.rawData)
+                sendTunData(packet.encodePacket())
             }
             true
         } else if (packet.isUdp()){
             Log.d(tag, "read udp packet:${packet.udpHeader}")
-            assert(packet.checkTcpUdpChecksum())
+            assert(packet.calculateUdpChecksum().toInt() == 0)
             val datagramPacket = DatagramPacket(packet.data, packet.data.size, InetSocketAddress(packet.ipHeader.destinationIp.toIpString(), packet.udpHeader.destinationPort.toNetInt()))
             proxyUdpServer.sendData(packet.udpHeader.sourcePort, datagramPacket)
             true
@@ -145,7 +148,7 @@ class TunSocks(
     /**
      * 接收到ipv6数据
      */
-    private fun receiveIpV6(data: ByteArray): Boolean{
+    private fun receiveIpV6(packet: NetPacket): Boolean{
 //        Log.d(tag, "ip data: ${data.toHexString()}")
         return false
     }
