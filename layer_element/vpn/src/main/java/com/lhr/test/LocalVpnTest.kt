@@ -52,7 +52,7 @@ object LocalVpnTest {
         GlobalScope.launch(IO) {
             try {
                 val time = System.currentTimeMillis()
-                val httpTestUrl = URL("http://192.168.2.249:8080/myServer")
+                val httpTestUrl = URL("http://192.168.1.68:8080/myServer")
                 val http = httpTestUrl.openConnection() as HttpURLConnection
                 http.connect()
                 val input = http.inputStream

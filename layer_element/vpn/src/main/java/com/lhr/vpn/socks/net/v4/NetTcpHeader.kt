@@ -108,7 +108,7 @@ class NetTcpHeader {
             System.arraycopy(data, offset, rawData, 0, 20)
             val optionByteLength = headerLength * 4 - 20
             val tempData = ByteArray(optionByteLength)
-            System.arraycopy(data, 20, tempData, 0, optionByteLength)
+            System.arraycopy(data, offset + 20, tempData, 0, optionByteLength)
             optionData = tempData
         }
     }

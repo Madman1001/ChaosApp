@@ -16,13 +16,11 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             tools:context="com.lhr.test.LocalVpnActivity">
-            <EditText
-                android:id="@+id/vpn_edit_text"
+            <FrameLayout
+                android:id="@+id/webViewContainer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="VPN"
-                android:textSize="20sp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent"

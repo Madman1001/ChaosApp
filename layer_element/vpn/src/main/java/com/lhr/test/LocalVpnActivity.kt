@@ -3,11 +3,18 @@ package com.lhr.test
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebSettings.LOAD_NO_CACHE
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.lhr.centre.annotation.CElement
@@ -17,6 +24,8 @@ import com.lhr.common.utils.NetworkUtils
 import com.lhr.vpn.LocalVpnService
 import com.lhr.vpn.R
 import com.lhr.vpn.databinding.ActivityLocalVpnBinding
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * @author lhr
@@ -37,6 +46,7 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
      * 获取权限资源
      */
     private lateinit var _launchActivity: ActivityResultLauncher<Intent>
+    private lateinit var mWebView: WebView
 
     private val testDataAdapter = object : BaseAdapter<TestData>() {
         override fun bind(holder: ViewHolder, position: Int, data: TestData) {
@@ -74,7 +84,6 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
                     startVPN()
                 }
             })
-        mBinding.vpnEditText.setText("Local IP: ${NetworkUtils.getHostIp()}")
         mBinding.testRv.run {
             adapter = testDataAdapter
             layoutManager = GridLayoutManager(context, 2).apply {
@@ -84,13 +93,40 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
         testDataAdapter.replaceData(dataList)
 
         mBinding.testIpEditText.setText(LocalVpnTest.getTestIp())
+
+        mBinding.webViewContainer.run {
+            mWebView = WebView(context)
+            mWebView.settings.apply {
+                this.cacheMode = LOAD_NO_CACHE
+            }
+            mWebView.webViewClient = object: WebViewClient(){
+                override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                    lifecycleScope.launch {
+                        view.loadUrl(url)
+                    }
+                    return false
+                }
+
+                override fun shouldOverrideUrlLoading(
+                    view: WebView,
+                    request: WebResourceRequest
+                ): Boolean {
+                    lifecycleScope.launch {
+                        view.loadUrl(request.url.toString())
+                    }
+                    return false
+                }
+            }
+            val param = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            addView(mWebView, param)
+        }
     }
 
 
     private fun udpClientTest(){
         val address = mBinding.testIpEditText.text.toString()
         val port = mBinding.testPortEditText.text.toString()
-        val data = mBinding.vpnEditText.text.toString()
+        val data = "Local IP: ${NetworkUtils.getHostIp()}, Udp Client Test"
         if (address.isNotEmpty() || port.isNotEmpty()){
             LocalVpnTest.udpClientTest(address, port.toInt(), data)
         }
@@ -100,7 +136,7 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
     private fun tcpClientTest(){
         val address = mBinding.testIpEditText.text.toString()
         val port = mBinding.testPortEditText.text.toString()
-        val data = mBinding.vpnEditText.text.toString()
+        val data = "Local IP: ${NetworkUtils.getHostIp()}, Tcp Client Test"
         if (address.isNotEmpty() || port.isNotEmpty()){
             LocalVpnTest.tcpClientTest(address, port.toInt(), data)
         }
@@ -119,7 +155,8 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
     }
 
     private fun httpsClientTest(){
-        LocalVpnTest.httpsTest()
+//        LocalVpnTest.httpsTest()
+        mWebView.loadUrl("http://www.baidu.com")
     }
 
     private fun startVPN() {

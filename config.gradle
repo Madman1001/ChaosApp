@@ -47,10 +47,5 @@ ext {
             "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinX}",
             "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinX}",
-
-            //test
-            "junit:junit:4.+",
-            "androidx.test.ext:junit:1.1.1",
-//          "org.robolectric:robolectric:3.8"
     ]
 }

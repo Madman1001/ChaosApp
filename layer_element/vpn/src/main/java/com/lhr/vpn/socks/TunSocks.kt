@@ -76,7 +76,7 @@ class TunSocks(
                             delay(100)
                             continue
                         }
-                        Log.d(tag, "read:${len}byte\n ip packet:${packet.ipHeader}")
+                        Log.d(tag, "read:${len}byte\n ${byteArray.copy(0, len).toHexString()}")
                         if (!onReceive(packet)){
                             delay(100)
                         }

@@ -2,6 +2,7 @@ package com.lhr.vpn.socks.net.v4
 
 import com.lhr.vpn.setInt
 import com.lhr.vpn.setShort
+import com.lhr.vpn.toHexString
 import com.lhr.vpn.toNetInt
 
 /**
