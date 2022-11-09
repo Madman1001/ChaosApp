@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebSettings.LOAD_NO_CACHE
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -24,8 +23,8 @@ import com.lhr.common.utils.NetworkUtils
 import com.lhr.vpn.LocalVpnService
 import com.lhr.vpn.R
 import com.lhr.vpn.databinding.ActivityLocalVpnBinding
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+
 
 /**
  * @author lhr
@@ -69,6 +68,8 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
         TestData("TCP Server测试"){tcpServerTest()},
         TestData("Http测试"){httpClientTest()},
         TestData("Https测试"){httpsClientTest()},
+        TestData("加载百度"){loadBaidu()},
+
     )
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -95,9 +96,29 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
         mBinding.testIpEditText.setText(LocalVpnTest.getTestIp())
 
         mBinding.webViewContainer.run {
-            mWebView = WebView(context)
+            mWebView = WebView(context).apply {
+                val dp = this@LocalVpnActivity.resources.configuration.densityDpi
+                if(dp > 650) {
+                    setInitialScale(95)
+                }else if(dp > 520) {
+                    setInitialScale(80)
+                }else if(dp > 450) {
+                    setInitialScale(70)
+                }else if(dp > 300) {
+                    setInitialScale(60)
+                }else {
+                    setInitialScale(50)
+                }
+            }
+
             mWebView.settings.apply {
-                this.cacheMode = LOAD_NO_CACHE
+                cacheMode = LOAD_NO_CACHE
+                useWideViewPort = true
+                loadWithOverviewMode = true
+                displayZoomControls = false
+                builtInZoomControls = true
+                setSupportZoom(true)
+                javaScriptEnabled = true
             }
             mWebView.webViewClient = object: WebViewClient(){
                 override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
@@ -115,6 +136,20 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
                         view.loadUrl(request.url.toString())
                     }
                     return false
+                }
+
+                override fun onPageFinished(view: WebView, url: String) {
+                    super.onPageFinished(view, url)
+                    view.loadUrl("""
+                        javascript:(function(){
+                            var objs = document.getElementsByTagName('img'); 
+                            for(var i=0;i<objs.length;i++)
+                            {
+                                var img = objs[i];
+                                img.style.maxWidth = '100%'; img.style.height = 'auto';
+                            }
+                        })()
+                    """.trimIndent())
                 }
             }
             val param = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
@@ -151,11 +186,16 @@ class LocalVpnActivity : BaseActivity<ActivityLocalVpnBinding>() {
     }
 
     private fun httpClientTest(){
-        LocalVpnTest.httpTest()
+//        LocalVpnTest.httpTest()
+        mWebView.loadUrl("http://img.xjh.me/random_img.php")
     }
 
     private fun httpsClientTest(){
 //        LocalVpnTest.httpsTest()
+        mWebView.loadUrl("https://img.xjh.me/random_img.php")
+    }
+
+    private fun loadBaidu(){
         mWebView.loadUrl("http://www.baidu.com")
     }
 

@@ -79,25 +79,28 @@ class NetPacket {
         }
     }
 
-    fun encodePacket(): ByteArray{
+    fun encodePacket(resetChecksum: Boolean = true): ByteArray{
         return if (isTcp()){
-            tcpHeader.checksum = 0
-            val tcpTotalLength = tcpHeader.rawData.size + tcpHeader.optionData.size
-            if (tcpTotalLength % 4 > 0){
-                tcpHeader.headerLength = (tcpTotalLength / 4) + 1
-            } else {
-                tcpHeader.headerLength = tcpTotalLength / 4
+            if (resetChecksum){
+                tcpHeader.checksum = 0
+                val tcpTotalLength = tcpHeader.rawData.size + tcpHeader.optionData.size
+                if (tcpTotalLength % 4 > 0){
+                    tcpHeader.headerLength = (tcpTotalLength / 4) + 1
+                } else {
+                    tcpHeader.headerLength = tcpTotalLength / 4
+                }
+                tcpHeader.checksum = calculateTcpChecksum()
+                ipHeader.checksum = 0
+                val ipTotalLength = ipHeader.rawData.size + ipHeader.optionData.size
+                if (ipTotalLength % 4 > 0){
+                    ipHeader.headerLength = (ipTotalLength / 4) + 1
+                } else {
+                    ipHeader.headerLength = ipTotalLength / 4
+                }
+                ipHeader.totalLength = (ipHeader.headerLength * 4 + tcpHeader.headerLength * 4 + data.size).toShort()
+                ipHeader.checksum = calculateIpChecksum()
             }
-            tcpHeader.checksum = calculateTcpChecksum()
-            ipHeader.checksum = 0
-            val ipTotalLength = ipHeader.rawData.size + ipHeader.optionData.size
-            if (ipTotalLength % 4 > 0){
-                ipHeader.headerLength = (ipTotalLength / 4) + 1
-            } else {
-                ipHeader.headerLength = ipTotalLength / 4
-            }
-            ipHeader.totalLength = (ipHeader.headerLength * 4 + tcpHeader.headerLength * 4 + data.size).toShort()
-            ipHeader.checksum = calculateIpChecksum()
+
             val byteArray = ByteArray(ipHeader.totalLength.toNetInt())
             System.arraycopy(ipHeader.rawData, 0, byteArray, 0, ipHeader.rawData.size)
             System.arraycopy(ipHeader.optionData, 0, byteArray, ipHeader.rawData.size, ipHeader.optionData.size)
@@ -106,18 +109,21 @@ class NetPacket {
             System.arraycopy(data, 0, byteArray, ipHeader.headerLength * 4 + tcpHeader.headerLength * 4, data.size)
             byteArray
         } else if (isUdp()){
-            udpHeader.checksum = 0
-            udpHeader.totalLength = (udpHeader.rawData.size + data.size).toShort()
-            udpHeader.checksum = calculateUdpChecksum()
-            ipHeader.checksum = 0
-            val ipTotalLength = ipHeader.rawData.size + ipHeader.optionData.size
-            if (ipTotalLength % 4 > 0){
-                ipHeader.headerLength = (ipTotalLength / 4) + 1
-            } else {
-                ipHeader.headerLength = ipTotalLength / 4
+            if (resetChecksum){
+                udpHeader.checksum = 0
+                udpHeader.totalLength = (udpHeader.rawData.size + data.size).toShort()
+                udpHeader.checksum = calculateUdpChecksum()
+                ipHeader.checksum = 0
+                val ipTotalLength = ipHeader.rawData.size + ipHeader.optionData.size
+                if (ipTotalLength % 4 > 0){
+                    ipHeader.headerLength = (ipTotalLength / 4) + 1
+                } else {
+                    ipHeader.headerLength = ipTotalLength / 4
+                }
+                ipHeader.totalLength = (ipHeader.headerLength * 4 + udpHeader.totalLength).toShort()
+                ipHeader.checksum = calculateIpChecksum()
             }
-            ipHeader.totalLength = (ipHeader.headerLength * 4 + udpHeader.totalLength).toShort()
-            ipHeader.checksum = calculateIpChecksum()
+
             val byteArray = ByteArray(ipHeader.totalLength.toNetInt())
             System.arraycopy(ipHeader.rawData, 0, byteArray, 0, ipHeader.rawData.size)
             System.arraycopy(ipHeader.optionData, 0, byteArray, ipHeader.rawData.size, ipHeader.optionData.size)

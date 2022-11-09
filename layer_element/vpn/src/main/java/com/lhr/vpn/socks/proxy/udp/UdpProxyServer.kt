@@ -19,6 +19,7 @@ import java.nio.channels.DatagramChannel
 import java.nio.channels.Pipe
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
+import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.collections.ArrayDeque
 import kotlin.random.Random
 
@@ -48,10 +49,10 @@ class UdpProxyServer(
         }
     }
     private val registerBuffer = ByteBuffer.allocate(4)
-    private val sendQueue = ArrayDeque<DatagramPacket>()
+    private val sendQueue = ConcurrentLinkedQueue<DatagramPacket>()
 
     fun sendData(port: Short, datagramPacket: DatagramPacket){
-        sendQueue.addLast(datagramPacket)
+        sendQueue.offer(datagramPacket)
 
         val bb = ByteBuffer.allocate(2)
         bb.asShortBuffer().put(port)
@@ -117,7 +118,7 @@ class UdpProxyServer(
 
         if (sendQueue.isEmpty()) return
 
-        val packet = sendQueue.removeFirst()
+        val packet = sendQueue.poll() ?: return
 
         val channel = localPortTable[port] ?: DatagramChannel.open().apply {
             socket().soTimeout = 5 * 1000

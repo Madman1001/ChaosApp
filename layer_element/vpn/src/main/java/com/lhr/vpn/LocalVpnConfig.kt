@@ -26,7 +26,7 @@ class LocalVpnConfig {
 
         const val PROXY_MTU = 255
 
-        const val PROXY_TUN_IS_BLOCKING = true
+        const val PROXY_TUN_IS_BLOCKING = false
 
         val HostIp = PROXY_ADDRESS.toIpInt()
     }

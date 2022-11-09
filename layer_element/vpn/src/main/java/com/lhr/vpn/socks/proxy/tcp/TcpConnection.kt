@@ -8,6 +8,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 import java.util.concurrent.BlockingDeque
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.LinkedBlockingDeque
 
 /**
@@ -22,8 +23,8 @@ class TcpConnection(
     private val TAG = this::class.java.simpleName
     private val selector = Selector.open()
     private val buf = ByteBuffer.allocate(1024 * 4)
-    private val remoteQueue: BlockingDeque<ByteBuffer> = LinkedBlockingDeque()
-    private val localQueue: BlockingDeque<ByteBuffer> = LinkedBlockingDeque()
+    private val remoteQueue: ConcurrentLinkedQueue<ByteBuffer> = ConcurrentLinkedQueue()
+    private val localQueue: ConcurrentLinkedQueue<ByteBuffer> = ConcurrentLinkedQueue()
 
     private var workJob: Job? = null
 
@@ -105,7 +106,7 @@ class TcpConnection(
             if (queue.isEmpty()){
                 tunnel.bindChannel?.channel?.keyFor(selector)?.interestOps(SelectionKey.OP_READ or SelectionKey.OP_WRITE)
             }
-            queue.put(buf.duplicate())
+            queue.offer(buf.duplicate())
         } else {
             selectionKey.cancel()
             Log.e(TAG, "tcp is over ${if (tunnel === remoteChannel) "remote" else "local"}")
