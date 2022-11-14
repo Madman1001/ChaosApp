@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
-import android.system.OsConstants
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lhr.vpn.socks.TunSocks
@@ -21,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference
 class LocalVpnService : VpnService() {
     companion object {
         private const val TAG = "LocalVpnService"
-
         const val VPN_CONTROL_ACTION_START = "VPN_START"
 
         const val VPN_CONTROL_ACTION_STOP = "VPN_STOP"
