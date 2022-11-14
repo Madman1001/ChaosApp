@@ -4,7 +4,7 @@ import android.util.Log
 import com.lhr.vpn.*
 import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.IP_VERSION_6
-import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
+import com.lhr.vpn.socks.net.MAX_IP_PACKET_SIZE
 import com.lhr.vpn.socks.net.v4.NetPacket
 import com.lhr.vpn.socks.proxy.ProxySession
 import com.lhr.vpn.socks.proxy.tcp.TcpProxyServer
@@ -64,7 +64,7 @@ class TunSocks(
             var tunOutput: FileChannel? = null
             var tunInput: FileChannel? = null
             kotlin.runCatching {
-                val buffer = ByteBuffer.allocate(MAX_PACKET_SIZE)
+                val buffer = ByteBuffer.allocate(MAX_IP_PACKET_SIZE)
                 val packet = NetPacket()
                 tunOutput = FileOutputStream(vpnService.tunInterface.fileDescriptor).channel
                 tunInput = FileInputStream(vpnService.tunInterface.fileDescriptor).channel

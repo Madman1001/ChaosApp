@@ -19,7 +19,8 @@ import java.net.InetSocketAddress
  */
 object UidUtils {
     private val TAG = this::class.java.simpleName
-
+    private val fieldsRegex =
+        Regex("^\\s*(\\d+): ([0-9A-F]+):(....) ([0-9A-F]+):(....) (..) (?:\\S+ ){3}\\s*(\\d+)\\s+\\d+\\s+(\\d+).*$")
     const val UID_UNKNOWN = -1
 
     fun getUidByNetLink(context: Context,
@@ -48,14 +49,41 @@ object UidUtils {
         }
         val lineBuffer = BufferedReader(InputStreamReader(FileInputStream(procFile)))
 
+        var uid = UID_UNKNOWN
         var line: String? = lineBuffer.readLine()
+        Log.e(TAG, line + "")
+        //skip first
+        if (line != null) line = lineBuffer.readLine()
 
         while (line != null){
-            Log.e(TAG, line)
+            val result = fieldsRegex.matchEntire(line)?.groupValues
+            if (result != null){
+                Log.e(
+                    TAG,"""
+                NetInfo(
+                    slot = ${result[1]},
+                    localAddress = ${result[2]},
+                    localPort = ${result[3]},
+                    remoteAddress = ${result[4]},
+                    remotePort = ${result[5]},
+                    state = ${result[6]},
+                    uid = ${result[7]},
+                    inode = ${result[8]}
+                )
+            """.trimIndent())
+
+                if (saddr == result[2]
+                    && sport == java.lang.Integer.parseInt(result[3], 16)
+                    && daddr == result[4]
+                    && dport == java.lang.Integer.parseInt(result[5], 16)){
+                    uid = java.lang.Integer.parseInt(result[7])
+                    break
+                }
+            }
             line = lineBuffer.readLine()
         }
         lineBuffer.close()
-        return UID_UNKNOWN
+        return uid
     }
 
     // from NetGuard
