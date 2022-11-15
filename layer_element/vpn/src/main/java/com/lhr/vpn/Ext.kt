@@ -1,5 +1,7 @@
 package com.lhr.vpn
 
+import java.nio.ByteBuffer
+
 /**
  * @author lhr
  * @date 22/10/2022
@@ -67,6 +69,33 @@ fun Int.toIpString(): String{
         .append(".")
         .append(this and 0xFF)
     return sb.toString()
+}
+
+fun ByteArray.toIpHexString(): String{
+    val buffer = ByteBuffer.wrap(this)
+    return String.format("%08X", buffer.asIntBuffer().get())
+}
+
+fun Int.toIpHexString(): String{
+    val buffer = ByteBuffer.allocate(4)
+    buffer.putInt(this)
+    buffer.flip()
+    val sb = StringBuilder()
+    while (buffer.hasRemaining()){
+        sb.append(String.format("%02X", buffer.get().toNetInt()))
+    }
+    return sb.toString()
+}
+
+fun String.toIpHexString(): String{
+    val list = this.split(".")
+    val buffer = ByteBuffer.allocate(4)
+    buffer.put(list[0].toInt().toByte())
+    buffer.put(list[1].toInt().toByte())
+    buffer.put(list[2].toInt().toByte())
+    buffer.put(list[3].toInt().toByte())
+    buffer.flip()
+    return buffer.asIntBuffer().get().toIpHexString()
 }
 
 fun String.toIpInt(): Int{

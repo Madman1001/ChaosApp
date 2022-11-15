@@ -14,7 +14,7 @@ const val PROTO_UDP = 17
 const val PROTO_ICMP = 1
 const val PROTO_IGMP = 2
 
-const val MAX_IP_PACKET_SIZE = 1500
+const val MAX_PACKET_SIZE = 1799
 const val MAX_IP_PACKET_HEADER_SIZE = 0xF
 
 /**

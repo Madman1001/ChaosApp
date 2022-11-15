@@ -6,9 +6,11 @@ import android.os.Build
 import android.system.OsConstants.*
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.lhr.vpn.toIpHexString
 import java.io.BufferedReader
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.net.InetAddress
 import java.net.InetSocketAddress
 
 
@@ -31,11 +33,23 @@ object UidUtils {
                         daddr: String,
                         dport: Int): Int{
         var uid = UID_UNKNOWN
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            uid = getNetLinkUidByConnectManager(context, protocol, saddr, sport, daddr, dport)
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            uid = getNetLinkUidByConnectManager(context, protocol, saddr, sport, daddr, dport)
+//        }
+        val saddrHex = InetAddress.getByName(saddr).address.toIpHexString()
+        val daddrHex = InetAddress.getByName(daddr).address.toIpHexString()
+        Log.e(TAG, saddrHex + ":" + daddrHex)
         if (uid == UID_UNKNOWN){
-            uid = getNetLinkUidByProc(ipver, protocol, saddr, sport, daddr, dport)
+            uid = getNetLinkUidByProc(ipver, protocol, saddrHex, sport, daddrHex, dport)
+            if (uid == UID_UNKNOWN && ipver == IPPROTO_IP){
+                uid = getNetLinkUidByProc(IPPROTO_IPV6,
+                    protocol,
+                    "0000000000000000FFFF0000$saddrHex",
+                    sport,
+                    "0000000000000000FFFF0000$daddrHex",
+                    dport
+                )
+            }
         }
         return uid
     }

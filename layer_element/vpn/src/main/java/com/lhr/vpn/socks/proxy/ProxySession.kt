@@ -9,10 +9,13 @@ import java.util.*
  * @des 代理session
  */
 class ProxySession(
+    val uid: Int,
     val localPort: Short,
     val address: Int,
     val port: Short,
 ) {
+    var sentBytes: Long = 0
+    var rcvdBytes: Long = 0
     /**
      * A unique, universal identifier for the session data structure.
      */

@@ -1,14 +1,16 @@
 package com.lhr.vpn.socks
 
+import android.system.OsConstants
 import android.util.Log
 import com.lhr.vpn.*
 import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.IP_VERSION_6
-import com.lhr.vpn.socks.net.MAX_IP_PACKET_SIZE
+import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
 import com.lhr.vpn.socks.net.v4.NetPacket
 import com.lhr.vpn.socks.proxy.ProxySession
 import com.lhr.vpn.socks.proxy.tcp.TcpProxyServer
 import com.lhr.vpn.socks.proxy.udp.UdpProxyServer
+import com.lhr.vpn.socks.utils.UidUtils
 import kotlinx.coroutines.*
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -64,7 +66,7 @@ class TunSocks(
             var tunOutput: FileChannel? = null
             var tunInput: FileChannel? = null
             kotlin.runCatching {
-                val buffer = ByteBuffer.allocate(MAX_IP_PACKET_SIZE)
+                val buffer = ByteBuffer.allocate(MAX_PACKET_SIZE)
                 val packet = NetPacket()
                 tunOutput = FileOutputStream(vpnService.tunInterface.fileDescriptor).channel
                 tunInput = FileInputStream(vpnService.tunInterface.fileDescriptor).channel
@@ -75,7 +77,7 @@ class TunSocks(
                     buffer.clear()
                     val len = tunInput?.read(buffer) ?: 0
                     if (len > 0){
-                        Log.d(tag, "read:${len}byte\n}")
+                        Log.d(tag, "read:${len}byte\n")
                         buffer.flip()
                         packet.decodePacket(buffer.array(), buffer.position(), buffer.limit() - buffer.position())
                         onReceive(packet)
@@ -138,9 +140,24 @@ class TunSocks(
                 val port = packet.tcpHeader.sourcePort
                 proxyTcpServer.tcpSessions[port]?.takeIf {
                     it.address == packet.ipHeader.destinationIp && it.port == packet.tcpHeader.destinationPort
-                } ?: ProxySession(port, packet.ipHeader.destinationIp, packet.tcpHeader.destinationPort).also {
-                    it.type = ProxySession.TYPE_TCP
-                    proxyTcpServer.tcpSessions[port] = it
+                } ?: LocalVpnService.vpnService.get()?.run {
+                    val uid = UidUtils.getUidByNetLink(this@run,
+                        OsConstants.IPPROTO_IP,
+                        OsConstants.IPPROTO_TCP,
+                        packet.ipHeader.sourceIp.toIpString(),
+                        packet.tcpHeader.sourcePort.toNetInt(),
+                        packet.ipHeader.destinationIp.toIpString(),
+                        packet.tcpHeader.destinationPort.toNetInt())
+                    Log.e(this@TunSocks.tag, "session is uid $uid")
+                    val context = this@run
+                    val pm = context.packageManager
+                    pm.getPackagesForUid(uid)?.forEach {
+                        Log.e(this@TunSocks.tag, "uid $uid package is $it")
+                    }
+                    ProxySession(uid, port, packet.ipHeader.destinationIp, packet.tcpHeader.destinationPort).apply {
+                        this.type = ProxySession.TYPE_TCP
+                        proxyTcpServer.tcpSessions[port] = this
+                    }
                 }
                 val sourceIp = packet.ipHeader.sourceIp
                 packet.ipHeader.sourceIp = packet.ipHeader.destinationIp

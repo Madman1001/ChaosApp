@@ -1,6 +1,6 @@
 package com.lhr.vpn
 
-import com.lhr.vpn.socks.net.MAX_IP_PACKET_SIZE
+import com.lhr.vpn.socks.net.MAX_PACKET_SIZE
 
 /**
  * @author lhr
@@ -26,7 +26,7 @@ class LocalVpnConfig {
 
         const val PROXY_DNS_SERVER = "8.8.8.8"
 
-        const val PROXY_MTU = MAX_IP_PACKET_SIZE
+        const val PROXY_MTU = MAX_PACKET_SIZE
 
         const val PROXY_TUN_IS_BLOCKING = false
 

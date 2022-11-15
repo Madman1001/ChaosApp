@@ -1,16 +1,12 @@
 package com.lhr.vpn.socks.proxy.tcp
 
 import android.net.VpnService
-import android.system.OsConstants
 import android.util.Log
-import com.lhr.vpn.LocalVpnService
 import com.lhr.vpn.socks.Tunnel
 import com.lhr.vpn.socks.bind
 import com.lhr.vpn.socks.proxy.ProxySession
-import com.lhr.vpn.socks.utils.UidUtils
 import com.lhr.vpn.toNetInt
 import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
 import java.net.InetSocketAddress
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
@@ -40,15 +36,15 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
         serverPort = serverSocketChannel.socket().localPort.toShort()
     }
 
-    fun startProxy(){
+    fun startProxy() {
         workJob = scope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                while (isActive){
+                while (isActive) {
                     selector.select()
                     val iterator = selector.selectedKeys().iterator()
-                    while (iterator.hasNext()){
+                    while (iterator.hasNext()) {
                         val key = iterator.next()
-                        when{
+                        when {
                             key.isAcceptable -> {
                                 Log.d(TAG, "isAcceptable")
                                 onAccept()
@@ -68,7 +64,7 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
         }
     }
 
-    private fun onAccept(){
+    private fun onAccept() {
         val socketChannel = serverSocketChannel.accept()
         Log.d(TAG, "socket channel ${socketChannel.socket().inetAddress}")
         val session = tcpSessions[socketChannel.socket().port.toShort()]
@@ -82,33 +78,24 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
         localChannel.bind(remoteChannel)
         assert(vpnService.protect(remoteChannel.channel.socket()))
         remoteChannel.channel.register(selector, SelectionKey.OP_CONNECT, remoteChannel)
-        remoteChannel.channel.connect(InetSocketAddress(socketChannel.socket().inetAddress, session.port.toNetInt()))
+        remoteChannel.channel.connect(
+            InetSocketAddress(
+                socketChannel.socket().inetAddress,
+                session.port.toNetInt()
+            )
+        )
     }
 
-    private fun onConnect(selectionKey: SelectionKey){
+    private fun onConnect(selectionKey: SelectionKey) {
         val remoteChannel = selectionKey.attachment() as Tunnel
         assert(remoteChannel.channel.finishConnect())
-        LocalVpnService.vpnService.get()?.let {
-            scope.launch(IO){
-                val remoteSocket = remoteChannel.channel.socket()
-                val localSocket = remoteChannel.bindChannel?.channel?.socket() ?: return@launch
-                val uid = UidUtils.getUidByNetLink(it,
-                    OsConstants.IPPROTO_IP,
-                    OsConstants.IPPROTO_TCP,
-                    remoteSocket.inetAddress.hostAddress,
-                    remoteSocket.port,
-                    localSocket.inetAddress.hostAddress,
-                    localSocket.port)
-                Log.e(TAG, "session is uid $uid")
-            }
-        }
         TcpConnection(remoteChannel, scope).startWork()
         selectionKey.cancel()
     }
 
-    fun stopProxy(){
+    fun stopProxy() {
         workJob?.cancel()
-        selector.use {  }
-        serverSocketChannel.use {  }
+        selector.use { }
+        serverSocketChannel.use { }
     }
 }
