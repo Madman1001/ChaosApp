@@ -2,14 +2,12 @@ package com.lhr.vpn.socks.proxy.udp
 
 import android.net.VpnService
 import android.util.Log
-import com.lhr.vpn.LocalVpnConfig
 import com.lhr.vpn.LocalVpnConfig.Companion.HostIp
 import com.lhr.vpn.socks.TunSocks
 import com.lhr.vpn.socks.net.IP_VERSION_4
 import com.lhr.vpn.socks.net.PROTO_UDP
-import com.lhr.vpn.socks.net.v4.NetIPHeader
 import com.lhr.vpn.socks.net.v4.NetPacket
-import com.lhr.vpn.socks.net.v4.NetUdpHeader
+import com.lhr.vpn.socks.proxy.ProxySession
 import com.lhr.vpn.toIpInt
 import kotlinx.coroutines.*
 import java.net.DatagramPacket
@@ -20,7 +18,6 @@ import java.nio.channels.Pipe
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.collections.ArrayDeque
 import kotlin.random.Random
 
 /**
@@ -37,6 +34,7 @@ class UdpProxyServer(
     private var workJob: Job? = null
 
     //本地ip地址映射
+    val udpSessions by lazy { mutableMapOf<Short, ProxySession>() }
     private val localPortTable by lazy { mutableMapOf<Short, DatagramChannel>() }
     private val useTimeTable by lazy { mutableMapOf<Short, Long>() }
 

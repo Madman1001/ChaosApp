@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.VpnService
+import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -84,12 +85,18 @@ class LocalVpnService : VpnService() {
             //暂时只代理自身网络
             .addAllowedApplication(this.packageName)
             //设置流量计费
-            //.setMetered(false)
+            .apply {
+                runOnVersion(Build.VERSION_CODES.Q, {
+                    setMetered(false)
+                })
+            }
             //设置配置界面的activity
             //.setConfigureIntent(config.configureIntent)
             //设置ip的mtu
             .setMtu(config.mtu)
             //.allowFamily(OsConstants.AF_INET)
+            //设置http代理
+            //.setHttpProxy()
             .setBlocking(config.isBlocking)
             //创建vpn通道，开始代理网络
             .establish()!!

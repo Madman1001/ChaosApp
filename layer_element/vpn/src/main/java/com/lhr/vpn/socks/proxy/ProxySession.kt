@@ -1,82 +1,59 @@
 package com.lhr.vpn.socks.proxy
 
-import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.util.*
 
 /**
  * @author lhr
  * @date 22/10/2022
  * @des 代理session
+ * @param uid the uid of the owner of a session
+ * @param saddr
+ * @param daddr
  */
 class ProxySession(
     val uid: Int,
-    val localPort: Short,
-    val address: Int,
-    val port: Short,
+    val saddr: InetSocketAddress,
+    val daddr: InetSocketAddress,
 ) {
-    var sentBytes: Long = 0
-    var rcvdBytes: Long = 0
     /**
      * A unique, universal identifier for the session data structure.
      */
     val sessionid: Long = Random().nextLong()
 
     /**
-     * Principal
-     * Set to the user's distinguished name (DN) or the application's principal name.
+     * total number of bytes sent
      */
-    var name = ""
+    var sentBytes: Long = 0
 
     /**
-     * USER or APPLICATION
+     * total number of bytes receive
      */
-    var type = TYPE_TCP
+    var rcvdBytes: Long = 0
 
     /**
-     * Defines whether the session is valid or invalid.
+     * TCP or UDP
      */
-    var state = STATE_VALID
+    var type = Type.TCP
 
     /**
-     * Maximum number of minutes without activity before the session will expire and the user must reauthenticate.
+     * Defines whether the session state.
      */
-    var maximumIdleTime = 0L
+    var state = State.READY
 
-    /**
-     * Maximum number of minutes (activity or no activity) before the session expires and the user must reauthenticate.
-     */
-    var maximumSessionTime = 0L
+    val saddrString = saddr.address.hostAddress
 
-    /**
-     * Maximum number of minutes before the client contacts OpenSSO Enterprise to refresh cached session information.
-     */
-    var maximumCachingTime = 0L
+    val sport = saddr.port.toShort()
 
-    companion object {
-        @JvmField
-        val TYPE_TCP = 1
+    val daddrString = daddr.address.hostAddress
 
-        @JvmField
-        val TYPE_UDP = 2
+    val dport = daddr.port.toShort()
+}
 
-        @JvmField
-        val STATE_VALID = 1
+enum class Type{
+    TCP, UDP
+}
 
-        @JvmField
-        val STATE_INVALID = -1
-
-        @JvmStatic
-        fun createSessionKey(
-            source: InetAddress,
-            sourcePort: Int,
-            target: InetAddress,
-            targetPort: Int
-        ): String {
-            return StringBuilder()
-                .append(source.hostAddress).append(":").append(sourcePort)
-                .append("-")
-                .append(target.hostAddress).append(":").append(targetPort)
-                .toString()
-        }
-    }
+enum class State{
+    READY, STARTING, RUNNING, STOPPING
 }

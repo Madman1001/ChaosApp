@@ -7,9 +7,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
 import java.nio.channels.Selector
-import java.util.concurrent.BlockingDeque
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.LinkedBlockingDeque
 
 /**
  * @author lhr
@@ -42,22 +40,24 @@ class TcpConnection(
                     val iterator = selector.selectedKeys().iterator()
                     while (iterator.hasNext()) {
                         val key = iterator.next()
-                        when {
-                            key.isReadable -> {
-                                onRead(key)
-                            }
-                            key.isWritable -> {
-                                onWrite(key)
-                            }
+                        if (key.isValid && key.isReadable){
+                            onRead(key)
+                        }
+                        if (key.isValid && key.isWritable){
+                            onWrite(key)
                         }
                         iterator.remove()
+                    }
+                    val keys = selector.keys()
+                    if (keys.isEmpty() || keys.all { !it.isValid }){
+                        break
                     }
                 }
             }.onFailure {
                 Log.e(TAG, "work job stop", it)
             }
-            remoteChannel.channel.use { }
             remoteChannel.bindChannel?.channel?.use { }
+            remoteChannel.channel.use { }
             selector.use { }
             Log.e(TAG, "work job end")
         }
@@ -81,7 +81,7 @@ class TcpConnection(
         }
         val buffer = queue.poll() ?: return
         Log.d(TAG, "WRITE ${String(buf.array(), buf.position(), buf.limit() - buf.position())}")
-        while (buffer.hasRemaining()){
+        while (buffer.hasRemaining() && tunnel.channel.isConnected){
             val len = tunnel.channel.write(buffer)
             if (len <= 0){
                 selectionKey.cancel()
@@ -110,7 +110,6 @@ class TcpConnection(
         } else {
             selectionKey.cancel()
             Log.e(TAG, "tcp is over ${if (tunnel === remoteChannel) "remote" else "local"}")
-            throw IOException("read $len bytes,")
         }
     }
 }

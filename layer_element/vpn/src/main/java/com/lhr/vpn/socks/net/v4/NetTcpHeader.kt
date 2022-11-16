@@ -8,6 +8,17 @@ import com.lhr.vpn.socks.net.*
  * @Author: mac
  * @Description: tcp数据包解析
  */
+/**
+ * Tcp control sign
+ */
+//(0 0 URG ACK PSH RST SYN FIN)
+const val SIGN_NUL = 0x00
+const val SIGN_URG = 0x20
+const val SIGN_ACK = 0x10
+const val SIGN_PSH = 0x08
+const val SIGN_RST = 0x04
+const val SIGN_SYN = 0x02
+const val SIGN_FIN = 0x01
 class NetTcpHeader {
     val rawData: ByteArray = ByteArray(20)
     val offset: Int = 0

@@ -26,7 +26,7 @@ class LocalVpnConfig {
 
         const val PROXY_DNS_SERVER = "8.8.8.8"
 
-        const val PROXY_MTU = MAX_PACKET_SIZE
+        const val PROXY_MTU = 1799
 
         const val PROXY_TUN_IS_BLOCKING = false
 

@@ -5,7 +5,6 @@ import android.util.Log
 import com.lhr.vpn.socks.Tunnel
 import com.lhr.vpn.socks.bind
 import com.lhr.vpn.socks.proxy.ProxySession
-import com.lhr.vpn.toNetInt
 import kotlinx.coroutines.*
 import java.net.InetSocketAddress
 import java.nio.channels.SelectionKey
@@ -78,12 +77,7 @@ class TcpProxyServer(private val vpnService: VpnService, val scope: CoroutineSco
         localChannel.bind(remoteChannel)
         assert(vpnService.protect(remoteChannel.channel.socket()))
         remoteChannel.channel.register(selector, SelectionKey.OP_CONNECT, remoteChannel)
-        remoteChannel.channel.connect(
-            InetSocketAddress(
-                socketChannel.socket().inetAddress,
-                session.port.toNetInt()
-            )
-        )
+        remoteChannel.channel.connect(session.daddr)
     }
 
     private fun onConnect(selectionKey: SelectionKey) {

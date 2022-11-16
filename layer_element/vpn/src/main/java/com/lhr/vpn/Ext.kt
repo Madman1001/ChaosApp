@@ -1,19 +1,19 @@
 package com.lhr.vpn
 
-import java.nio.ByteBuffer
+import android.os.Build
 
 /**
  * @author lhr
  * @date 22/10/2022
  * @des 扩展工具
  */
-fun ByteArray.toHexString(): String {
+fun ByteArray.toHexString(gapNumber: Int = 16, gapString: String = String.format("\n%4s", "")): String {
     val sb = StringBuilder()
     for (i in this.indices) {
-        if (i % 16 == 0) {
-            sb.append(String.format("\n%4s", ""))
+        if (i % gapNumber == 0) {
+            sb.append(gapString)
         }
-        sb.append(java.lang.String.format(" %02X", this[i].toNetInt() and 0xFF))
+        sb.append(java.lang.String.format("%02X", this[i].toNetInt() and 0xFF))
     }
     return sb.toString()
 }
@@ -37,6 +37,10 @@ fun ByteArray.toBinString(): String {
 fun ByteArray.getShort(offset: Int): Short{
     return ((this[offset].toNetInt() shl 8) or this[offset + 1].toNetInt()).toShort()
 }
+
+infix fun Byte?.equals(other: Int?): Boolean = other?.toByte() == this
+
+infix fun Short?.equals(other: Int?): Boolean = other?.toShort() == this
 
 fun ByteArray.setShort(offset: Int, value: Short){
     this[offset] = (value.toNetInt() ushr 8).toByte()
@@ -71,33 +75,6 @@ fun Int.toIpString(): String{
     return sb.toString()
 }
 
-fun ByteArray.toIpHexString(): String{
-    val buffer = ByteBuffer.wrap(this)
-    return String.format("%08X", buffer.asIntBuffer().get())
-}
-
-fun Int.toIpHexString(): String{
-    val buffer = ByteBuffer.allocate(4)
-    buffer.putInt(this)
-    buffer.flip()
-    val sb = StringBuilder()
-    while (buffer.hasRemaining()){
-        sb.append(String.format("%02X", buffer.get().toNetInt()))
-    }
-    return sb.toString()
-}
-
-fun String.toIpHexString(): String{
-    val list = this.split(".")
-    val buffer = ByteBuffer.allocate(4)
-    buffer.put(list[0].toInt().toByte())
-    buffer.put(list[1].toInt().toByte())
-    buffer.put(list[2].toInt().toByte())
-    buffer.put(list[3].toInt().toByte())
-    buffer.flip()
-    return buffer.asIntBuffer().get().toIpHexString()
-}
-
 fun String.toIpInt(): Int{
     val list = this.split(".")
     var value = 0
@@ -120,4 +97,12 @@ fun ByteArray.copy(offset: Int, len: Int): ByteArray{
     val copyData = ByteArray(len)
     System.arraycopy(this, offset, copyData, 0, len)
     return copyData
+}
+
+fun runOnVersion(version: Int, upAction: ()->Unit, downAction: ()->Unit = {}){
+    if (Build.VERSION.SDK_INT >= version) {
+        upAction.invoke()
+    } else {
+        downAction.invoke()
+    }
 }
