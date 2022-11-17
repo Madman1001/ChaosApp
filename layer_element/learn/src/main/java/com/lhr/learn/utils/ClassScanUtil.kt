@@ -17,15 +17,21 @@ object ClassScanUtil {
 
     fun getAllClass(context: Context): List<String> {
         val result = mutableListOf<String>()
-        for (dexFile in getDexFilesByContext(context)) {
-            Log.e(tag, "Dex File By Context ${dexFile.name}")
-            result.addAll(getDexAllClassName(dexFile))
+        kotlin.runCatching {
+            for (dexFile in getDexFilesByContext(context)) {
+                Log.e(tag, "Dex File By Context ${dexFile.name}")
+                result.addAll(getDexAllClassName(dexFile))
+            }
         }
-        for (dexFile in getDexFilesBySystem()) {
-            Log.e(tag, "Dex File By System ${dexFile.name}")
-            result.addAll(getDexAllClassName(dexFile))
-            dexFile.close()
+
+        kotlin.runCatching {
+            for (dexFile in getDexFilesBySystem()) {
+                Log.e(tag, "Dex File By System ${dexFile.name}")
+                result.addAll(getDexAllClassName(dexFile))
+                dexFile.close()
+            }
         }
+
         return result
     }
 

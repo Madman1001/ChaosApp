@@ -2,13 +2,9 @@ package com.lhr.learn.classcheck
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.TextUtils
 import android.util.Log
-import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import androidx.core.content.getSystemService
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,7 +13,6 @@ import com.lhr.common.ui.BaseAdapter
 import com.lhr.common.ui.BaseFragment
 import com.lhr.learn.R
 import com.lhr.learn.databinding.FragmentClassCheckBinding
-import com.lhr.learn.utils.ClassScanUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -27,9 +22,7 @@ import kotlinx.coroutines.launch
  * @Description: 类查看工具
  */
 class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
-    private var allClassList = listOf<String>()
-
-    private var selectClassList = listOf<String>()
+    private lateinit var classesViewModel: ClassesViewModel
 
     private val classDataAdapter = object : BaseAdapter<String>() {
         override fun bind(holder: ViewHolder, position: Int, data: String) {
@@ -43,7 +36,10 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
     }
 
     override fun initView(savedInstanceState: Bundle?) {
+        classesViewModel = getClassesViewModel(attachActivity.application)
+
         mBinding.pager = this
+
         initInputEditView()
 
         initClassRecyclerView()
@@ -57,8 +53,7 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
             }
         }
         lifecycleScope.launch(Dispatchers.IO) {
-            allClassList = ClassScanUtil.getAllClass(requireContext())
-            classDataAdapter.replaceData(allClassList)
+            classDataAdapter.replaceData(classesViewModel.getAllClasses())
         }
     }
 
@@ -67,14 +62,7 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
         mBinding.adbInCode.run {
             doOnTextChanged { text, start, before, count ->
                 Log.e("TAG", "onTextChanged $text $start $before $count")
-                if (TextUtils.isEmpty(text)) {
-                    classDataAdapter.replaceData(allClassList)
-                } else {
-                    selectClassList = allClassList.filter {
-                        it.contains(text ?: ".*", true)
-                    }
-                    classDataAdapter.replaceData(selectClassList)
-                }
+                classDataAdapter.replaceData(classesViewModel.matchClasses(text.toString()))
             }
             initInputBar(mBinding.root as ViewGroup)
         }
