@@ -26,7 +26,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/adb_in_code" />
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/adb_in_code"
             android:layout_width="0dp"
             android:layout_height="50dp"
@@ -35,6 +35,7 @@
             android:imeOptions="actionNone"
             android:singleLine="true"
             android:textSize="16sp"
+            android:completionThreshold="0"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/adb_in_run"
             app:layout_constraintStart_toEndOf="@id/adb_out_clean" />

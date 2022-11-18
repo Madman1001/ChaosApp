@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.lifecycleScope
@@ -14,7 +15,9 @@ import com.lhr.common.ui.BaseFragment
 import com.lhr.learn.R
 import com.lhr.learn.databinding.FragmentClassCheckBinding
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * @CreateDate: 2022/8/16
@@ -40,8 +43,6 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
 
         mBinding.pager = this
 
-        initInputEditView()
-
         initClassRecyclerView()
     }
 
@@ -53,16 +54,21 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
             }
         }
         lifecycleScope.launch(Dispatchers.IO) {
-            classDataAdapter.replaceData(classesViewModel.getAllClasses())
+            val list = classesViewModel.getClasses()
+            withContext(Dispatchers.Main){
+                classDataAdapter.replaceData(list)
+                initInputEditView()
+            }
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initInputEditView() {
         mBinding.adbInCode.run {
+            val mAdapter = ArrayAdapter<String>(attachActivity, R.layout.item_text_view, classesViewModel.getClasses())
+            this.setAdapter(mAdapter)
             doOnTextChanged { text, start, before, count ->
                 Log.e("TAG", "onTextChanged $text $start $before $count")
-                classDataAdapter.replaceData(classesViewModel.matchClasses(text.toString()))
             }
             initInputBar(mBinding.root as ViewGroup)
         }
