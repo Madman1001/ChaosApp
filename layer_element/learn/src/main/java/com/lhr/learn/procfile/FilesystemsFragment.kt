@@ -2,6 +2,8 @@ package com.lhr.learn.procfile
 
 import android.app.Activity
 import android.os.Bundle
+import android.system.Os
+import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -73,9 +75,8 @@ class FilesystemsFragment : BaseFragment<FragmentFilesystemsBinding>() {
         override var layout: Int = R.layout.item_files_list
     }
 
-    override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
-        requireActivity().onBackPressedDispatcher.addCallback(
+    override fun initView(savedInstanceState: Bundle?) {
+        attachActivity.onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
@@ -91,9 +92,7 @@ class FilesystemsFragment : BaseFragment<FragmentFilesystemsBinding>() {
                     }
                 }
             })
-    }
 
-    override fun initView(savedInstanceState: Bundle?) {
         val filePath = arguments?.getString(KEY_FILE_PATH) ?: "/proc"
         basePath = File(filePath)
         currentPath = basePath
@@ -116,7 +115,7 @@ class FilesystemsFragment : BaseFragment<FragmentFilesystemsBinding>() {
     private fun openFile(file: File) {
         if (file.exists()) {
             if (file.isFile) {
-                TxtFileDetailFragment.start(attachActivity, file.absolutePath)
+                TextFileDetailFragment.start(attachActivity, file.absolutePath)
             } else if (file.isDirectory) {
                 currentPath = file
                 lifecycleScope.launch(Dispatchers.IO) {
@@ -133,7 +132,20 @@ class FilesystemsFragment : BaseFragment<FragmentFilesystemsBinding>() {
         val result = mutableListOf<File>()
         if (file.exists() && file.isDirectory) {
             for (f in file.listFiles() ?: emptyArray()) {
-                result.add(f)
+                if (f.canRead()){
+                    result.add(f)
+                } else {
+                    Log.e("FilesystemsFragment", "${f.canonicalPath} cannot read")
+                }
+            }
+        }
+        result.sortWith { o1, o2 ->
+            return@sortWith if (o1.isDirectory && o2.isFile){
+                -1
+            } else if (o1.isFile && o2.isDirectory){
+                1
+            } else {
+                o1.name.compareTo(o2.name)
             }
         }
         return result
