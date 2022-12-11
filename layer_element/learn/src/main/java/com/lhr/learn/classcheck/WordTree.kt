@@ -32,7 +32,7 @@ class WordTree {
         }
     }
 
-    fun matchWords(word: String, limit: Int): Collection<String>{
+    fun matchWords(word: String, limit: Int = Int.MAX_VALUE): Collection<String>{
         if (TextUtils.isEmpty(word)) return emptyList()
         val result = ArrayList<String>()
         var curNode = root

@@ -81,7 +81,7 @@ class GLImageRender(private val context: Context,
         GLESUtils.checkGlError("glUseProgram")
 
         /* ---------------------加载纹理坐标----------------------- */
-        val aTexCoordLocation = GLES20.glGetAttribLocation(mProgramHandle,"a_TexCoord")
+        val aTexCoordLocation = GLES20.glGetAttribLocation(mProgramHandle,"aTexCoord")
         mTexVertexBuffer?.position(0)
         GLES20.glVertexAttribPointer(
             aTexCoordLocation,          /* 目标地址 */
@@ -95,7 +95,7 @@ class GLImageRender(private val context: Context,
         GLESUtils.checkGlError("mTexVertexBuffer")
 
         /* ---------------------加载顶点坐标----------------------- */
-        val mPositionLocation = GLES20.glGetAttribLocation(mProgramHandle, "a_Position")
+        val mPositionLocation = GLES20.glGetAttribLocation(mProgramHandle, "vPosition")
         mVertexBuffer?.position(0)
         GLES20.glVertexAttribPointer(
             mPositionLocation,          /* 目标地址 */
@@ -109,7 +109,7 @@ class GLImageRender(private val context: Context,
         GLESUtils.checkGlError("mVertexBuffer")
 
         /* ---------------------加载纹理----------------------- */
-        val uTextureUnitLocation =  GLES20.glGetUniformLocation(mProgramHandle,"u_TextureUnit")
+        val uTextureUnitLocation =  GLES20.glGetUniformLocation(mProgramHandle,"uTextureUnit")
        GLES20.glUniform1i(uTextureUnitLocation, 0)
         // 开启纹理透明混合，这样才能绘制透明图片
         GLES20.glEnable(GL10.GL_BLEND)

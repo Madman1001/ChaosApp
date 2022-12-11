@@ -68,7 +68,9 @@ class ClassCheckFragment : BaseFragment<FragmentClassCheckBinding>() {
             val mAdapter = ArrayAdapter<String>(attachActivity, R.layout.item_text_view, classesViewModel.getClasses())
             this.setAdapter(mAdapter)
             doOnTextChanged { text, start, before, count ->
-                Log.e("TAG", "onTextChanged $text $start $before $count")
+                val time = System.currentTimeMillis()
+                classDataAdapter.replaceData(classesViewModel.findClasses(text.toString()))
+                Log.e("TAG", "find $text cast time ${System.currentTimeMillis() - time}ms")
             }
             initInputBar(mBinding.root as ViewGroup)
         }

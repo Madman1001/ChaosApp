@@ -14,6 +14,8 @@ fun getClassesViewModel(app: Application):ClassesViewModel =
 class ClassesViewModel(app: Application): AndroidViewModel(app) {
     private val app get() = getApplication<Application>()
 
+    private var classesTree = ClassesTree()
+
     private var wordTree = WordTree()
 
     private var allClassList = listOf<String>()
@@ -39,9 +41,19 @@ class ClassesViewModel(app: Application): AndroidViewModel(app) {
         for (name in classes) {
             wordTree.addWords(name.split("."))
         }
+        classesTree.reset()
+        classesTree.addClasses(classes)
     }
 
-    fun matchPromptWords(clazz: String, limit: Int): Collection<String> {
-        return wordTree.matchWords(clazz, limit)
+    fun findClasses(key: String): Collection<String>{
+        val wordList = wordTree.matchWords(key)
+        val result = ArrayList<String>()
+        if (wordList.isNotEmpty()){
+            for (word in wordList) {
+                result.addAll(classesTree.matchClasses(word))
+            }
+        }
+        result.addAll(classesTree.matchClasses(key,-1))
+        return result
     }
 }

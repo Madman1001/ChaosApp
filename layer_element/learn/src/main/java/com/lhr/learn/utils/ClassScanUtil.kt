@@ -22,6 +22,8 @@ object ClassScanUtil {
                 Log.e(tag, "Dex File By Context ${dexFile.name}")
                 result.addAll(getDexAllClassName(dexFile))
             }
+        }.onFailure {
+            it.printStackTrace()
         }
 
         kotlin.runCatching {
@@ -30,6 +32,8 @@ object ClassScanUtil {
                 result.addAll(getDexAllClassName(dexFile))
                 dexFile.close()
             }
+        }.onFailure {
+            it.printStackTrace()
         }
 
         return result
