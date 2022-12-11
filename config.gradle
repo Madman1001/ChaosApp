@@ -28,7 +28,7 @@ ext {
 
 
     dependencies = [
-            //image
+            //wallpaper
             "com.github.bumptech.glide:glide:${versions.glide}",
             "com.github.bumptech.glide:compiler:${versions.glide}",
 

@@ -1,11 +1,11 @@
-package com.lhr.image
+package com.lhr.wallpaper
 
 import android.content.Context
 import android.graphics.Rect
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
-import com.lhr.opengl.utils.GLESUtils
-import com.lhr.opengl.utils.ShaderUtils
+import com.lhr.common.ext.readText
+import com.lhr.wallpaper.base.GLHelper
 import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -34,14 +34,14 @@ class GLDigitalRainRender(private val context: Context)
         gl?.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
         //创建着色器程序
         if (mProgramHandle == 0) {
-            val vertexString= ShaderUtils.readShader(context, R.raw.default_v)
-            val fragmentString= ShaderUtils.readShader(context, R.raw.digital_rain_f)
-            mProgramHandle = GLESUtils.createProgram(vertexString, fragmentString)
+            val vertexString = context.resources.openRawResource(R.raw.default_v).readText()
+            val fragmentString= context.resources.openRawResource(R.raw.digital_rain_f).readText()
+            mProgramHandle = GLHelper.createProgram(vertexString, fragmentString)
         }
 
         //创建顶点坐标缓冲区
         if (mVertexBuffer == null){
-            mVertexBuffer = GLESUtils.createFloatBuffer(VERTEX_DATA)
+            mVertexBuffer = GLHelper.createFloatBuffer(VERTEX_DATA)
         }
     }
 
@@ -53,7 +53,7 @@ class GLDigitalRainRender(private val context: Context)
     override fun onDrawFrame(gl: GL10?) {
         // Select the program.
         GLES20.glUseProgram(mProgramHandle)
-        GLESUtils.checkGlError("glUseProgram")
+        GLHelper.checkGlError("glUseProgram")
 
         /* ---------------------加载顶点坐标----------------------- */
         val mPositionLocation = GLES20.glGetAttribLocation(mProgramHandle, "aPos")
@@ -67,7 +67,7 @@ class GLDigitalRainRender(private val context: Context)
             mVertexBuffer               /* 数据源 */
         )
         GLES20.glEnableVertexAttribArray(mPositionLocation)
-        GLESUtils.checkGlError("mPositionLocation")
+        GLHelper.checkGlError("mPositionLocation")
 
         /* ---------------------设置参数----------------------- */
         val uTime = GLES20.glGetUniformLocation(mProgramHandle, "time")
@@ -80,7 +80,7 @@ class GLDigitalRainRender(private val context: Context)
             0,                        /* 顶点起始位置 */
             VERTEX_DATA.size / 2     /* 数据长度 */
         )
-        GLESUtils.checkGlError("glDrawArrays")
+        GLHelper.checkGlError("glDrawArrays")
 
         // 解绑
         GLES20.glDisableVertexAttribArray(mPositionLocation)

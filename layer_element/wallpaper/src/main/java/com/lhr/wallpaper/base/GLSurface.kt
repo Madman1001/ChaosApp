@@ -1,4 +1,4 @@
-package com.lhr.learn.bitmap.gl
+package com.lhr.wallpaper.base
 
 import android.opengl.EGL14
 import android.view.Surface

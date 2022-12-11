@@ -1,4 +1,4 @@
-package com.lhr.learn.bitmap.gl
+package com.lhr.wallpaper.base
 
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -7,6 +7,9 @@ import android.opengl.GLUtils
 import android.util.Log
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
 import java.nio.charset.Charset
 
 
@@ -15,7 +18,7 @@ import java.nio.charset.Charset
  * @date 7/12/2022
  * @des
  */
-object ShaderUtil {
+object GLHelper {
     /**
      * 加载制定shader的方法
      * @param shaderType shader的类型  GLES20.GL_VERTEX_SHADER   GLES20.GL_FRAGMENT_SHADER
@@ -145,5 +148,15 @@ object ShaderUtil {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,0)
 
         return textureIds[0]
+    }
+
+    fun createFloatBuffer(coords: FloatArray): FloatBuffer {
+        // Allocate a direct ByteBuffer, using 4 bytes per float, and copy coords into it.
+        val bb = ByteBuffer.allocateDirect(coords.size * Float.SIZE_BYTES)
+        bb.order(ByteOrder.nativeOrder())
+        val fb = bb.asFloatBuffer()
+        fb.put(coords)
+        fb.position(0)
+        return fb
     }
 }

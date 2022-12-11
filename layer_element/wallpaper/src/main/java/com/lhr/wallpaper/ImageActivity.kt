@@ -1,23 +1,24 @@
-package com.lhr.image
+package com.lhr.wallpaper
 
 import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.opengl.GLES20
 import android.opengl.GLSurfaceView
-import android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY
-import android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import com.lhr.centre.annotation.CElement
+import com.lhr.common.ui.BaseActivity
+import com.lhr.image.databinding.ActivityImageBinding
+import com.lhr.wallpaper.base.BitmapRenderer
+import com.lhr.wallpaper.base.GLSurface
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.microedition.khronos.opengles.GL
+import java.nio.IntBuffer
 
 /**
  * @author lhr
@@ -25,13 +26,8 @@ import javax.microedition.khronos.opengles.GL
  * @des
  */
 @CElement(name = "图像功能")
-class ImageActivity : AppCompatActivity() {
+class ImageActivity : BaseActivity<ActivityImageBinding>() {
     private var glView: GLSurfaceView? = null
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_image)
-
-    }
 
     override fun onResume() {
         super.onResume()
@@ -63,10 +59,12 @@ class ImageActivity : AppCompatActivity() {
                         (this as ViewGroup).removeView(glView)
                     }
                 }
-                glView = GLSurfaceView(this@ImageActivity)
-                glView?.setEGLContextClientVersion(2)
-                glView?.setRenderer(GLImageRender(this@ImageActivity, normalBitmap))
-                this@ImageActivity.findViewById<ViewGroup>(R.id.image_content_layout).addView(glView)
+                glView = GLSurfaceView(this@ImageActivity).apply {
+                    setEGLContextClientVersion(2)
+                    setRenderer(GLImageRender(this@ImageActivity, normalBitmap))
+                }
+                mBinding.imageContentLayout.addView(glView, 0)
+
             }
         }
     }
@@ -86,7 +84,7 @@ class ImageActivity : AppCompatActivity() {
                 glView = GLSurfaceView(this@ImageActivity)
                 glView?.setEGLContextClientVersion(2)
                 glView?.setRenderer(GLBlurImageRender(this@ImageActivity, normalBitmap))
-                this@ImageActivity.findViewById<ViewGroup>(R.id.image_content_layout).addView(glView)
+                mBinding.imageContentLayout.addView(glView, 0)
             }
         }
     }
@@ -100,14 +98,14 @@ class ImageActivity : AppCompatActivity() {
         glView = GLSurfaceView(this@ImageActivity)
         glView?.setEGLContextClientVersion(2)
         glView?.setRenderer(GLDigitalRainRender(this@ImageActivity))
-        this@ImageActivity.findViewById<ViewGroup>(R.id.image_content_layout).addView(glView)
+        mBinding.imageContentLayout.addView(glView, 0)
     }
 
 
     fun obtainBitmap3(src: Bitmap, result: (Bitmap)->Unit){
         val width = src.width
         val height = src.height
-        val glRenderer = BitmapRenderer(attachActivity.application, src)
+        val glRenderer = BitmapRenderer(this.application, src)
         val glPbufferSurface = GLSurface(width, height)
         glRenderer.addSurface(glPbufferSurface)
         glRenderer.startRender()

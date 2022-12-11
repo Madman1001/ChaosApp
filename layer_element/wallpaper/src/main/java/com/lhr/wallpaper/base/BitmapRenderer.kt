@@ -1,11 +1,10 @@
-package com.lhr.learn.bitmap.gl
+package com.lhr.wallpaper.base
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.opengl.GLES10
 import android.opengl.GLES20
 import com.lhr.common.ext.readText
-import com.lhr.learn.R
+import com.lhr.wallpaper.R
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -73,12 +72,12 @@ class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
 
     override fun onCreated() {
         //基于顶点着色器与片元着色器创建程序
-        program = ShaderUtil.createProgram(verticesShader, fragmentShader)
+        program = GLHelper.createProgram(verticesShader, fragmentShader)
         // 获取着色器中的属性引用id(传入的字符串就是我们着色器脚本中的属性名)
         vPosition = GLES20.glGetAttribLocation(program, "vPosition")
         aTexCoord = GLES20.glGetAttribLocation(program, "aTexCoord")
         uTextureUnit = GLES20.glGetUniformLocation(program, "uTextureUnit")
-        mTextureId = ShaderUtil.loadTexture(bitmap)
+        mTextureId = GLHelper.loadTexture(bitmap)
         vertices = getVertices()
         fragments = getFragments()
     }

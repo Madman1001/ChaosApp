@@ -1,4 +1,4 @@
-package com.lhr.image
+package com.lhr.wallpaper
 
 import android.os.Handler
 import android.os.Looper

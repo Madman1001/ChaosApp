@@ -11,9 +11,9 @@ project(':centre_processor').projectDir = new File("layer_inter/centre_processor
 project(':centre_annotation').projectDir = new File("layer_inter/centre_annotation")
 
 //组件层
-include ':access', ':image',':game',':adb',':vpn','learn',':anim', ':opengl',':sys'
+include ':access', ':wallpaper',':game',':adb',':vpn','learn',':anim', ':opengl',':sys'
 project(':access').projectDir = new File("layer_element/access")
-//project(':image').projectDir = new File("layer_element/image")
+project(':wallpaper').projectDir = new File("layer_element/wallpaper")
 //project(':game').projectDir = new File("layer_element/game")
 project(':adb').projectDir = new File("layer_element/adb")
 project(':learn').projectDir = new File("layer_element/learn")
