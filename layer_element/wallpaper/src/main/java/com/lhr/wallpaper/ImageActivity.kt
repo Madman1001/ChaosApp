@@ -7,13 +7,16 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
+import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import com.lhr.centre.annotation.CElement
 import com.lhr.common.ui.BaseActivity
-import com.lhr.image.databinding.ActivityImageBinding
-import com.lhr.wallpaper.base.BitmapRenderer
+import com.lhr.wallpaper.base.GLRenderer
+import com.lhr.wallpaper.databinding.ActivityImageBinding
+import com.lhr.wallpaper.render.BitmapRenderer
 import com.lhr.wallpaper.base.GLSurface
+import com.lhr.wallpaper.render.BlurRenderer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,16 +30,10 @@ import java.nio.IntBuffer
  */
 @CElement(name = "图像功能")
 class ImageActivity : BaseActivity<ActivityImageBinding>() {
-    private var glView: GLSurfaceView? = null
-
-    override fun onResume() {
-        super.onResume()
-        glView?.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        glView?.onPause()
+    private var bitmapRenderer: GLRenderer? = null
+    override fun initView(savedInstanceState: Bundle?) {
+        super.initView(savedInstanceState)
+        mBinding.click = this
     }
 
     fun gotoWallpaper(view: View){
@@ -47,49 +44,50 @@ class ImageActivity : BaseActivity<ActivityImageBinding>() {
 
     }
 
-    fun imageNormal(view: View){
+    fun imageNormal(){
         GlobalScope.launch(Dispatchers.Default){
             val option = BitmapFactory.Options()
             option.inMutable = true
             val normalBitmap =
                 BitmapFactory.decodeResource(this@ImageActivity.resources,R.drawable.imager_demo,option)
             withContext(Dispatchers.Main){
-                if (glView?.parent != null){
-                    glView?.parent?.run {
-                        (this as ViewGroup).removeView(glView)
+                mBinding.renderSurface.holder.surface?.run {
+                    val surface = GLSurface(this, mBinding.renderSurface.width, mBinding.renderSurface.height)
+                    bitmapRenderer = BitmapRenderer(this@ImageActivity, normalBitmap)
+                    bitmapRenderer?.addSurface(surface)
+                    bitmapRenderer?.startRender()
+                    bitmapRenderer?.requestRender()
+                    bitmapRenderer?.postRunnable {
+                        bitmapRenderer?.removeSurface(surface)
                     }
                 }
-                glView = GLSurfaceView(this@ImageActivity).apply {
-                    setEGLContextClientVersion(2)
-                    setRenderer(GLImageRender(this@ImageActivity, normalBitmap))
-                }
-                mBinding.imageContentLayout.addView(glView, 0)
-
             }
         }
     }
 
-    fun imageBlur(view: View){
+    fun imageBlur(){
         GlobalScope.launch(Dispatchers.Default){
             val option = BitmapFactory.Options()
             option.inMutable = true
             val normalBitmap =
                 BitmapFactory.decodeResource(this@ImageActivity.resources,R.drawable.imager_demo,option)
             withContext(Dispatchers.Main){
-                if (glView?.parent != null){
-                    glView?.parent?.run {
-                        (this as ViewGroup).removeView(glView)
+                mBinding.renderSurface.holder.surface?.run {
+                    val surface = GLSurface(this, mBinding.renderSurface.width, mBinding.renderSurface.height)
+                    bitmapRenderer = BlurRenderer(this@ImageActivity, normalBitmap)
+                    bitmapRenderer?.addSurface(surface)
+                    bitmapRenderer?.startRender()
+                    bitmapRenderer?.requestRender()
+                    bitmapRenderer?.postRunnable {
+                        bitmapRenderer?.removeSurface(surface)
                     }
                 }
-                glView = GLSurfaceView(this@ImageActivity)
-                glView?.setEGLContextClientVersion(2)
-                glView?.setRenderer(GLBlurImageRender(this@ImageActivity, normalBitmap))
-                mBinding.imageContentLayout.addView(glView, 0)
             }
         }
     }
 
-    fun digitalRain(view: View){
+    private var glView: GLSurfaceView? = null
+    fun digitalRain(){
         if (glView?.parent != null){
             glView?.parent?.run {
                 (this as ViewGroup).removeView(glView)
@@ -98,6 +96,7 @@ class ImageActivity : BaseActivity<ActivityImageBinding>() {
         glView = GLSurfaceView(this@ImageActivity)
         glView?.setEGLContextClientVersion(2)
         glView?.setRenderer(GLDigitalRainRender(this@ImageActivity))
+        glView?.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
         mBinding.imageContentLayout.addView(glView, 0)
     }
 

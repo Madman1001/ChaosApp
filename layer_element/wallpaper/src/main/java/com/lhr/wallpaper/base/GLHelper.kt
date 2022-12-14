@@ -95,7 +95,7 @@ object GLHelper {
         var error: Int
         while (GLES20.glGetError().also { error = it } != GLES20.GL_NO_ERROR) {
             Log.e("ES20_ERROR", "$op: glError $error")
-            throw RuntimeException("$op: glError $error")
+            throw RuntimeException("$op: glError $error, " + GLUtils.getEGLErrorString(error))
         }
     }
 

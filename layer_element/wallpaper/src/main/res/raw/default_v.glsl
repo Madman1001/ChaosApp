@@ -1,4 +1,3 @@
-#version 120
 attribute vec2 aPos;
 
 void main() {

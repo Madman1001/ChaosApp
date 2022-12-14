@@ -1,4 +1,7 @@
+#ifdef GL_ES
 precision mediump float;
+#endif
+
 uniform sampler2D uSampler;
 varying vec2 vCoordinate;
 uniform int uBlurRadius;

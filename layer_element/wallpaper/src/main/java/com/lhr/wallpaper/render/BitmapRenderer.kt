@@ -1,20 +1,20 @@
-package com.lhr.wallpaper.base
+package com.lhr.wallpaper.render
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES20
 import com.lhr.common.ext.readText
 import com.lhr.wallpaper.R
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
+import com.lhr.wallpaper.base.GLHelper
+import com.lhr.wallpaper.base.GLRenderer
+import com.lhr.wallpaper.base.GLSurface
 import java.nio.FloatBuffer
-import kotlin.random.Random
 
 
 /**
  * @author lhr
  * @date 7/12/2022
- * @des
+ * @des opengl图片渲染
  */
 class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
     private val TAG = "TestRenderer"
@@ -24,50 +24,37 @@ class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
     private var uTextureUnit = 0
     private var mTextureId = 0
 
-    private var vertices: FloatBuffer? = null
-
-    private var fragments: FloatBuffer? = null
-
-    /**
-     * 获取图形的顶点
-     * 特别提示：由于不同平台字节顺序不同数据单元不是字节的一定要经过ByteBuffer
-     * 转换，关键是要通过ByteOrder设置nativeOrder()，否则有可能会出问题
-     *
-     * @return 顶点Buffer
-     */
-    private fun getVertices(): FloatBuffer {
-        val vertices = floatArrayOf(
-            -1f, -1f,
-            -1f, 1f,
-            1f, 1f,
-            1f, -1f
+    private val vertices: FloatBuffer by lazy {
+        GLHelper.createFloatBuffer(
+            floatArrayOf(
+                -1f, -1f,
+                -1f, 1f,
+                1f, 1f,
+                1f, -1f
+            )
         )
-
-        // 创建顶点坐标数据float缓冲
-        // vertices.length*4是因为一个float占四个字节
-        val vbb: ByteBuffer = ByteBuffer.allocateDirect(vertices.size * Float.SIZE_BYTES)
-        vbb.order(ByteOrder.nativeOrder()) //设置字节顺序
-        val vertexBuf: FloatBuffer = vbb.asFloatBuffer() //转换为Float型缓冲
-        vertexBuf.put(vertices) //向缓冲区中放入顶点坐标数据
-        vertexBuf.position(0) //设置缓冲区起始位置
-        return vertexBuf
     }
 
-    private fun getFragments(): FloatBuffer {
-        val fragments = floatArrayOf(
-            0f, 1f,
-            0f, 0f,
-            1f, 0f,
-            1f, 1f
+    private val fragments: FloatBuffer by lazy {
+        GLHelper.createFloatBuffer(
+            floatArrayOf(
+                0f, 1f,
+                0f, 0f,
+                1f, 0f,
+                1f, 1f
+            )
         )
+    }
 
-        // 创建贴图坐标数据float缓冲
-        val fbb = ByteBuffer.allocateDirect(fragments.size * Float.SIZE_BYTES)
-        fbb.order(ByteOrder.nativeOrder())
-        val fragmentBuf = fbb.asFloatBuffer()
-        fragmentBuf.put(fragments)
-        fragmentBuf.position(0)
-        return fragmentBuf
+
+    // 顶点着色器的脚本
+    private val verticesShader by lazy {
+        context.resources.openRawResource(R.raw.image_v).readText()
+    }
+
+    // 片元着色器的脚本
+    private val fragmentShader by lazy {
+        context.resources.openRawResource(R.raw.image_f).readText()
     }
 
     override fun onCreated() {
@@ -78,8 +65,6 @@ class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
         aTexCoord = GLES20.glGetAttribLocation(program, "aTexCoord")
         uTextureUnit = GLES20.glGetUniformLocation(program, "uTextureUnit")
         mTextureId = GLHelper.loadTexture(bitmap)
-        vertices = getVertices()
-        fragments = getFragments()
     }
 
     override fun onUpdate() {}
@@ -92,9 +77,10 @@ class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT or GLES20.GL_COLOR_BUFFER_BIT)
         // 使用某套shader程序
         GLES20.glUseProgram(program)
-        vertices?.position(0)
+        vertices.position(0)
         GLES20.glVertexAttribPointer(vPosition, 2, GLES20.GL_FLOAT, false, 0, vertices)
         // 为画笔指定顶点位置数据(vPosition)
+        fragments.position(0)
         GLES20.glVertexAttribPointer(aTexCoord, 2, GLES20.GL_FLOAT, false, 0, fragments)
         // 允许顶点位置数据数组
         GLES20.glEnableVertexAttribArray(vPosition)
@@ -108,14 +94,6 @@ class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
         // 将纹理ID绑定到当前活动的纹理单元上
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureId)
-        val randR = GLES20.glGetUniformLocation(program, "randR")
-        val randG = GLES20.glGetUniformLocation(program, "randG")
-        val randB = GLES20.glGetUniformLocation(program, "randB")
-        val randA = GLES20.glGetUniformLocation(program, "randA")
-        GLES20.glUniform1f(randR, Random.nextFloat())
-        GLES20.glUniform1f(randG, Random.nextFloat())
-        GLES20.glUniform1f(randB, Random.nextFloat())
-        GLES20.glUniform1f(randA, Random.nextFloat())
 
         GLES20.glDrawArrays(
             GLES20.GL_TRIANGLE_FAN,        /* 绘制模式 */
@@ -130,14 +108,4 @@ class BitmapRenderer(val context: Context, var bitmap: Bitmap): GLRenderer() {
     }
 
     override fun onDestroy() {}
-
-    // 顶点着色器的脚本
-    private val verticesShader by lazy {
-        context.resources.openRawResource(R.raw.image_v).readText()
-    }
-
-    // 片元着色器的脚本
-    private val fragmentShader by lazy {
-        context.resources.openRawResource(R.raw.image_f).readText()
-    }
 }

@@ -19,7 +19,7 @@ abstract class GLRenderer: Thread() {
     private var eglContext: EGLContext = EGL14.EGL_NO_CONTEXT
 
     private var eventQueue: ArrayBlockingQueue<Event>
-    private var outputSurfaces: MutableList<GLSurface?>
+    private var outputSurfaces: MutableList<GLSurface>
     private var rendering = false
     private var isRelease = false
 
@@ -31,10 +31,10 @@ abstract class GLRenderer: Thread() {
         eventQueue = ArrayBlockingQueue(100)
     }
 
-    private fun makeOutputSurface(surface: GLSurface?): Boolean {
+    private fun makeOutputSurface(surface: GLSurface): Boolean {
         // 创建Surface缓存
         try {
-            when (surface!!.type) {
+            when (surface.type) {
                 GLSurface.TYPE_WINDOW_SURFACE -> {
                     val attributes = intArrayOf(EGL14.EGL_NONE)
                     // 创建失败时返回EGL14.EGL_NO_SURFACE
@@ -73,13 +73,13 @@ abstract class GLRenderer: Thread() {
         return true
     }
 
-    fun addSurface(@NonNull surface: GLSurface?) {
+    fun addSurface(@NonNull surface: GLSurface) {
         val event = Event(Event.ADD_SURFACE)
         event.param = surface
         if (!eventQueue.offer(event)) Log.e(TAG, "queue full")
     }
 
-    fun removeSurface(@NonNull surface: GLSurface?) {
+    fun removeSurface(@NonNull surface: GLSurface) {
         val event = Event(Event.REMOVE_SURFACE)
         event.param = surface
         if (!eventQueue.offer(event)) Log.e(TAG, "queue full")
@@ -189,11 +189,11 @@ abstract class GLRenderer: Thread() {
     private fun render() {
         // 渲染(绘制)
         for (output in outputSurfaces) {
-            if (output!!.eglSurface === EGL_NO_SURFACE) {
+            if (output.eglSurface === EGL_NO_SURFACE) {
                 if (!makeOutputSurface(output)) continue
             }
             // 设置当前的上下文环境和输出缓冲区
-            EGL14.eglMakeCurrent(eglDisplay, output!!.eglSurface, output.eglSurface, eglContext)
+            EGL14.eglMakeCurrent(eglDisplay, output.eglSurface, output.eglSurface, eglContext)
             // 设置视窗大小及位置
             GLES20.glViewport(
                 output.viewport.x,
@@ -206,6 +206,7 @@ abstract class GLRenderer: Thread() {
             // 交换显存(将surface显存和显示器的显存交换)
             EGL14.eglSwapBuffers(eglDisplay, output.eglSurface)
         }
+        EGL14.eglMakeCurrent(eglDisplay, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, eglContext)
     }
 
     override fun run() {
@@ -219,9 +220,8 @@ abstract class GLRenderer: Thread() {
                 event = eventQueue.take()
                 when (event.event) {
                     Event.ADD_SURFACE -> {
-
                         // 创建eglSurface
-                        val surface = event.param as GLSurface?
+                        val surface = event.param as GLSurface
                         Log.d(TAG, "add:$surface")
                         makeOutputSurface(surface)
                         outputSurfaces.add(surface)
@@ -250,7 +250,7 @@ abstract class GLRenderer: Thread() {
         onDestroy()
         // 销毁eglSurface
         for (outputSurface in outputSurfaces) {
-            EGL14.eglDestroySurface(eglDisplay, outputSurface!!.eglSurface)
+            EGL14.eglDestroySurface(eglDisplay, outputSurface.eglSurface)
             outputSurface.eglSurface = EGL_NO_SURFACE
         }
         destroyGL()
@@ -303,7 +303,7 @@ abstract class GLRenderer: Thread() {
         return GLUtils.getEGLErrorString(EGL14.eglGetError())
     }
 
-    private class Event internal constructor(val event: Int) {
+    private class Event constructor(val event: Int) {
         var param: Any? = null
 
         companion object {
