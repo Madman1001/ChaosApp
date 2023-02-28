@@ -5,6 +5,7 @@ buildscript {
     }
     repositories {
         maven { url uri('./repo') }
+        maven { url "https://jitpack.io" }
 
         google()
         mavenCentral()
@@ -18,25 +19,10 @@ buildscript {
 
 allprojects {
     repositories {
+        maven { url "https://jitpack.io" }
+
         google()
         mavenCentral()
-    }
-}
-
-subprojects.forEach { Project subProject ->
-    println subProject.name
-    if (subProject.name.contains("vpn")) return
-    subProject.tasks.whenTaskAdded { Task task ->
-        if (task.name.contains("lint")     //不扫描潜在bug可以使用该项
-                || task.name == "clean"
-                || task.name.contains("Aidl")     //项目中用到Aidl则不可以舍弃这个任务
-                || task.name.contains("mockableAndroidJar")//用不到测试时可以先关闭
-                || task.name.contains("UnitTest")//用不到测试时可以先关闭
-                || task.name.contains("AndroidTest")//用不到测试时可以先关闭
-                || task.name.contains("Ndk") || task.name.contains("Jni")//用不到NDK和jni时关闭
-        ) {
-            task.enabled = false
-        }
     }
 }
 

@@ -7,11 +7,13 @@ import com.lhr.common.ui.BaseActivity
 import com.lhr.common.ui.BaseAdapter
 import com.lhr.common.ui.startFragment
 import com.lhr.learn.applications.AppListFragment
+import com.lhr.learn.arpcheck.ArpCheckFragment
 import com.lhr.learn.bitmap.BitmapCropFragment
 import com.lhr.learn.classcheck.ClassCheckFragment
 import com.lhr.learn.databinding.ActivityLearnBinding
 import com.lhr.learn.nativelib.NativeLibFragment
 import com.lhr.learn.procfile.FilesystemsFragment
+import com.lhr.learn.record.RecordFragment
 
 /**
  * @author lhr
@@ -27,6 +29,8 @@ class LearnActivity : BaseActivity<ActivityLearnBinding>() {
         ListData("Class Check", this::gotoClassCheck),
         ListData("Native Files", this::gotoNativeFileCheck),
         ListData("Proc Files", this::gotoProcFilesystems),
+        ListData("Arp Check", this::gotoArpCheck),
+        ListData("Record Voice", this::gotoRecord),
     )
 
     override fun initView(savedInstanceState: Bundle?) {
@@ -66,6 +70,14 @@ class LearnActivity : BaseActivity<ActivityLearnBinding>() {
 
     private fun gotoNativeFileCheck(){
         this.startFragment<NativeLibFragment>()
+    }
+
+    private fun gotoArpCheck(){
+        this.startFragment<ArpCheckFragment>()
+    }
+
+    private fun gotoRecord(){
+        this.startFragment<RecordFragment>()
     }
 
     data class ListData(val name: String, val action: () -> Unit = {})

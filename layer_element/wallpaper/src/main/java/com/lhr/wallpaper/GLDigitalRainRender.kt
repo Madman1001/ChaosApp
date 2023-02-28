@@ -118,7 +118,7 @@ class GLDigitalRainRender(private val context: Context)
         // 设置当前活动的纹理单元为纹理单元0
         GLES20.glActiveTexture(GLES20.GL_TEXTURE1)
         // 将纹理ID绑定到当前活动的纹理单元上
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, iChannel1)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, iTexture1)
 
         GLES20.glDrawArrays(
             GLES20.GL_TRIANGLE_FAN,        /* 绘制模式 */

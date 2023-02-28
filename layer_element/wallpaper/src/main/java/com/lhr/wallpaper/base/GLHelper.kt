@@ -95,7 +95,19 @@ object GLHelper {
         var error: Int
         while (GLES20.glGetError().also { error = it } != GLES20.GL_NO_ERROR) {
             Log.e("ES20_ERROR", "$op: glError $error")
-            throw RuntimeException("$op: glError $error, " + GLUtils.getEGLErrorString(error))
+            throw RuntimeException("$op: glError $error, " + getGLErrorString(error))
+        }
+    }
+
+    private fun getGLErrorString(error: Int): String{
+        return when(error){
+            //从上一次调用glGetError以来没有生产任何错误
+            GLES20.GL_NO_ERROR -> ""
+            GLES20.GL_INVALID_ENUM -> "GLenum 参数超出范围，忽略生产错误命令"
+            GLES20.GL_INVALID_VALUE -> "数值型参数超出范围，忽略生产错误命名"
+            GLES20.GL_INVALID_OPERATION -> "特定命名在当前OPenGL ES状态无法执行"
+            GLES20.GL_OUT_OF_MEMORY -> "内存不足执行该命令，如果遇到这个错误。除非当前错误代码。否者OPenGL ES管线状态被认为未定义"
+            else -> "未知异常"
         }
     }
 

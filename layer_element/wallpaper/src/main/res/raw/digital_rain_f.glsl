@@ -20,10 +20,10 @@ uniform vec2 iChannelResolution;
 
 float text(vec2 fragCoord)
 {
-    vec2 uv = mod(fragCoord.xy, 16.)*.0625;
-    vec2 block = fragCoord*.0625 - uv;
-    uv = uv*.8+.1; // scale the letters up a bit
-    uv += floor(texture(iChannel1, block/iChannelResolution.xy + iTime*.002).xy * 16.); // randomize letters
+    vec2 uv = mod(fragCoord.xy, 16.) * .0625;
+    vec2 block = fragCoord * .0625 - uv;
+    uv = uv * .8 + .1; // scale the letters up a bit
+    uv += floor(texture(iChannel1, block/iChannelResolution.xy + iTime * .002).xy * 16.); // randomize letters
     uv *= .0625; // bring back into 0-1 range
     uv.x = -uv.x; // flip letters horizontally
     return texture(iChannel0, uv).r;
@@ -43,7 +43,7 @@ vec3 rain(vec2 fragCoord)
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-    fragColor = vec4(text(fragCoord)*rain(fragCoord),1.0);
+    fragColor = vec4(text(fragCoord) * rain(fragCoord), 1.0);
 }
 // --------[ Original ShaderToy ends here ]---------- //
 
