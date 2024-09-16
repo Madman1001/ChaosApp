@@ -4,9 +4,9 @@ buildscript {
         kotlin_version = rootProject.ext.versions['kotlin']
     }
     repositories {
+        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
         maven { url uri('./repo') }
         maven { url "https://jitpack.io" }
-
         google()
         mavenCentral()
     }
@@ -19,8 +19,8 @@ buildscript {
 
 allprojects {
     repositories {
+        maven{url 'http://maven.aliyun.com/nexus/content/groups/public/'}
         maven { url "https://jitpack.io" }
-
         google()
         mavenCentral()
     }
